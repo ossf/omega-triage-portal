@@ -1,0 +1,71 @@
+{% extends "./base.html" %}
+
+{% block body %}
+    {% block main %}
+    
+<div class="row" style="margin-top: 30px">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+
+        <div class="row jumbotron" style="padding-top: 36px; padding-bottom: 36px">
+            <div class="container">
+                <h1 class="display-3">Omega</h1>
+                <p>
+                    <strong>Omega</strong> is a security analysis triage and management suite created and
+                    maintained by the Open Source Security Foundation.
+                </p>
+                <p>
+                    Access to Omega is restricted to authorized users of the Open Source Security Foundation.
+                </p>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="float-right w-100"></div>
+                  <h5 class="card-title">Latest Findings</h5>
+                  <p class="card-text">Access the latest findings from the last 24 hours.</p>
+                  <a class="btn btn-primary" href="/findings?q=severity:critical,high&sort_by=updated_dt&order_direction=desc">View Findings</a>
+                </div>
+                <div class="card-footer">
+                  <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h5 class="card-title">Active Cases</h5>
+                  <p class="card-text">View all reported but unfixed vulnerabilities.</p>
+                  <a class="btn btn-primary" href="/cases?q=state:active">View Active Cases</a>
+                </div>
+                <div class="card-footer">
+                  <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h5 class="card-title">Search</h5>
+                  <p class="card-text">
+                    Search for a vulnerability by its ID, CVE, or description.
+                    <form action="/findings" method="GET">
+                      <div class="input-group">
+                      <input type="text" class="form-control" placeholder="Search..." name="query"/>
+                    </form>
+                  </p>
+                </div>
+                <div class="card-footer">
+                  <small class="text-muted">Last updated 3 mins ago</small>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+    {% endblock main %}
+{% endblock body %}
