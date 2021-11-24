@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROOT="${CODESPACE_VSCODE_FOLDER}"
+ROOT="/workspaces/omega-triage-portal"
 
 # Create and activate the virtual environment
 echo "Creating virtual environment."
