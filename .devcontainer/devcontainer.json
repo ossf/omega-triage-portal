@@ -15,9 +15,9 @@
 			"previewLimit": 50,
 			"server": "localhost",
 			"port": 5432,
-			"database": "postgres",
-			"username": "postgres",
-			"password": "postgres"
+			"database": "triage",
+			"username": "triage_user",
+			"password": "triage_password"
 		}],
 		"python.pythonPath": "/usr/local/bin/python",
 		"python.languageServer": "Pylance",
@@ -47,7 +47,7 @@
 	"forwardPorts": [8000],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "bash .devcontainer/postcreate-initialize.sh",
+	"postCreateCommand": "bash .devcontainer/postcreate-initialize.sh >> logs/omega-triage.log",
 
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode"
