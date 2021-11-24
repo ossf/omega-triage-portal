@@ -2,6 +2,7 @@
 
 # Static Files (brought in via Yarn)
 src/triage/static/triage/resources
+logs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

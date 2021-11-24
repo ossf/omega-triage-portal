@@ -31,6 +31,6 @@ python manage.py migrate
 python manage.py makemigrations
 python manage.py migrate triage
 
-echo "Initialization completed." >> $ROOT/logs/omega-triage.logs
+echo "Initialization completed." >> $ROOT/logs/omega-triage.log
 
 
