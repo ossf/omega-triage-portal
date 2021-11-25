@@ -21,6 +21,7 @@
                 "pylint_django",
                 "--django-settings-module",
                 "core.settings",
+                "--exit-zero",
                 "${workspaceFolder}/src/triage"
             ],
             "presentation": {

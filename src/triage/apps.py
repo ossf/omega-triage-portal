@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""This module configures application-level settings for the Triage Portal."""
+
 import logging
 import mimetypes
 

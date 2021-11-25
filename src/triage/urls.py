@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
+"""This module URL patterns specific to the Triage Portal."""
+
 from django.urls import path
-from triage.views import findings, filters, home, cases
+
+from triage.views import cases, filters, findings, home
 
 urlpatterns = [
     path("cases/", cases.show_cases),

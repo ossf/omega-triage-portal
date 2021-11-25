@@ -58,7 +58,6 @@ def show_upload(request: HttpRequest) -> HttpResponse:
         for file in files:
             try:
                 importer = SARIFImporter.import_sarif_file(package_url, json.load(file))
-                importer.import_sarif_file()
             except:  # pylint: disable=bare-except
                 logger.warning("Failed to import SARIF file", exc_info=True)
 
