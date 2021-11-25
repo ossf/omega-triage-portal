@@ -1,30 +1,32 @@
-from django.apps import AppConfig
-
-import mimetypes
 import logging
-from core.settings import DEBUG
+import mimetypes
+
 from django.apps import AppConfig, apps
 from django.contrib import admin
+
+from core.settings import DEBUG
+
 logger = logging.getLogger(__name__)
 
 
 class TriageConfig(AppConfig):
     """
-    Application configuration for Omega/Triage.
+    Application configuration for Omega/Triage .
 
     This class gets called when Django is initialized, and takes care of
     one-time initialization.
     """
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'triage'
-    verbose_name = 'Triage'
+
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "triage"
+    verbose_name = "Triage"
 
     _is_init_completed = False
 
     def ready(self):
         if self._is_init_completed:
-            return True # Only run once
-        logger.debug('TriageConfig initializing.')
+            return True  # Only run once
+        logger.debug("TriageConfig initializing.")
         if DEBUG:
             self._register_models_admin_config()
         mimetypes.init()
@@ -37,18 +39,17 @@ class TriageConfig(AppConfig):
         """Registers all Triage models in the Django admin interface."""
         models = apps.get_models()
         num_registered = 0
-        
+
         class TriageModelAdmin(admin.ModelAdmin):
-            readonly_fields = ('uuid',)
+            readonly_fields = ("uuid",)
 
         for model in filter(lambda m: not admin.site.is_registered(m), models):
-            
-            if model.__module__.startswith('triage.') and hasattr(model, 'uuid'):
+
+            if model.__module__.startswith("triage.") and hasattr(model, "uuid"):
                 admin.site.register(model, TriageModelAdmin)
             else:
                 admin.site.register(model, admin.ModelAdmin)
 
             num_registered += 1
-        logger.debug(f'Registered {num_registered} models to admin module.')
+        logger.debug("Registered %d models to admin module.", num_registered)
         return
-

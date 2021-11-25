@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""This module provides support for import SARIF files into the Triage Portal's data model."""
+
 import hashlib
 import json
 import logging
@@ -5,61 +8,60 @@ import os
 import uuid
 from typing import Optional, Union
 
-from django.contrib.auth.models import User
+import django.contrib.auth
 from packageurl import PackageURL
+
 from triage.models.models import Finding, ProjectVersion, Scan, Tool
 from triage.util.general import get_complex
 
 logger = logging.getLogger(__name__)
 
 
-class DataImporter:
-    def __init__(self) -> None:
-        pass
-
-
-class SARIFImporter(DataImporter):
+class SARIFImporter:
     """
     This class handles importing SARIF files into the database.
     """
-    def __init__(self):
-        pass
 
     @classmethod
     def save_file_archive(cls, file_archive: bytes) -> Optional[uuid.UUID]:
+        """Save a file archive (bits) somewhere."""
+        # REMOV
         if file_archive is None:
             return None
+        # TODO Remove SARIFImporter.safe_file_archive
 
         filename = uuid.uuid4()
         os.makedirs("temp-data", exist_ok=True)
-        with open(os.path.join("temp-data", str(filename)), "wb") as f:
-            f.write(file_archive)
+        with open(os.path.join("temp-data", str(filename)), "wb") as output_file:
+            output_file.write(file_archive)
         return filename
 
     @classmethod
     def import_sarif_file(
-        self, package_url: Union[PackageURL, str], sarif: dict, file_archive: bytes = None
+        cls, package_url: Union[PackageURL, str], sarif: dict, file_archive: bytes = None
     ) -> bool:
         """
         Imports a SARIF file containing tool findings into the database.
 
         Args:
-            package_url: The PackageURL to attach all findings to. This PackageURL must contain a version.
+            package_url: The PackageURL to attach all findings to. This PackageURL must
+                         contain a version.
             sarif: The SARIF content (as a dict) to import.
             file_archive: The file archive containing the SARIF file.
-        
+
         Returns:
             True if the SARIF content was successfully imported, False otherwise.
         """
-        
         if package_url is None:
             raise TypeError("The package_url must not be None")
 
         if isinstance(package_url, str):
             package_url = PackageURL.from_string(package_url)
-        
+
         if package_url.version is None:
-            raise TypeError(f"The package_url ({package_url}) does not contain a version. Unable to import.")
+            raise TypeError(
+                f"The package_url ({package_url}) does not contain a version. Unable to import."
+            )
 
         if sarif is None:
             raise TypeError("The sarif content must not be None.")
@@ -71,9 +73,9 @@ class SARIFImporter(DataImporter):
             raise ValueError("Missing 'file_archive'.")
 
         file_archive_name = SARIFImporter.save_file_archive(file_archive)
-
-        ADMIN_USER = User.objects.get(id=1)
-        project_version = ProjectVersion.get_or_create_from_package_url(package_url, ADMIN_USER)
+        user_model = django.contrib.auth.get_user_model()
+        admin_user = user_model.objects.get(id=1)
+        project_version = ProjectVersion.get_or_create_from_package_url(package_url, admin_user)
 
         num_imported = 0
         processed = set()  # Reduce duplicates
@@ -90,8 +92,8 @@ class SARIFImporter(DataImporter):
                 name=tool_name,
                 version=tool_version,
                 defaults={
-                    "created_by": ADMIN_USER,
-                    "updated_by": ADMIN_USER,
+                    "created_by": admin_user,
+                    "updated_by": admin_user,
                     "type": Tool.ToolType.STATIC_ANALYSIS,
                 },
             )
@@ -100,8 +102,8 @@ class SARIFImporter(DataImporter):
                 project_version=project_version,
                 tool=tool,
                 artifact_uuid=file_archive_name,
-                created_by=ADMIN_USER,
-                updated_by=ADMIN_USER,
+                created_by=admin_user,
+                updated_by=admin_user,
             )
             scan.save()
 
@@ -121,13 +123,13 @@ class SARIFImporter(DataImporter):
                 message = get_complex(result, "message.text")
                 level = get_complex(result, "level")
                 for location in get_complex(result, "locations"):
-                    artifactLocation = get_complex(location, "physicalLocation.artifactLocation")
+                    artifact_location = get_complex(location, "physicalLocation.artifactLocation")
 
-                    src_root = get_complex(artifactLocation, "uriBaseId", "%SRCROOT%")
+                    src_root = get_complex(artifact_location, "uriBaseId", "%SRCROOT%")
                     if src_root.upper() not in ["%SRCROOT%", "SRCROOT"]:
                         continue
 
-                    uri = get_complex(artifactLocation, "uri")
+                    uri = get_complex(artifact_location, "uri")
 
                     # Ensure we only insert the same message once
                     key = {
@@ -148,7 +150,7 @@ class SARIFImporter(DataImporter):
                         # finding.issue_type = rule_description_map.get(rule_id, rule_id)
 
                         # issue.file = file
-                        finding.file_path = get_complex(artifactLocation, "uri")
+                        finding.file_path = get_complex(artifact_location, "uri")
                         finding.file_line = get_complex(
                             location, "physicalLocation.region.startLine", 0
                         )
@@ -156,8 +158,8 @@ class SARIFImporter(DataImporter):
                         finding.analyst_severity_level = Finding.SeverityLevel.NOT_SPECIFIED
                         finding.confidence = Finding.ConfidenceLevel.NOT_SPECIFIED
 
-                        finding.created_by = ADMIN_USER
-                        finding.updated_by = ADMIN_USER
+                        finding.created_by = admin_user
+                        finding.updated_by = admin_user
 
                         # try:
                         #    result_copy = json.dumps(result).replace("\\u0000", "")

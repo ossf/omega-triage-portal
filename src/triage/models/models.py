@@ -7,9 +7,12 @@ from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from packageurl import PackageURL
+
+from triage.util.azure_blob_storage import (
+    AzureBlobStorageAccessor,
+    ToolshedBlobStorageAccessor,
+)
 from triage.util.general import modify_purl
-from triage.util.azure_blob_storage import (AzureBlobStorageAccessor,
-                                            ToolshedBlobStorageAccessor)
 
 logger = logging.getLogger(__name__)
 
@@ -304,6 +307,7 @@ class Case(BaseTimestampedModel, BaseUserTrackedModel):
     """
     Represents a case that is being reported to a maintainer for a fix.
     """
+
     class State(models.TextChoices):
         NEW = "N", _("New")
         REPORTED = "R", _("Reported")
@@ -319,7 +323,7 @@ class Case(BaseTimestampedModel, BaseUserTrackedModel):
         CERT = "CT", _("CERT")
         MSRC = "MS", _("MSRC")
         NOT_SPECIFIED = "NS", _("Not Specified")
-    
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     findings = models.ManyToManyField(Finding, related_name="cases")
     state = models.CharField(max_length=2, choices=State.choices, default=State.NEW)

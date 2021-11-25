@@ -2,7 +2,6 @@ import json
 import logging
 import os
 from base64 import b64encode
-from typing import Any, List
 
 from django.http import (
     HttpRequest,
@@ -15,6 +14,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
+
 from triage.models.models import Finding
 from triage.util.azure_blob_storage import ToolshedBlobStorageAccessor
 from triage.util.finding_importers.sarif_importer import SARIFImporter
@@ -32,25 +32,14 @@ def show_findings(request: HttpRequest) -> HttpResponse:
         q: query to search for, or all findings if not provided
     """
     query = request.GET.get("q")
-    c = Finding.objects.all()  # Default
+    findings = Finding.objects.all()  # Default
     if query:
-        q = parse_query_to_Q(query)
-        if q:
-            c = Finding.objects.filter(q)
+        query_object = parse_query_to_Q(query)
+        if query_object:
+            findings = findings.filter(query_object)
+    context = {"query": query, "findings": findings}
 
-    return render(request, "triage/findings_show.html", {"query": query, "findings": c})
-
-
-def show_finding(request: HttpRequest) -> HttpResponse:
-    query = request.GET.get("q")
-    data = {}
-    if not query:
-        data["findings"] = Finding.objects.all()
-    else:
-        data["findings"] = Finding.objects.filter(title__icontains=query)
-        data["query"] = query
-
-    return render(request, "triage/findings_show.html", data)
+    return render(request, "triage/findings_show.html", context)
 
 
 @require_http_methods(["GET", "POST"])
@@ -70,7 +59,7 @@ def show_upload(request: HttpRequest) -> HttpResponse:
             try:
                 importer = SARIFImporter.import_sarif_file(package_url, json.load(file))
                 importer.import_sarif_file()
-            except:
+            except:  # pylint: disable=bare-except
                 logger.warning("Failed to import SARIF file", exc_info=True)
 
         return render(request, "triage/findings_upload.html", {"status": "ok"})
@@ -126,8 +115,8 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
     package_url = request.GET.get("package_url")
     file_path = request.GET.get("file_path")
     if package_url and file_path:
-        sv = SourceViewer(package_url)
-        res = sv.get_file(file_path)
+        viewer = SourceViewer(package_url)
+        res = viewer.get_file(file_path)
         if res:
             return JsonResponse(
                 {
@@ -202,7 +191,7 @@ def api_add(request: HttpRequest) -> JsonResponse:
         package_url = PackageURL.from_string(request.POST.get("package_url"))
         if package_url.version is None:
             raise ValueError("Missing version")
-    except:
+    except ValueError:
         return JsonResponse({"error": "Invalid or missing package url"})
 
     SARIFImporter.import_sarif_file(package_url, sarif_content, scan_artifact.read())
