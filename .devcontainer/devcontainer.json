@@ -6,19 +6,20 @@
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
 	"workspaceFolder": "/workspace",
-
 	// Set *default* container specific settings.json values on container create.
-	"settings": { 
-		"sqltools.connections": [{
-			"name": "Container database",
-			"driver": "PostgreSQL",
-			"previewLimit": 50,
-			"server": "localhost",
-			"port": 5432,
-			"database": "triage",
-			"username": "triage_user",
-			"password": "triage_password"
-		}],
+	"settings": {
+		"sqltools.connections": [
+			{
+				"name": "Container database",
+				"driver": "PostgreSQL",
+				"previewLimit": 50,
+				"server": "localhost",
+				"port": 5432,
+				"database": "triage",
+				"username": "triage_user",
+				"password": "triage_password"
+			}
+		],
 		"python.pythonPath": "/usr/local/bin/python",
 		"python.languageServer": "Pylance",
 		"python.linting.enabled": true,
@@ -33,9 +34,8 @@
 		"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
 		"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
 		"python.testing.pytestPath": "/usr/local/py-utils/bin/pytest",
-		"python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python"		
+		"python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python"
 	},
-
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-python.python",
@@ -43,13 +43,16 @@
 		"mtxr.sqltools",
 		"mtxr.sqltools-driver-pg"
 	],
-
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [8000],
-
+	"forwardPorts": [
+		8000
+	],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "bash .devcontainer/postcreate-initialize.sh",
-
+	"remoteEnv": {
+		"DJANGO_SETTINGS_MODULE": "core.settings",
+		"PYTHONPATH": "/workspaces/omega-triage-portal/src"
+	},
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode"
 }
