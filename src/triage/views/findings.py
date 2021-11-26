@@ -3,6 +3,7 @@ import logging
 import os
 from base64 import b64encode
 
+from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -42,6 +43,7 @@ def show_findings(request: HttpRequest) -> HttpResponse:
     return render(request, "triage/findings_show.html", context)
 
 
+@login_required
 @require_http_methods(["GET", "POST"])
 def show_upload(request: HttpRequest) -> HttpResponse:
     """Show the upload form for findings (SARIF, etc.)"""
@@ -50,14 +52,16 @@ def show_upload(request: HttpRequest) -> HttpResponse:
 
     if request.method == "POST":
         package_url = request.POST.get("package_url")
-        files = request.FILES.getlist("sarif_file")
+        files = request.FILES.getlist("sarif_file[]")
 
         if not files:
             return HttpResponseBadRequest("No files provided")
 
         for file in files:
             try:
-                importer = SARIFImporter.import_sarif_file(package_url, json.load(file))
+                importer = SARIFImporter.import_sarif_file(
+                    package_url, json.load(file), request.user
+                )
             except:  # pylint: disable=bare-except
                 logger.warning("Failed to import SARIF file", exc_info=True)
 

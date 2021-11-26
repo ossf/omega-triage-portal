@@ -41,7 +41,7 @@
             </thead>
             <tbody style="word-break: break-word;white-space:normal;word-wrap:break-word">
                 {% for finding in findings %}
-                    <tr data-finding-uuid="{{ finding.pk }}" data-finding-title="{{ finding.title }}" data-file-path="{{ finding.file_path}}" data-file-location="{{ finding.file_line }}" style="cursor:pointer">
+                    <tr data-finding-uuid="{{ finding.uuid }}" data-finding-title="{{ finding.title }}" data-file-path="{{ finding.file_path}}" data-file-location="{{ finding.file_line }}" style="cursor:pointer">
                         <td>{{ finding.scan.project_version }}</td>
                         <td>{{ finding.title }}</td>
                         <td>{{ finding.get_filename_display }}</td>
@@ -61,6 +61,7 @@
             <li><a class="dropdown-item" href="#">Watch</a></li>
             <li><a class="dropdown-item" href="#">Tooling Bug</a></li>
             <li><a class="dropdown-item" href="#">Discussion</a></li>
+            <li><a class="dropdown-item" href="/findings/upload">Upload Findings</a></li>
         </ul>
     </div>
 </div>

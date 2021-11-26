@@ -6,9 +6,10 @@ import json
 import logging
 import os
 import uuid
-from typing import Optional, Union
+from typing import Optional, Type, Union
 
-import django.contrib.auth
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from packageurl import PackageURL
 
 from triage.models.models import Finding, ProjectVersion, Scan, Tool
@@ -38,7 +39,7 @@ class SARIFImporter:
 
     @classmethod
     def import_sarif_file(
-        cls, package_url: Union[PackageURL, str], sarif: dict, file_archive: bytes = None
+        cls, package_url: Union[PackageURL, str], sarif: dict, user: Optional[Type[AbstractUser]]
     ) -> bool:
         """
         Imports a SARIF file containing tool findings into the database.
@@ -69,13 +70,9 @@ class SARIFImporter:
         if sarif.get("version") != "2.1.0":
             raise ValueError("Only SARIF version 2.1.0 is supported.")
 
-        if file_archive is None:
-            raise ValueError("Missing 'file_archive'.")
-
-        file_archive_name = SARIFImporter.save_file_archive(file_archive)
-        user_model = django.contrib.auth.get_user_model()
-        admin_user = user_model.objects.get(id=1)
-        project_version = ProjectVersion.get_or_create_from_package_url(package_url, admin_user)
+        user_model = get_user_model()
+        user = user_model.objects.get(id=1)
+        project_version = ProjectVersion.get_or_create_from_package_url(package_url, user)
 
         num_imported = 0
         processed = set()  # Reduce duplicates
@@ -92,8 +89,8 @@ class SARIFImporter:
                 name=tool_name,
                 version=tool_version,
                 defaults={
-                    "created_by": admin_user,
-                    "updated_by": admin_user,
+                    "created_by": user,
+                    "updated_by": user,
                     "type": Tool.ToolType.STATIC_ANALYSIS,
                 },
             )
@@ -101,9 +98,9 @@ class SARIFImporter:
             scan = Scan(
                 project_version=project_version,
                 tool=tool,
-                artifact_uuid=file_archive_name,
-                created_by=admin_user,
-                updated_by=admin_user,
+                artifact_url_base=None,
+                created_by=user,
+                updated_by=user,
             )
             scan.save()
 
@@ -158,8 +155,8 @@ class SARIFImporter:
                         finding.analyst_severity_level = Finding.SeverityLevel.NOT_SPECIFIED
                         finding.confidence = Finding.ConfidenceLevel.NOT_SPECIFIED
 
-                        finding.created_by = admin_user
-                        finding.updated_by = admin_user
+                        finding.created_by = user
+                        finding.updated_by = user
 
                         # try:
                         #    result_copy = json.dumps(result).replace("\\u0000", "")

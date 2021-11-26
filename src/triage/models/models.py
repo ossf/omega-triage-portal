@@ -109,8 +109,7 @@ class Scan(BaseTimestampedModel, BaseUserTrackedModel):
     project_version = models.ForeignKey(ProjectVersion, on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
 
-    artifact_uuid = models.UUIDField(null=True, blank=True, editable=False)
-
+    artifact_url_base = models.CharField(max_length=1024, null=True, blank=True)
     active = models.BooleanField(default=True)
     created_dt = models.DateTimeField(auto_now_add=True)
 
