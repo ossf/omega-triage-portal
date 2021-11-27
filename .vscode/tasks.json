@@ -43,5 +43,34 @@
                 }
             }
         },
+        {
+            "label": "Django: Make Migrations (Triage)",
+            "type": "shell",
+            "detail": "Make migrations for the Triage app.",
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "manage.py",
+                "makemigrations",
+                "triage"
+            ],
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/src"
+            },
+        },
+        {
+            "label": "Django: Migrate Database",
+            "type": "shell",
+            "detail": "Migrate the Triage app.",
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "manage.py",
+                "migrate"
+            ],
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/src"
+            },
+        },
     ]
 }

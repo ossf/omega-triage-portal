@@ -11,7 +11,7 @@ from django.http import (
     HttpResponseForbidden,
     JsonResponse,
 )
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
@@ -32,7 +32,7 @@ def show_findings(request: HttpRequest) -> HttpResponse:
     Params:
         q: query to search for, or all findings if not provided
     """
-    query = request.GET.get("q")
+    query = request.GET.get("q", "").strip()
     findings = Finding.objects.all()  # Default
     if query:
         query_object = parse_query_to_Q(query)
@@ -40,7 +40,7 @@ def show_findings(request: HttpRequest) -> HttpResponse:
             findings = findings.filter(query_object)
     context = {"query": query, "findings": findings}
 
-    return render(request, "triage/findings_show.html", context)
+    return render(request, "triage/findings_list.html", context)
 
 
 @login_required
@@ -65,7 +65,7 @@ def show_upload(request: HttpRequest) -> HttpResponse:
             except:  # pylint: disable=bare-except
                 logger.warning("Failed to import SARIF file", exc_info=True)
 
-        return render(request, "triage/findings_upload.html", {"status": "ok"})
+        return redirect("/findings/upload?status=success")
 
 
 def show_finding_by_uuid(request: HttpRequest, finding_uuid) -> HttpResponse:

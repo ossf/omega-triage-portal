@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from packageurl import PackageURL
 
+from triage.models.base import WorkItemState
 from triage.models.models import Finding, ProjectVersion, Scan, Tool
 from triage.util.general import get_complex
 
@@ -143,7 +144,7 @@ class SARIFImporter:
                         # Create the issue
                         finding = Finding(scan=scan)
                         finding.title = message
-                        finding.state = Finding.State.NOT_SPECIFIED
+                        finding.state = WorkItemState.NOT_SPECIFIED
                         # finding.issue_type = rule_description_map.get(rule_id, rule_id)
 
                         # issue.file = file

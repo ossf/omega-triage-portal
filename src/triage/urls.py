@@ -3,10 +3,14 @@
 
 from django.urls import path
 
-from triage.views import cases, filters, findings, home
+from triage.views import cases, filters, findings, home, tool_defect
 
 urlpatterns = [
     path("cases/", cases.show_cases),
+    path("tool_defect/<uuid:tool_defect_uuid>", tool_defect.show_tool_defect),
+    path("tool_defect/new", tool_defect.show_add_tool_defect),
+    path("tool_defect/save", tool_defect.save_tool_defect),
+    path("tool_defect/", tool_defect.show_tool_defects),
     path("api/findings/add", findings.api_add),
     path("api/findings/get_files", findings.api_get_files),
     path("api/findings/get_source_code", findings.api_get_source_code),

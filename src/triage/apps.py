@@ -30,8 +30,10 @@ class TriageConfig(AppConfig):
         if self._is_init_completed:
             return True  # Only run once
         logger.debug("TriageConfig initializing.")
+
         if DEBUG:
             self._register_models_admin_config()
+
         mimetypes.init()
 
         self._is_init_completed = True
@@ -40,7 +42,7 @@ class TriageConfig(AppConfig):
 
     def _register_models_admin_config(self):
         """Registers all Triage models in the Django admin interface."""
-        models = apps.get_models()
+        models = self.apps.get_models()
         num_registered = 0
 
         class TriageModelAdmin(admin.ModelAdmin):

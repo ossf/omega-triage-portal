@@ -36,5 +36,6 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports": true
         }
-    }
+    },
+    "editor.bracketPairColorization.enabled": true
 }

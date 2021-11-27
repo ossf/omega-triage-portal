@@ -1,15 +1,22 @@
-import tarfile
 import io
+import logging
+import os
+import tarfile
+import uuid
+from typing import List, Union
+
+from azure.storage.blob import BlobClient, BlobServiceClient
 from django.core.cache import cache
 from packageurl import PackageURL
-from azure.storage.blob import BlobServiceClient, BlobClient
-from typing import Union, List
-import os
-import uuid
+
 import triage
-import logging
-from core.settings import TOOLSHED_BLOB_STORAGE_CONTAINER, TOOLSHED_BLOB_STORAGE_URL
+from core.settings import (
+    TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET,
+    TOOLSHED_BLOB_STORAGE_URL_SECRET,
+)
+
 logger = logging.getLogger(__name__)
+
 
 class AzureBlobStorageAccessor:
     """
@@ -22,33 +29,43 @@ class AzureBlobStorageAccessor:
     >>> blob_storage.get_blob_list()
     >>> blob_storage.get_blob_contents('tool-codeql-results.json')
     """
+
     def __init__(self, name_prefix: str):
         """Initialize AzureBlobStorageAccessor."""
         if not name_prefix or not name_prefix.strip():
             raise ValueError("name_prefix cannot be empty")
-        
-        if not TOOLSHED_BLOB_STORAGE_URL or not TOOLSHED_BLOB_STORAGE_CONTAINER:
+
+        if not TOOLSHED_BLOB_STORAGE_URL_SECRET or not TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET:
             raise ValueError("TOOLSHED_BLOB_STORAGE_URL and TOOLSHED_BLOB_CONTAINER must be set")
 
-        self.blob_service = BlobServiceClient(TOOLSHED_BLOB_STORAGE_URL)
-        self.container = self.blob_service.get_container_client(TOOLSHED_BLOB_STORAGE_CONTAINER)
+        self.blob_service = BlobServiceClient(TOOLSHED_BLOB_STORAGE_URL_SECRET)
+        self.container = self.blob_service.get_container_client(
+            TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET
+        )
         self.name_prefix = name_prefix
 
     def get_blob_list(self):
         """Get list of blobs in the Toolshed container."""
         try:
-            cache_key = f'AzureBlobStorageAccessor[name_prefix={self.name_prefix}].blob_list'
+            cache_key = f"AzureBlobStorageAccessor[name_prefix={self.name_prefix}].blob_list"
             if cache.has_key(cache_key):
                 return cache.get(cache_key)
             else:
-                data = list(map(lambda b: {"full_path": b.name, "relative_path": b.name[len(self.name_prefix)+1:]},
-                                self.container.list_blobs(name_starts_with=self.name_prefix)))
-                cache.set(cache_key, data, timeout=60*60)
+                data = list(
+                    map(
+                        lambda b: {
+                            "full_path": b.name,
+                            "relative_path": b.name[len(self.name_prefix) + 1 :],
+                        },
+                        self.container.list_blobs(name_starts_with=self.name_prefix),
+                    )
+                )
+                cache.set(cache_key, data, timeout=60 * 60)
                 return data
         except:
             logger.exception("Failed to get blob list")
             return []
-    
+
     def get_blob_contents(self, blob_name: str) -> Union[str, bytes]:
         """Load blob contents from Toolshed."""
         try:
@@ -58,8 +75,9 @@ class AzureBlobStorageAccessor:
             logger.exception("Failed to get blob contents")
             return None
 
+
 class ToolshedBlobStorageAccessor:
-    def __init__(self, scan: 'triage.models.Scan'):
+    def __init__(self, scan: "triage.models.Scan"):
         if not scan:
             raise ValueError("scan cannot be empty")
         self.scan = scan
@@ -73,35 +91,39 @@ class ToolshedBlobStorageAccessor:
     def get_toolshed_prefix(self, package_url: PackageURL):
         if not package_url:
             return None
-        
+
         if package_url.namespace:
             return f"{package_url.type}/{package_url.namespace}/{package_url.name}/{package_url.version}"
         else:
             return f"{package_url.type}/{package_url.name}/{package_url.version}"
 
     def get_tool_files(self):
-        results = []    # type: List[dict]
+        results = []  # type: List[dict]
         for blob in self.blob_accessor.get_blob_list():
-            if blob.get('relative_path').startswith('tool-'):
-                results.append({
-                    "full_path": blob.get('full_path'),
-                    "relative_path": "tools/" + blob.get("relative_path")
-                })
+            if blob.get("relative_path").startswith("tool-"):
+                results.append(
+                    {
+                        "full_path": blob.get("full_path"),
+                        "relative_path": "tools/" + blob.get("relative_path"),
+                    }
+                )
         return results
 
     def get_package_files(self):
         results = []
         for blob in self.blob_accessor.get_blob_list():
-            if blob.get('relative_path').startswith('reference-binaries'):
-                if blob.get('relative_path').endswith('.tgz'):
-                    
-                    contents = self.blob_accessor.get_blob_contents(blob.get('full_path'))
-                    tar = tarfile.open(fileobj=io.BytesIO(contents), mode='r')
+            if blob.get("relative_path").startswith("reference-binaries"):
+                if blob.get("relative_path").endswith(".tgz"):
+
+                    contents = self.blob_accessor.get_blob_contents(blob.get("full_path"))
+                    tar = tarfile.open(fileobj=io.BytesIO(contents), mode="r")
                     for member in tar.getmembers():
-                        results.append({
-                            "full_path": f"{blob.get('full_path')}:{member.name}",
-                            "relative_path": "package/" + member.name
-                        })
+                        results.append(
+                            {
+                                "full_path": f"{blob.get('full_path')}:{member.name}",
+                                "relative_path": "package/" + member.name,
+                            }
+                        )
         return results
 
     def get_intermediate_files(self):

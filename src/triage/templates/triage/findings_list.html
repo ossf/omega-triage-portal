@@ -1,0 +1,61 @@
+{% extends "./base.html" %}
+
+{% block body %}
+{% block main %}
+<div class="row mt-4">
+    <div class="col-12">
+        <label for="finding_query" class="visually-hidden">Search Query</label>
+        <form action="/findings" method="get">
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" name="q" class="form-control" id="finding_query" placeholder="Search Query..." spellcheck="false" autocomplete="off" value="{{ query }}"/>
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Queries</button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><h6 class="dropdown-header">Shared Queries</h6></li>
+                    <li><a class="dropdown-item" href="/findings?q=status:Untriaged+tag:backdoor">Untriaged Backdoors</a></li>
+                    <li><a class="dropdown-item" href="#">Assigned to Me</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header">My Queries</h6></li>
+                    <li><a class="dropdown-item" href="#">Assigned to Me</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#">Save Current Query As...</a></li>
+                </ul>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row mt-4">
+    <div class="col-lg-12 pl-4 pr-4">
+        <table id="finding_list" class="table table-sm table-hover" style="overflow-y:auto">
+            <thead>
+                <tr>
+                    <th scope="col">Package</th>
+                    <th scope="col" class="text-nowrap">Issue</th>
+                    <th scope="col" class="text-nowrap">Filename</th>
+                </tr>
+            </thead>
+            <tbody style="word-break: break-word;white-space:normal;word-wrap:break-word">
+                {% for finding in findings %}
+                    <tr data-finding-uuid="{{ finding.uuid }}" data-finding-title="{{ finding.title }}" data-file-path="{{ finding.file_path}}" data-file-location="{{ finding.file_line }}" style="cursor:pointer">
+                        <td>{{ finding.scan.project_version }}</td>
+                        <td>{{ finding.title }}</td>
+                        <td>{{ finding.get_filename_display }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    {% endblock main %}
+{% endblock body %}
+
+{% block javascript %}
+    /* Handle clicks of the "New Tool Finding" button */
+    $('#action_new_tooling_bug').on('click', (e) => {
+        let finding_uuid = $('#finding_list').data('finding_uuid');
+        if (finding_uuid !== undefined) {
+            document.location.href = `/tool_defect/new?finding_uuid=${finding_uuid}`;
+        }
+    });
+{% endblock %}

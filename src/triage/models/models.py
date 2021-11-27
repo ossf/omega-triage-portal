@@ -5,9 +5,11 @@ from typing import Optional
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from packageurl import PackageURL
 
+from triage.models.base import BaseTimestampedModel, BaseUserTrackedModel, WorkItemState
 from triage.util.azure_blob_storage import (
     AzureBlobStorageAccessor,
     ToolshedBlobStorageAccessor,
@@ -15,22 +17,6 @@ from triage.util.azure_blob_storage import (
 from triage.util.general import modify_purl
 
 logger = logging.getLogger(__name__)
-
-
-class BaseTimestampedModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
-
-
-class BaseUserTrackedModel(models.Model):
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
-    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
-
-    class Meta:
-        abstract = True
 
 
 class Tool(BaseTimestampedModel, BaseUserTrackedModel):
@@ -44,12 +30,25 @@ class Tool(BaseTimestampedModel, BaseUserTrackedModel):
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     name = models.CharField(max_length=128)
+    friendly_name = models.CharField(max_length=128, blank=True, null=True)
     version = models.CharField(max_length=64, blank=True)
     type = models.CharField(max_length=2, choices=ToolType.choices, default=ToolType.NOT_SPECIFIED)
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name} {self.version}"
+        parts = []
+        if self.friendly_name:
+            parts.append(self.friendly_name)
+        else:
+            parts.append(self.name)
+        if self.version:
+            parts.append(self.version)
+        return " ".join(parts)
+
+    def save(self, *args, **kwargs):
+        if self.friendly_name is None:
+            self.friendly_name = self.name
+        super().save(*args, **kwargs)
 
 
 class Project(BaseTimestampedModel, BaseUserTrackedModel):
@@ -233,14 +232,6 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
                 return cls.NONE
             return cls.NOT_SPECIFIED
 
-    class State(models.TextChoices):
-        NEW = "N", _("New")
-        ACTIVE = "A", _("Active")
-        RESOLVED = "R", _("Resolved")
-        DELETED = "D", _("Deleted")
-        CLOSED = "CL", _("Closed")
-        NOT_SPECIFIED = "NS", _("Not Specified")
-
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     scan = models.ForeignKey(Scan, on_delete=models.CASCADE)
 
@@ -266,15 +257,25 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
     analyst_severity_level = models.CharField(
         max_length=2, choices=SeverityLevel.choices, default=SeverityLevel.NOT_SPECIFIED
     )
-    state = models.CharField(max_length=2, choices=State.choices, default=State.NEW)
+    state = models.CharField(max_length=2, choices=WorkItemState.choices, default=WorkItemState.NEW)
 
     # Who the finding is currently assigned to
     assigned_to = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     assigned_dt = models.DateTimeField(auto_now_add=True)
 
+    def get_absolute_url(self):
+        return f"/finding/{self.uuid}"
+
     @property
     def get_filename_display(self):
         return self.file_path or "-"
+
+    @property
+    def get_severity_display(self):
+        """Gets the best severity level (analyst estimate taking precedence)"""
+        if self.analyst_severity_level == Finding.SeverityLevel.NOT_SPECIFIED:
+            return self.get_severity_level_display()
+        return self.get_analyst_severity_level_display()
 
     def get_source_code(self):
         if self.file_path:
@@ -307,15 +308,6 @@ class Case(BaseTimestampedModel, BaseUserTrackedModel):
     Represents a case that is being reported to a maintainer for a fix.
     """
 
-    class State(models.TextChoices):
-        NEW = "N", _("New")
-        REPORTED = "R", _("Reported")
-        ACTIVE = "A", _("Active")
-        RESOLVED = "RS", _("Resolved")
-        DELETED = "D", _("Deleted")
-        CLOSED = "CL", _("Closed")
-        NOT_SPECIFIED = "NS", _("Not Specified")
-
     class CasePartner(models.TextChoices):
         NONE = "N", _("None")
         GITHUB_SECURITY_LAB = "GS", _("GitHub Security Lab")
@@ -325,7 +317,7 @@ class Case(BaseTimestampedModel, BaseUserTrackedModel):
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     findings = models.ManyToManyField(Finding, related_name="cases")
-    state = models.CharField(max_length=2, choices=State.choices, default=State.NEW)
+    state = models.CharField(max_length=2, choices=WorkItemState.choices, default=WorkItemState.NEW)
     title = models.CharField(max_length=1024)
     description = models.TextField(null=True, blank=True)
     assigned_to = models.ForeignKey(

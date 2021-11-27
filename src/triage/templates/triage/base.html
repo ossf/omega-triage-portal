@@ -8,9 +8,9 @@
     <link rel="icon" href="https://openssf.org/wp-content/uploads/sites/132/2021/09/cropped-favicon-192x192.png" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/bootstrap/dist/css/bootstrap.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/@fortawesome/fontawesome-free/css/all.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-bs4/css/dataTables.bootstrap4.min.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-fixedheader-bs4/css/fixedHeader.bootstrap4.min.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-keytable-bs4/css/keyTable.bootstrap4.min.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-fixedheader-bs5/css/fixedHeader.bootstrap5.min.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-keytable-bs5/css/keyTable.bootstrap5.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/jstree/dist/themes/default/style.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/jstree-bootstrap-theme/dist/themes/proton/style.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/select2/dist/css/select2.min.css" %}" />
@@ -20,6 +20,8 @@
       a.navbar-brand { font-size: 50px; font-weight: bold; color: #222!important; text-shadow: 0 0 5px #ddd; margin-left: 12px; padding-top: 0 }
       button.navbar-toggler { margin-left: 8px }
       li.nav-item { margin-left: 12px }
+      a { color: inherit; text-decoration: none }
+
       #editor-title, #note-title, #file-listing-title { color:#fff;font-size:0.85em;padding-top:4px;padding-bottom:4px;padding-left: 7px; margin-bottom:2px;}
       #issue_list tr { cursor: pointer; }
       #issue_list td { padding-top:0; padding-bottom:0; padding-left: 3px; padding-right: 3px; }
@@ -82,6 +84,13 @@
                 <a class="nav-link" href="/cases/">Cases</a>
               {% endif %}
             </li>
+            <li class="nav-item">
+              {% if '/tool_defect' in request.path %}
+                <a class="nav-link active" href="/tool_defect">Tool Defects</a>
+              {% else %}
+                <a class="nav-link" href="/tool_defect">Tool Defects</a>
+              {% endif %}
+            </li>            
           </ul>
       </div>
     </nav>
@@ -100,14 +109,14 @@
     <script type="text/javascript" src="{% static "triage/resources/@popperjs/core/dist/umd/popper.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/bootstrap/dist/js/bootstrap.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/datatables.net/js/jquery.dataTables.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "triage/resources/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "triage/resources/datatables.net-bs5/js/dataTables.bootstrap5.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "triage/resources/datatables.net-fixedheader-bs4/js/fixedHeader.bootstrap4.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "triage/resources/datatables.net-fixedheader-bs5/js/fixedHeader.bootstrap5.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/datatables.net-keytable/js/dataTables.keyTable.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "triage/resources/datatables.net-keytable-bs4/js/keyTable.bootstrap4.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "triage/resources/datatables.net-keytable-bs5/js/keyTable.bootstrap5.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/datatables.net-select/js/dataTables.select.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/tablesorter/dist/js/jquery.tablesorter.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "triage/resources/tablesorter/dist/js/jquery.tablesorter.widgets.js" %}"></script>
+    <script type="text/javascript" src="{% static "triage/resources/tablesorter/dist/js/jquery.tablesorter.widgets.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/ace-builds/src-min-noconflict/ace.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/ace-builds/src-min-noconflict/ext-settings_menu.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/ace-builds/src-min-noconflict/ext-modelist.js" %}"></script>
@@ -115,7 +124,7 @@
     <script type="text/javascript" src="{% static "triage/resources/jstree/dist/jstree.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/select2/dist/js/select2.min.js" %}"></script>
     
-    <script type="text/javascript" src="{% static "triage/resources/omega.js" %}"></script>
+    <script type="text/javascript" src="{% static "triage/omega.js" %}"></script>
 
     <script type="text/javascript" charset="utf-8">
       $(document).ready(function () {
