@@ -7,7 +7,10 @@ $(document).ready(function () {
             style: 'os',
             info: false
         },
-        scrollY: '30vh',
+        scrollResize: true,
+        scrollCollapse: true,
+        scrollY: '100',
+        lengthChange: false,
         paging: false,
         info: false,
         searching: false,

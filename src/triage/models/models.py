@@ -277,6 +277,14 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
             return self.get_severity_level_display()
         return self.get_analyst_severity_level_display()
 
+    @property
+    def get_impact_display(self):
+        """Gets the best impact level (analyst estimate taking precedence)"""
+        if self.analyst_impact is not None:
+            return self.analyst_impact
+        else:
+            return (self.impact_context or 0) * (self.impact_usage or 0)
+
     def get_source_code(self):
         if self.file_path:
             return self.scan.get_source_code(self.file_path)

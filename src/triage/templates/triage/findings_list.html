@@ -2,6 +2,16 @@
 
 {% block body %}
 {% block main %}
+<style>
+    #resize_wrapper {
+        position: absolute;
+        top: 8em;
+        left: 1em;
+        right: 1em;
+        bottom: 1em;
+    }
+</style>
+
 <div class="row mt-4">
     <div class="col-12">
         <label for="finding_query" class="visually-hidden">Search Query</label>
@@ -24,20 +34,22 @@
         </form>
     </div>
 </div>
-<div class="row mt-4">
+<div id="resize_wrapper" class="row mt-4">
     <div class="col-lg-12 pl-4 pr-4">
-        <table id="finding_list" class="table table-sm table-hover" style="overflow-y:auto">
+        <table id="finding_list" class="table table-sm table-hover">
             <thead>
                 <tr>
-                    <th scope="col">Package</th>
-                    <th scope="col" class="text-nowrap">Issue</th>
-                    <th scope="col" class="text-nowrap">Filename</th>
+                    <th>Package</th>
+                    <th class="text-nowrap">Issue</th>
+                    <th class="text-nowrap">Filename</th>
                 </tr>
             </thead>
             <tbody style="word-break: break-word;white-space:normal;word-wrap:break-word">
                 {% for finding in findings %}
                     <tr data-finding-uuid="{{ finding.uuid }}" data-finding-title="{{ finding.title }}" data-file-path="{{ finding.file_path}}" data-file-location="{{ finding.file_line }}" style="cursor:pointer">
-                        <td>{{ finding.scan.project_version }}</td>
+                        <td>
+                            {% include "triage/widgets/project_name_pretty.html" with project=finding.scan.project_version only %}
+                        </td>
                         <td>{{ finding.title }}</td>
                         <td>{{ finding.get_filename_display }}</td>
                     </tr>
