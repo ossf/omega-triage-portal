@@ -3,6 +3,12 @@
 {% block body %}
     {% block main %}
 <div class="row">
+    <div class="col-12 mt-4 mb-2">
+        <div class="fs-2">
+            {{ finding.title }}
+            <span class="text-muted">#{{ finding.pk }}</span>
+        </div>
+    </div>
     <div class="col-2">
         <div class="card" style="max-height: 500px">
             <div class="accordion" id="accordionExample">
@@ -35,21 +41,21 @@
     </div>
     <div class="col-8">
         <div class="card">
-            <div id="editor"></div>
+            <div id="editor">{{ finding.get_source_code }}</div>
         </div>
     </div>
     <div class="col-2">
         <div class="text-end">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-bars"></i></button>
-        <ul class="dropdown-menu dropdown-menu-end">
+        <ul class="dropdown-menu dropdown-menu-end shadow ">
             <li><a class="dropdown-item" href="#">Auto-Triage Rules</a></li>
             <li><a class="dropdown-item" href="#">Compare Versions</a></li>
-            <li><a class="dropdown-item" href="#">Export to SARIF</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-file-export"></i>&nbsp;&nbsp;Export to SARIF</a></li>
             <li><a class="dropdown-item" href="#">Similar Findings</a></li>
             <li><a class="dropdown-item" href="#">Source Repository</a></li>
             <li><a class="dropdown-item" href="#">Watch</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a id="action_new_tooling_bug" class="dropdown-item" href="#"><i class="fas fa-bug"></i>&nbsp;&nbsp;New Tooling Bug</a></li>
+            <li><a class="dropdown-item" href="/tool_defect/new?finding_uuid={{ finding.uuid }}"><i class="fas fa-bug"></i>&nbsp;&nbsp;New Tooling Bug</a></li>
             <li><a class="dropdown-item" href="https://slack.com"><i class="fab fa-slack"></i>&nbsp;&nbsp;Slack</a></li>
             <li><a class="dropdown-item" href="/findings/upload">Upload Findings</a></li>
         </ul>
@@ -66,7 +72,6 @@
             </li>
             
             <li class="list-group-item">
-                <div class="float-end"><a href="#"><i class="fas fa-cog"></i></a></div>
                 <p class="text-muted fw-bold">True Positive</p>
                 <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
@@ -110,7 +115,7 @@
             </li>
             <li class="list-group-item">
                 <p class="text-muted fw-bold">Notes</p>
-                <textarea class="form-control w-100 h-100"></textarea>
+                <textarea class="form-control w-100 h-100" style="min-height: 150px" placeholder="Add a quick note..."></textarea>
             </li>            
             <li class="list-group-item">
                 
