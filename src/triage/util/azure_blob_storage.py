@@ -71,7 +71,12 @@ class AzureBlobStorageAccessor:
         """Load blob contents from Toolshed."""
         try:
             blob = self.container.get_blob_client(blob_name)
-            return blob.download_blob().readall()
+            if blob.exists():
+                logger.info("Blob exists, downloading: %s", blob_name)
+                return blob.download_blob().readall()
+            else:
+                logger.warning("Blob %s does not exist.", blob_name)
+                return None
         except:
             logger.exception("Failed to get blob contents")
             return None
@@ -98,20 +103,15 @@ class ToolshedBlobStorageAccessor:
         else:
             return f"{package_url.type}/{package_url.name}/{package_url.version}"
 
-    def get_tool_files(self):
+    def get_tool_files(self, path_prefix="/tools"):
+        """Retrieve all tool findings files from Toolshed."""
         results = []  # type: List[dict]
         for blob in self.blob_accessor.get_blob_list():
-            results.append(blob.get("relative_path"))
-            # if blob.get("relative_path").startswith("tool-"):
-            #    results.append(
-            #        {
-            #            "full_path": blob.get("full_path"),
-            #            "relative_path": "tools/" + blob.get("relative_path"),
-            #        }
-            #    )
+            results.append(os.path.join(path_prefix, blob.get("relative_path")))
         return results
 
-    def get_package_files(self):
+    def get_package_files(self, path_prefix="/package"):
+        """Retreive all package file contents from any available source."""
         results = []
         for blob in self.blob_accessor.get_blob_list():
             if blob.get("relative_path").startswith("reference-binaries"):
@@ -119,21 +119,35 @@ class ToolshedBlobStorageAccessor:
                     contents = self.blob_accessor.get_blob_contents(blob.get("full_path"))
                     tar = tarfile.open(fileobj=io.BytesIO(contents), mode="r")
                     for member in tar.getmembers():
-                        results.append(
-                            {
-                                "full_path": f"{blob.get('full_path')}:{member.name}",
-                                "relative_path": "package/" + member.name,
-                            }
-                        )
-        if not results:
-            results = self.backup()
+                        results.append(os.path.join(path_prefix, member.name))
 
+        if not results:
+            viewer = SourceViewer(self.package_url)
+            viewer.load_if_needed()
+            for filename in viewer.get_file_list():
+                results.append(os.path.join(path_prefix, filename))
         return results
 
-    def backup(self):
-        sv = SourceViewer(self.package_url)
-        sv.load_if_needed()
-        return list(sv.get_file_list())
+    def get_file_contents(self, filename):
+        """Retrieve contents of a file from the Toolshed."""
+        try:
+            logger.info("Attempting to retrieve file contents for %s", filename)
+            filename = filename.replace("tools/", "")
+            full_path = os.path.join(self.get_toolshed_prefix(self.package_url), filename)
+            logger.info("full path: " + full_path)
+            contents = self.blob_accessor.get_blob_contents(full_path)
+            logger.info("Contents length: %d bytes", len(contents))
+            if contents:
+                return contents
+            else:
+                return None
+        except:
+            logger.exception("Failed to get blob contents")
+            return None
+
+    def get_all_files(self):
+        """Retrieve all files about the scan."""
+        return self.get_tool_files() + self.get_package_files() + self.get_intermediate_files()
 
     def get_intermediate_files(self):
         return []

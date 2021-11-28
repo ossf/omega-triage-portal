@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
 
-from triage.models.models import Finding
+from triage.models.models import Finding, Scan
 from triage.util.azure_blob_storage import ToolshedBlobStorageAccessor
 from triage.util.finding_importers.sarif_importer import SARIFImporter
 from triage.util.search_parser import parse_query_to_Q
@@ -106,35 +106,22 @@ def api_update_finding(request: HttpRequest) -> JsonResponse:
 
 def api_get_source_code(request: HttpRequest) -> JsonResponse:
     """Returns the source code for a finding."""
-    finding_uuid = request.GET.get("finding-uuid")
-    if finding_uuid:
-        finding = get_object_or_404(Finding, uuid=finding_uuid)
-        # if not finding.can_view(request.user):
-        #    return HttpResponseForbidden()
-
-        return JsonResponse(
-            {
-                "file_contents": b64encode(finding.get_source_code()).decode("utf-8"),
-                "file_name": os.path.basename(finding.file_path),
-                "file_location": finding.file_line,
-                "status": "ok",
-            }
-        )
-    package_url = request.GET.get("package_url")
+    scan_uuid = request.GET.get("scan_uuid")
     file_path = request.GET.get("file_path")
-    if package_url and file_path:
-        viewer = SourceViewer(package_url)
-        res = viewer.get_file(file_path)
-        if res:
+    if scan_uuid:
+        scan = get_object_or_404(Scan, uuid=scan_uuid)
+        source_code = scan.get_file_contents(file_path)
+        if source_code:
             return JsonResponse(
                 {
-                    "file_contents": b64encode(res.get("content")).decode("utf-8"),
-                    "file_name": file_path,
+                    "file_contents": b64encode(source_code).decode("utf-8"),
+                    "file_name": os.path.basename(file_path),
                     "status": "ok",
                 }
             )
+        return JsonResponse({"status": "error", "message": "File not found"}, status=404)
 
-    return JsonResponse({"status": "error"})
+    return JsonResponse({"status": "error"}, status=500)
 
 
 @cache_page(60 * 5)
@@ -144,12 +131,10 @@ def api_get_files(request: HttpRequest) -> JsonResponse:
     finding = get_object_or_404(Finding, uuid=finding_uuid)
 
     accessor = ToolshedBlobStorageAccessor(finding.scan)
-    tool_files = [f"/tools/{t}" for t in accessor.get_tool_files()]
-    package_files = [f"/package/{t}" for t in accessor.get_package_files()]
-    intermediate_files = accessor.get_intermediate_files()
+    file_listing = accessor.get_all_files()
 
     source_graph = path_to_graph(
-        package_files + tool_files + intermediate_files,
+        file_listing,
         finding.scan.project_version.package_url,
         separator="/",
         root="Root",

@@ -38,15 +38,27 @@ const load_source_code = function (options) {
         'url': '/api/findings/get_source_code',
         'method': 'GET',
         'data': {
-            'finding-uuid': options['finding-uuid']
+            'scan_uuid': options['scan_uuid'],
+            'file_path': options['file_path']
         },
-        'success': function ({ file_contents, file_name }, textStatus, jqXHR) {
+        'success': function ({ file_contents, file_name, status }, textStatus, jqXHR) {
             let editor = ace.edit("editor");
             editor.getSession().setValue(atob(file_contents));
-            let mode = ace.require("ace/ext/modelist").getModeForPath(file_name).mode;
+            var get_mode_filename = (file_name) => {
+                if (file_name.indexOf('.sarif')) {
+                    return `file_name${".json"}`
+                }
+                return file_name;
+            }
+            let mode = ace.require("ace/ext/modelist").getModeForPath(get_mode_filename(file_name)).mode;
             editor.session.setMode(mode);
             editor.setShowPrintMargin(false);
             editor.resize();
+            editor.setTheme("ace/theme/cobalt");
+            editor.setOptions({
+                'fontFamily': 'Inconsolata',
+                'fontSize': '14px',
+            });
 
             // Show the editor if needed
             $('#editor-container').removeClass('d-none');
@@ -71,7 +83,7 @@ const load_source_code = function (options) {
             //$('#issue-metadata-link').data('issue-id', $row.data('issue-id'));
 
             $(window).trigger('resize');
-            $('#editor').css('height', $(window).height() - 395);
+            $('#editor').css('height', $(window).height() - $('#editor').offset().top - 10);
 
             //window.setTimeout(function() {
             //    ace.edit('editor').scrollToLine($row.data('line-number'), true, false);
@@ -102,6 +114,7 @@ const load_file_listing = function (options) {
                         'responsive': true
                     }
                 },
+                'animation': 40,
                 'plugins': ['sort'],
                 'sort': function (a, b) {
                     a1 = this.get_node(a);
@@ -123,11 +136,10 @@ const load_file_listing = function (options) {
                 },
                 "changed.jstree": function (event, data) {
                     if (data.node.children.length === 0) {
+                        const scan_uuid = $.data(document.body, 'current_finding').scan_uuid;
                         load_source_code({
-                            'package_url': data.node.li_attr.package_url,
-                            'file-path': data.node.id,
-                            'finding_title': data.node.li_attr.finding_title,
-                            'file-location': data.node.li_attr.finding_location
+                            'scan_uuid': scan_uuid,
+                            'file_path': data.node.id
                         });
                     }
                 }

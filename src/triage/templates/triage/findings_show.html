@@ -3,12 +3,20 @@
 {% block body %}
     {% block main %}
 <style>
+/* Remove the caret from dropdown triggers */
 .dropdown-toggle::after {
     content: none;
 }
+/* Give file links a little color */
 .jstree-proton .jstree-anchor {
     color: rgb(0, 0, 59);
 }
+/* Remove the scrollbar from the file listing */
+#data::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+}
+
 </style>
 <div class="row">
     <div class="col-12 mt-4 mb-2">
@@ -17,11 +25,11 @@
             <span class="text-muted">#{{ finding.pk }}</span>
         </div>
     </div>
-    <div class="col-2 border-end">
+    <div id="file_listing" class="col-2 border-end">
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
-                <p class="text-muted fw-bold">Package Files</p>
-                <div id="data" style="margin-top: 5px;overflow:auto"></div>
+                <p class="text-muted fw-bold mb-0">Files</p>
+                <div id="data" style="margin-top: 0px;overflow:auto"></div>
             </li>
         </ul>
     </div>
@@ -126,6 +134,11 @@
 {% endblock body %}
 
 {% block javascript %}
+    /* Stash some page-level data */
+    $.data(document.body, 'current_finding', {
+        'finding_uuid': '{{ finding.uuid }}',
+        'scan_uuid': '{{ finding.scan.uuid }}'
+    });
     /* Handle clicks of the "New Tool Finding" button */
     $('#action_new_tooling_bug').on('click', (e) => {
         let finding_uuid = $('#finding_list').data('finding_uuid');
@@ -135,12 +148,12 @@
     });
     $(document).ready(() => {
         load_file_listing({"finding_uuid": "{{ finding.uuid }}"});
-
-        load_source_code({
-            'finding-uuid': '{{ finding.uuid }}',
-            'finding-title': '{{ finding.title }}',
-            'file-path': '{{ finding.file_path }}',
-            'file-location': '{{ finding.file_line }}',
+        
+        /* Resize the file and editor */
+        $(window).on('resize', (e) => {
+            $('#editor').css('height', $(window).height() - $('#editor').offset().top - 10);
+            $('#data').css('height', $(window).height() - $('#data').offset().top - 10);
         });
+        $(window).trigger('resize');
     });
 {% endblock %}

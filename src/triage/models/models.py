@@ -117,6 +117,17 @@ class Scan(BaseTimestampedModel, BaseUserTrackedModel):
     def get_absolute_url(self):
         return f"/scan/{self.uuid}"
 
+    def get_file_content(self, filename: str) -> Optional[str]:
+        if filename is None:
+            return None
+
+        accessor = ToolshedBlobStorageAccessor(self)
+        for _filename in accessor.get_all_files():
+            print(f"Comparing {_filename} to {filename}")
+            if _filename == filename:
+                return accessor.get_file_content(_filename)
+        return None
+
     def get_source_files(self) -> list:
         """Retreives the source code for this scan."""
         accessor = ToolshedBlobStorageAccessor(self)
@@ -146,6 +157,11 @@ class Scan(BaseTimestampedModel, BaseUserTrackedModel):
 
         accessor = AzureBlobStorageAccessor(prefix)
         return accessor.get_blob_list()
+
+    def get_file_contents(self, filename) -> Optional[str]:
+        """Retreives the contents of a file."""
+        accessor = ToolshedBlobStorageAccessor(self)
+        return accessor.get_file_contents(filename)
 
 
 class TriageRule(models.Model):
