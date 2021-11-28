@@ -70,7 +70,11 @@ def show_upload(request: HttpRequest) -> HttpResponse:
 
 def show_finding_by_uuid(request: HttpRequest, finding_uuid) -> HttpResponse:
     finding = get_object_or_404(Finding, uuid=finding_uuid)
-    return render(request, "triage/findings_show.html", {"finding": finding})
+    from django.contrib.auth.models import User
+
+    assignee_list = User.objects.all()
+    context = {"finding": finding, "assignee_list": assignee_list}
+    return render(request, "triage/findings_show.html", context)
 
 
 @require_http_methods(["POST"])

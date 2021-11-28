@@ -1,1 +1,16 @@
-{{ project.package_url }}
+{% load project_helpers %}
+{% parse_package_url project.package_url %}
+{% spaceless %}
+    <div class="badge bg-secondary">{{ package_url.type }}</div>
+
+    <span style="font-size: 80%">
+        {% if package_url.namespace %}
+            {{ package_url.namespace }}/{{ package_url.name }}
+        {% else %}
+            {{ package_url.name }}
+        {% endif %}
+        <span class="text-muted">
+            {{ package_url.version }}
+        </span>
+    </span>
+{% endspaceless %}

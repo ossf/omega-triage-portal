@@ -2,6 +2,11 @@
 
 {% block body %}
     {% block main %}
+<style>
+.dropdown-toggle::after {
+    content: none;
+}
+</style>
 <div class="row">
     <div class="col-12 mt-4 mb-2">
         <div class="fs-2">
@@ -47,22 +52,35 @@
     <div class="col-2">
         <div class="text-end">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-bars"></i></button>
-        <ul class="dropdown-menu dropdown-menu-end shadow ">
-            <li><a class="dropdown-item" href="#">Auto-Triage Rules</a></li>
-            <li><a class="dropdown-item" href="#">Compare Versions</a></li>
-            <li><a class="dropdown-item" href="#"><i class="fas fa-file-export"></i>&nbsp;&nbsp;Export to SARIF</a></li>
-            <li><a class="dropdown-item" href="#">Similar Findings</a></li>
-            <li><a class="dropdown-item" href="#">Source Repository</a></li>
-            <li><a class="dropdown-item" href="#">Watch</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="/tool_defect/new?finding_uuid={{ finding.uuid }}"><i class="fas fa-bug"></i>&nbsp;&nbsp;New Tooling Bug</a></li>
-            <li><a class="dropdown-item" href="https://slack.com"><i class="fab fa-slack"></i>&nbsp;&nbsp;Slack</a></li>
-            <li><a class="dropdown-item" href="/findings/upload">Upload Findings</a></li>
-        </ul>
+            <ul class="dropdown-menu dropdown-menu-end shadow ">
+                <li><a class="dropdown-item" href="#">Auto-Triage Rules</a></li>
+                <li><a class="dropdown-item" href="#">Compare Versions</a></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-file-export"></i>&nbsp;&nbsp;Export to SARIF</a></li>
+                <li><a class="dropdown-item" href="#">Similar Findings</a></li>
+                <li><a class="dropdown-item" href="#">Source Repository</a></li>
+                <li><a class="dropdown-item" href="#">Watch</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/tool_defect/new?finding_uuid={{ finding.uuid }}"><i class="fas fa-bug"></i>&nbsp;&nbsp;New Tooling Bug</a></li>
+                <li><a class="dropdown-item" href="https://slack.com"><i class="fab fa-slack"></i>&nbsp;&nbsp;Slack</a></li>
+                <li><a class="dropdown-item" href="/findings/upload">Upload Findings</a></li>
+            </ul>
         </div>
         <ul class="list-group list-group-flush">
             <li class="list-group-item pb-4 pt-4">
-                <div class="float-end"><a href="#"><i class="fas fa-cog"></i></a></div>
+                <button class="btn dropdown-toggle float-end" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cog"></i></button>
+                <ul class="dropdown-menu dropdown-menu-end shadow pt-0 pb-0" style="width: 280px; border:0">
+                    <li class="list-group-item">
+                        <strong>Choose an assignee</strong>
+                    </li>
+                    <li class="list-group-item">
+                        <input type="text" list="assignee_list" class="form-control"/>
+                        <datalist id="assignee_list">
+                            {% for assignee in assignee_list %}
+                                <option value="{{ assignee.username }}">{{ assignee.first_name }} {{ assignee.last_name }}</option>
+                            {% endfor %}
+                        </datalist>
+                    </li>
+                </ul>
                 <p class="text-muted fw-bold">Assignee</p>
                 {% if finding.assigned_to %}
                     <a href="#">{{ finding.assigned_to }}</a>
@@ -74,13 +92,13 @@
             <li class="list-group-item">
                 <p class="text-muted fw-bold">True Positive</p>
                 <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" />
                     <label class="btn btn-outline-success" for="btnradio1">True</label>
                   
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" />
                     <label class="btn btn-outline-danger" for="btnradio2">False</label>
                     
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
+                    <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off" />
                     <label class="btn btn-outline-info" for="btnradio3">Indet</label>
                   </div>
             </li>
