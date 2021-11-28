@@ -24,16 +24,16 @@
             {% endif %}
         </div>
 
-        <div class="col-lg-6">
+        <div class="col-lg-6 g-3">
             <div class="row">
-                <div class="col-12">
-                    <label for="toolDefectTitle" class="form-label">Title</label>
-                    <input type="text" class="form-control" id="toolDefectTitle" name="title" value="{{ tool_defect.title }}" />
+                <div class="col-lg-12 mb-3">
+                    <label for="toolDefectTitle" class="form-label sr-only">Title</label>
+                    <input type="text" class="form-control" id="toolDefectTitle" name="title" value="{{ tool_defect.title }}" placeholder="Defect title" />
                 </div>
                 <div class="col-lg-6">
                     <label for="toolDefectState" class="form-label">State</label>
                     <select id="toolDefectState" class="form-select" name="state">
-                        {% for state in tool_defect_states %}
+                        {% for state in tool_defect_states|dictsort:1 %}
                             <option value="{{ state.0 }}">{{ state.1 }}</option>
                         {% endfor %}
                     </select>
@@ -41,11 +41,11 @@
                 <div class="col-lg-6">
                     <label for="toolDefectTool" class="form-label">Tool</label>
                     <select id="toolDefectTool" class="form-select" name="tool">
-                        {% for tool in tools %}
-                            <option value="{{ tool.uuid }}" {% if tool_defect.}>{{ tool }}</option>
+                        {% for tool in tools|dictsort:"name" %}
+                            <option value="{{ tool.uuid }}">{{ tool }}</option>
                         {% endfor %}
                     </select>
-                </div>            
+                </div>
                 <div class="col-lg-12">
                     <label for="toolDefectFindings" class="form-label">Associated Findings</label>
                     {% if tool_defect.finding or finding %}

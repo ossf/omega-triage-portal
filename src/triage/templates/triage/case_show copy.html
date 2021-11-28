@@ -30,36 +30,34 @@
 </div>
 <div class="row" style="margin-top: 8px">
     <div class="col-lg-12">
-        <h4>Cases</h4>
-        {% if cases %}
-            <table id="case_list" class="table table-sm table-hover" style="overflow-y:auto">
-                <thead>
-                    <tr>
-                        <th scope="col">Case ID</th>
-                        <th scope="col" class="text-nowrap">Title</th>
-                        <th scope="col" class="text-nowrap">Assigned To</th>
-                        <th scope="col" class="text-nowrap">Status</th>
+        <h4>Active Cases</h4>
+        <table id="case_list" class="table table-sm table-hover" style="overflow-y:auto">
+            <thead>
+                <tr>
+                    <th scope="col">Case ID</th>
+                    <th scope="col" class="text-nowrap">Title</th>
+                    <th scope="col" class="text-nowrap">Assigned To</th>
+                    <th scope="col" class="text-nowrap">Status</th>
+                </tr>
+            </thead>
+            <tbody style="word-break: break-word;white-space:normal;word-wrap:break-word">
+                {% for case in cases %}
+                    <tr style="cursor:pointer">
+                        <td>{{ case.pk }}</td>
+                        <td>{{ case.title }}</td>
+                        <td>{{ case.assigned_to }}</td>
+                        <td>{{ case.get_status_display }}</td>
                     </tr>
-                </thead>
-                <tbody style="word-break: break-word;white-space:normal;word-wrap:break-word">
-                    {% for case in cases %}
-                        <tr style="cursor:pointer">
-                            <td>{{ case.pk }}</td>
-                            <td>{{ case.title }}</td>
-                            <td>{{ case.assigned_to }}</td>
-                            <td>{{ case.get_status_display }}</td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center"><i>No cases found.</i></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <i>There are no cases available. Try expanding your query.</i>
-        {% endif %}
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center"><i>No cases found.</i></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
+
+    {% include "triage/case_part_edit.html" %}
     {% endblock main %}
 {% endblock body %}

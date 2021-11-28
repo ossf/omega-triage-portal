@@ -28,6 +28,12 @@
     <div id="file_listing" class="col-2 border-end">
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
+                <button class="btn dropdown-toggle float-end" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cog"></i></button>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li>
+                        <a class="dropdown-item" href="#"><i class="fas fa-download"></i>&nbsp;&nbsp;Download files</a>
+                    </li>
+                </ul>
                 <p class="text-muted fw-bold mb-0">Files</p>
                 <div id="data" style="margin-top: 0px;overflow:auto"></div>
             </li>
@@ -148,6 +154,11 @@
     });
     $(document).ready(() => {
         load_file_listing({"finding_uuid": "{{ finding.uuid }}"});
+        
+        load_source_code({
+            'scan_uuid': "{{ finding.scan.uuid }}",
+            'file_path': "{{ finding.file_path }}"
+        });
         
         /* Resize the file and editor */
         $(window).on('resize', (e) => {

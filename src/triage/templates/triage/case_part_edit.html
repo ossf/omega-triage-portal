@@ -11,8 +11,8 @@
             <div class="col-md-4">
                 <label for="caseState" class="form-label">State</label>
                 <select id="caseState" class="form-select">
-                    {% for state in case_states %}
-                        <option>{{ state.1 }}</option>
+                    {% for state in case_states|dictsort:1 %}
+                        <option value="{{ state.0 }}">{{ state.1 }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -28,8 +28,8 @@
             <div class="col-md-4">
                 <label for="caseReportingPartner" class="form-label">Reporting Partner</label>
                 <select id="caseReportingPartner" class="form-select">
-                    {% for partner in reporting_partner %}
-                        <option>{{ partner.1 }}</option>
+                    {% for partner in reporting_partner|dictsort:1 %}
+                        <option value="{{ partner.0 }}">{{ partner.1 }}</option>
                     {% endfor %}
                 </select>
             </div>

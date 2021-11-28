@@ -6,6 +6,7 @@ from django.urls import path
 from triage.views import cases, filters, findings, home, tool_defect
 
 urlpatterns = [
+    path("cases/new", cases.new_case),
     path("cases/", cases.show_cases),
     path("tool_defect/<uuid:tool_defect_uuid>", tool_defect.show_tool_defect),
     path("tool_defect/new", tool_defect.show_add_tool_defect),

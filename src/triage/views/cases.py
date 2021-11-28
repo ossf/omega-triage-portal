@@ -18,6 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
 
+from triage.models.base import WorkItemState
 from triage.models.models import Case, Project, ProjectVersion
 from triage.util.azure_blob_storage import ToolshedBlobStorageAccessor
 from triage.util.finding_importers.sarif_importer import SARIFImporter
@@ -36,7 +37,19 @@ def show_cases(request: HttpRequest) -> HttpResponse:
     c = {
         "query": query,
         "cases": Case.objects.all(),
-        "case_states": Case.State.choices,
+        "case_states": WorkItemState.choices,
         "reporting_partner": Case.CasePartner.choices,
     }
     return render(request, "triage/case_show.html", c)
+
+
+@require_http_methods(["GET"])
+def new_case(request: HttpRequest) -> HttpResponse:
+    """Shows the new case form."""
+    if request.method == "GET":
+        context = {
+            "case_states": WorkItemState.choices,
+            "reporting_partner": Case.CasePartner.choices,
+        }
+        return render(request, "triage/case_new.html", context)
+    return HttpResponseBadRequest()
