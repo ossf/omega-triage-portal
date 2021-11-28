@@ -13,6 +13,8 @@ output:
 ]
 
 """
+
+
 def path_to_graph(paths, package_url, separator="/", root=None):
     """
     Converts a list of paths into a graph suitable for jstree.
@@ -31,7 +33,6 @@ def path_to_graph(paths, package_url, separator="/", root=None):
 
     result = []
     seen_nids = set()
-    
     if root:
         result.append(
             {
@@ -42,7 +43,7 @@ def path_to_graph(paths, package_url, separator="/", root=None):
                 "package_url": None,
                 "path": "/",
                 "file_id": None,
-                "icon": "",
+                "icon": "fa fa-folder",
             }
         )
     else:
@@ -50,14 +51,14 @@ def path_to_graph(paths, package_url, separator="/", root=None):
 
     for path in paths:
         if not isinstance(path, str) or not path or path.startswith("pkg:"):
-            logger.debug('Ignoring invalid path [%s]', path)
+            logger.debug("Ignoring invalid path [%s]", path)
             continue
 
         if not path.startswith(separator):
             path = separator + path
 
         path_parts = path.split(separator)[1:]
-        
+
         logging.debug(f"Analyzing: %s", path_parts)
         for (part_id, part) in enumerate(path_parts):
             if part_id == 0:
@@ -65,7 +66,7 @@ def path_to_graph(paths, package_url, separator="/", root=None):
                 node_id = part
             else:
                 parent_id = separator.join(path_parts[:part_id])
-                node_id = separator.join(path_parts[:(part_id + 1)])
+                node_id = separator.join(path_parts[: (part_id + 1)])
             node_name = part
 
             if node_name and node_id not in seen_nids:
@@ -76,12 +77,50 @@ def path_to_graph(paths, package_url, separator="/", root=None):
                         "text": node_name,
                         "parent": parent_id,
                         "package_url": package_url,
-                        "li_attr": {
-                            "package_url": package_url
-                        },
+                        "li_attr": {"package_url": package_url},
                         "path": node_id,
-                        "icon": "fas fa-code" if part_id == len(path_parts) else "",
+                        "icon": get_icon_for_path(node_name, part_id == len(path_parts)),
                     }
                 )
                 seen_nids.add(node_id)
     return result
+
+
+def get_icon_for_path(path: str, is_leaf_node: bool) -> str:
+    # if not is_leaf_node:
+    #    return "fa fa-folder"
+
+    icon_map = {
+        "application/javascript": "fa fa-code",
+        "text/x-python": "fa fa-code",
+        "application/json": "fa fa-code",
+        "text/html": "fab fa-html5",
+        "text/css": "fab fa-css3",
+        "text/markdown": "fab fa-markdown",
+        "text/plain": "fas fa-file-alt",
+        "application/pdf": "fas fa-file-pdf",
+        "application/zip": "far fa-file-archive",
+        "application/x-tar": "far fa-file-archive",
+        "text/csv": "fas fa-file-csv",
+    }
+    extension_map = {
+        ".cs": "fa fa-code",
+        ".log": "far fa-file-alt",
+        ".gz": "fa fa-file-archive",
+        ".error": "fas fa-exclamation-triangle",
+        ".sarif": "fas fa-bug",
+    }
+    import mimetypes
+
+    for mime_type, css in icon_map.items():
+        if mimetypes.guess_type(path)[0] == mime_type:
+            return css
+
+    for extension, css in extension_map.items():
+        if path.endswith(extension):
+            return css
+
+    if "." not in path:
+        return "far fa-folder-open"
+
+    return "fa fa-file-alt"  # fallback, default

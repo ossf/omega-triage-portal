@@ -102,60 +102,32 @@ const load_file_listing = function (options) {
                         'responsive': true
                     }
                 },
-                'plugins': ['sort']
-            });
-            $('#data').on({
-                "loaded.jstree": function (event, data) {
-                    $(this).jstree("open_all");
-                },
-                "changed.jstree": function (event, data) {
-                    if (data.node.children.length === 0) {
-                        load_source_code({
-                            'package_url': data.node.li_attr.package_url,
-                            'file_path': data.node.id
-                        }, {
-                            'finding_title': data.node.li_attr.finding_title,
-                            'file_location': data.node.li_attr.finding_location
-                        });
+                'plugins': ['sort'],
+                'sort': function (a, b) {
+                    a1 = this.get_node(a);
+                    b1 = this.get_node(b);
+                    if (a1.children.length === 0 && b1.children.length === 0) {
+                        return a1.text.localeCompare(b1.text);
+                    } else if (a1.children.length === 0) {
+                        return 1;
+                    } else if (b1.children.length === 0) {
+                        return -1;
+                    } else {
+                        return a1.text.localeCompare(b1.text);
                     }
                 }
             });
-        }
-    });
-}
-
-const load_blob_listing = function (options) {
-    $.ajax({
-        'url': '/api/findings/get_blob_list',
-        'method': 'GET',
-        'data': options,
-        'success': function (data, textStatus, jqXHR) {
-            if ($('#data_blob').jstree(true)) {
-                $('#data_blob').jstree(true).destroy();
-            }
-            let tree_data = data.data;
-            $('#data_blob').jstree({
-                'core': {
-                    'data': tree_data,
-                    'multiple': false,
-                    'themes': {
-                        'dblclick_toggle': false,
-                        'icons': true,
-                        'name': 'proton',
-                        'responsive': true
-                    }
-                },
-                'plugins': ['sort']
-            });
-            $('#data_blob').on({
+            $('#data').on({
                 "loaded.jstree": function (event, data) {
-                    $(this).jstree("open_all");
+                    $(this).jstree("open_node", $(this).find('li:first'));
                 },
                 "changed.jstree": function (event, data) {
                     if (data.node.children.length === 0) {
                         load_source_code({
                             'package_url': data.node.li_attr.package_url,
-                            'file_path': data.node.id
+                            'file-path': data.node.id,
+                            'finding_title': data.node.li_attr.finding_title,
+                            'file-location': data.node.li_attr.finding_location
                         });
                     }
                 }
@@ -171,6 +143,4 @@ const get_file_for_issue = function ($row) {
         'file-path': $row.data('file-path'),
         'file-location': $row.data('file-location'),
     });
-    load_file_listing({ 'finding_uuid': $row.data('finding-uuid') });
-    //load_blob_listing({ 'finding_uuid': finding_uuid });
 }

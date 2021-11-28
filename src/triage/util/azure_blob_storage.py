@@ -14,6 +14,7 @@ from core.settings import (
     TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET,
     TOOLSHED_BLOB_STORAGE_URL_SECRET,
 )
+from triage.util.source_viewer.viewer import SourceViewer
 
 logger = logging.getLogger(__name__)
 
@@ -81,8 +82,8 @@ class ToolshedBlobStorageAccessor:
         if not scan:
             raise ValueError("scan cannot be empty")
         self.scan = scan
-        package_url = PackageURL.from_string(scan.project_version.package_url)
-        name_prefix = self.get_toolshed_prefix(package_url)
+        self.package_url = PackageURL.from_string(scan.project_version.package_url)
+        name_prefix = self.get_toolshed_prefix(self.package_url)
         if not name_prefix:
             raise ValueError("Invalid package_url")
 
@@ -100,13 +101,14 @@ class ToolshedBlobStorageAccessor:
     def get_tool_files(self):
         results = []  # type: List[dict]
         for blob in self.blob_accessor.get_blob_list():
-            if blob.get("relative_path").startswith("tool-"):
-                results.append(
-                    {
-                        "full_path": blob.get("full_path"),
-                        "relative_path": "tools/" + blob.get("relative_path"),
-                    }
-                )
+            results.append(blob.get("relative_path"))
+            # if blob.get("relative_path").startswith("tool-"):
+            #    results.append(
+            #        {
+            #            "full_path": blob.get("full_path"),
+            #            "relative_path": "tools/" + blob.get("relative_path"),
+            #        }
+            #    )
         return results
 
     def get_package_files(self):
@@ -114,7 +116,6 @@ class ToolshedBlobStorageAccessor:
         for blob in self.blob_accessor.get_blob_list():
             if blob.get("relative_path").startswith("reference-binaries"):
                 if blob.get("relative_path").endswith(".tgz"):
-
                     contents = self.blob_accessor.get_blob_contents(blob.get("full_path"))
                     tar = tarfile.open(fileobj=io.BytesIO(contents), mode="r")
                     for member in tar.getmembers():
@@ -124,7 +125,15 @@ class ToolshedBlobStorageAccessor:
                                 "relative_path": "package/" + member.name,
                             }
                         )
+        if not results:
+            results = self.backup()
+
         return results
+
+    def backup(self):
+        sv = SourceViewer(self.package_url)
+        sv.load_if_needed()
+        return list(sv.get_file_list())
 
     def get_intermediate_files(self):
         return []

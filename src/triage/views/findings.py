@@ -12,6 +12,7 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
@@ -136,18 +137,22 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"status": "error"})
 
 
+@cache_page(60 * 5)
 def api_get_files(request: HttpRequest) -> JsonResponse:
     """Returns a list of files related to a finding."""
     finding_uuid = request.GET.get("finding_uuid")
     finding = get_object_or_404(Finding, uuid=finding_uuid)
 
     accessor = ToolshedBlobStorageAccessor(finding.scan)
-    tool_files = accessor.get_tool_files()
-    package_files = accessor.get_package_files()
+    tool_files = [f"/tools/{t}" for t in accessor.get_tool_files()]
+    package_files = [f"/package/{t}" for t in accessor.get_package_files()]
     intermediate_files = accessor.get_intermediate_files()
 
     source_graph = path_to_graph(
-        package_files + tool_files + intermediate_files, finding.scan.project_version.package_url
+        package_files + tool_files + intermediate_files,
+        finding.scan.project_version.package_url,
+        separator="/",
+        root="Root",
     )
 
     return JsonResponse({"data": source_graph, "status": "ok"})

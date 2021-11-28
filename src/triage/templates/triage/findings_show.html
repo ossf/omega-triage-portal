@@ -6,6 +6,9 @@
 .dropdown-toggle::after {
     content: none;
 }
+.jstree-proton .jstree-anchor {
+    color: rgb(0, 0, 59);
+}
 </style>
 <div class="row">
     <div class="col-12 mt-4 mb-2">
@@ -14,35 +17,13 @@
             <span class="text-muted">#{{ finding.pk }}</span>
         </div>
     </div>
-    <div class="col-2">
-        <div class="card" style="max-height: 500px">
-            <div class="accordion" id="accordionExample">
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingOne">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                            Analysis Results (Raw)
-                        </button>
-                    </h2>
-                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            <div id="data_blob" style="margin-top: 5px;overflow:auto"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h4 class="accordion-header" id="headingTwo">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-                            Analyzed Files
-                        </button>
-                    </h4>
-                    <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            <div id="data" style="margin-top: 5px;overflow:auto"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="col-2 border-end">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <p class="text-muted fw-bold">Package Files</p>
+                <div id="data" style="margin-top: 5px;overflow:auto"></div>
+            </li>
+        </ul>
     </div>
     <div class="col-8">
         <div class="card">
@@ -151,5 +132,15 @@
         if (finding_uuid !== undefined) {
             document.location.href = `/tool_defect/new?finding_uuid=${finding_uuid}`;
         }
+    });
+    $(document).ready(() => {
+        load_file_listing({"finding_uuid": "{{ finding.uuid }}"});
+
+        load_source_code({
+            'finding-uuid': '{{ finding.uuid }}',
+            'finding-title': '{{ finding.title }}',
+            'file-path': '{{ finding.file_path }}',
+            'file-location': '{{ finding.file_line }}',
+        });
     });
 {% endblock %}
