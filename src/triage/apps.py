@@ -4,7 +4,7 @@
 import logging
 import mimetypes
 
-from django.apps import AppConfig, apps
+from django.apps import AppConfig
 from django.contrib import admin
 
 from core.settings import DEBUG
@@ -46,15 +46,16 @@ class TriageConfig(AppConfig):
         num_registered = 0
 
         class TriageModelAdmin(admin.ModelAdmin):
+            """Custom model admin to show additional fields."""
+
             readonly_fields = ("uuid",)
 
         for model in filter(lambda m: not admin.site.is_registered(m), models):
-
             if model.__module__.startswith("triage.") and hasattr(model, "uuid"):
                 admin.site.register(model, TriageModelAdmin)
             else:
                 admin.site.register(model, admin.ModelAdmin)
 
             num_registered += 1
+
         logger.debug("Registered %d models to admin module.", num_registered)
-        return

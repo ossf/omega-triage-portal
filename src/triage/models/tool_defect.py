@@ -1,19 +1,13 @@
 import logging
 import uuid
-from typing import Optional
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from packageurl import PackageURL
 
-from triage.models.base import BaseTimestampedModel, BaseUserTrackedModel, WorkItemState
+from triage.models.base import WorkItemState
 from triage.models.models import Finding, Note, Tool
-from triage.util.azure_blob_storage import (
-    AzureBlobStorageAccessor,
-    ToolshedBlobStorageAccessor,
-)
 from triage.util.general import modify_purl
 
 logger = logging.getLogger(__name__)

@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy as _
 
 
 class BaseTimestampedModel(models.Model):
+    """A mixin that adds a created/updated date field to a model."""
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -12,6 +14,8 @@ class BaseTimestampedModel(models.Model):
 
 
 class BaseUserTrackedModel(models.Model):
+    """A mixin that adds a created/updated by field to a model."""
+
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
 
@@ -20,6 +24,11 @@ class BaseUserTrackedModel(models.Model):
 
 
 class WorkItemState(models.TextChoices):
+    """
+    This class contains work item state fields, which can be used as choice values
+    in other models.
+    """
+
     NEW = "N", _("New")
     ACTIVE = "A", _("Active")
     RESOLVED = "R", _("Resolved")

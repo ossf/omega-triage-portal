@@ -3,9 +3,7 @@ import uuid
 from typing import Optional
 
 from django.contrib.auth.models import User
-from django.core.cache import cache
 from django.db import models
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from packageurl import PackageURL
 
@@ -15,6 +13,7 @@ from triage.util.azure_blob_storage import (
     ToolshedBlobStorageAccessor,
 )
 from triage.util.general import modify_purl
+from triage.util.source_viewer.viewer import SourceViewer
 
 logger = logging.getLogger(__name__)
 
@@ -125,21 +124,17 @@ class Scan(BaseTimestampedModel, BaseUserTrackedModel):
 
     def get_source_code(self, filename: str) -> Optional[str]:
         """Retreives the source code for a file."""
-        from triage.util.source_viewer.viewer import SourceViewer
 
-        sv = SourceViewer(self.project_version.package_url)
-        res = sv.get_file(filename)
+        viewer = SourceViewer(self.project_version.package_url)
+        res = viewer.get_file(filename)
         if res:
             return res.get("content")
-        else:
-            return None
+        return None
 
     def get_file_list(self) -> list:
         """Retreives a list of files in the scan."""
-        from triage.util.source_viewer.viewer import SourceViewer
-
-        sv = SourceViewer(self.project_version.package_url)
-        return sv.get_file_list()
+        viewer = SourceViewer(self.project_version.package_url)
+        return viewer.get_file_list()
 
     def get_blob_list(self) -> list:
         """Retreives a list of blobs in the scan."""
@@ -268,6 +263,7 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
 
     @property
     def get_filename_display(self):
+        """Render the filename or a placeholder where one does not exist."""
         return self.file_path or "-"
 
     @property
@@ -286,11 +282,12 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
             return (self.impact_context or 0) * (self.impact_usage or 0)
 
     def get_source_code(self):
+        """Retrieve source code pertaining to this finding."""
         if self.file_path:
             return self.scan.get_source_code(self.file_path)
-        else:
-            logger.debug("No source code available (file_path is empty)")
-            return None
+
+        logger.debug("No source code available (file_path is empty)")
+        return None
 
 
 class Filter(BaseTimestampedModel, BaseUserTrackedModel):
