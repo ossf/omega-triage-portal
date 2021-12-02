@@ -35,13 +35,13 @@
                     </li>
                 </ul>
                 <p class="text-muted fw-bold mb-0">Files</p>
-                <div id="data" style="margin-top: 0px;overflow:auto"></div>
+                <div id="data" class="pr-0 mt-0 w-100" style="overflow:auto; padding-right: 0;"></div>
             </li>
         </ul>
     </div>
     <div class="col-8">
         <div class="card">
-            <div id="editor">{{ finding.get_source_code }}</div>
+            <div id="editor" class="overflow-auto">{{ finding.get_source_code }}</div>
         </div>
     </div>
     <div class="col-2">
@@ -94,7 +94,27 @@
                     <label class="btn btn-outline-danger" for="btnradio2">False</label>
                     
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off" />
-                    <label class="btn btn-outline-info" for="btnradio3">Indet</label>
+                    <label class="btn btn-outline-info" for="btnradio3">???</label>
+                  </div>
+            </li>
+
+            <li class="list-group-item">
+                <p class="text-muted fw-bold">Severity</p>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+                    <input type="radio" class="btn-check" name="btnradio1" id="btnradio1a" autocomplete="off" />
+                    <label class="btn btn-outline-success" for="btnradio1">1</label>
+                  
+                    <input type="radio" class="btn-check" name="btnradio1" id="btnradio2a" autocomplete="off" />
+                    <label class="btn btn-outline-danger" for="btnradio2">2</label>
+                    
+                    <input type="radio" class="btn-check" name="btnradio1" id="btnradio3a" autocomplete="off" />
+                    <label class="btn btn-outline-info" for="btnradio3">3</label>
+                    
+                    <input type="radio" class="btn-check" name="btnradio1" id="btnradio4a" autocomplete="off" />
+                    <label class="btn btn-outline-info" for="btnradio3">4</label>
+
+                    <input type="radio" class="btn-check" name="btnradio1" id="btnradio3" autocomplete="off" />
+                    <label class="btn btn-outline-info" for="btnradio3">FP</label>
                   </div>
             </li>
 

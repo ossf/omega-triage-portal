@@ -3,7 +3,7 @@ import logging
 import os
 import tarfile
 import uuid
-from typing import List, Union
+from typing import List, Optional, Union
 
 from azure.storage.blob import BlobClient, BlobServiceClient
 from django.core.cache import cache
@@ -28,6 +28,8 @@ class AzureBlobStorageAccessor:
     Example:
     >>> blob_storage = AzureBlobStorageAccessor('npm/left-pad/1.3.0')
     >>> blob_storage.get_blob_list()
+    >>> blob_storage.get_tool_contents('tool-codeql-results.json')
+    >>> blob_storage.get_package_contents(')
     >>> blob_storage.get_blob_contents('tool-codeql-results.json')
     """
 
@@ -133,6 +135,7 @@ class ToolshedBlobStorageAccessor:
         try:
             logger.info("Attempting to retrieve file contents for %s", filename)
             filename = filename.replace("tools/", "")
+            clean_filename = self.clean_filename(filename)
             full_path = os.path.join(self.get_toolshed_prefix(self.package_url), filename)
             contents = self.blob_accessor.get_blob_contents(full_path)
             logger.info("Contents length: %d bytes", len(contents))
@@ -150,3 +153,17 @@ class ToolshedBlobStorageAccessor:
 
     def get_intermediate_files(self):
         return []
+
+    def clean_filename(self, filename: str) -> Optional[str]:
+        if not filename:
+            return None
+
+        if filename.startswith("pkg:"):
+            return None
+
+        if filename.startswith("/opt/"):
+            parts = filename.split("/")[3:]
+            parts = parts[parts.index("src") + 1 :]
+            return "/".join(parts)
+
+        return filename
