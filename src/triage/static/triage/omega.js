@@ -1,4 +1,19 @@
 $(document).ready(function () {
+    /* Initialize Bootstrap Components */
+    $('[data-toggle="popover"]').popover();
+    $('[data-toggle="tooltip"]').tooltip();
+
+    /* Add CSRF token to AJAX requests */
+    $.ajaxSetup({
+        'timeout': 15000,
+        'beforeSend': function (jqXHR, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type) && !this.crossDomain) {
+                jqXHR.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        }
+    });
+
+
     /*
      * Initialize the DataTable (finding list)
      */
@@ -32,7 +47,28 @@ $(document).ready(function () {
             });
         }
     });
+
+    // Initialize the ACE editor
+    initialize_editor();
 })
+
+// General Purpose Helper Functions
+let getCookie = function (name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 const load_source_code = function (options) {
     $.ajax({
         'url': '/api/findings/get_source_code',
@@ -41,6 +77,7 @@ const load_source_code = function (options) {
             'scan_uuid': options['scan_uuid'],
             'file_path': options['file_path']
         },
+        'dataType': 'json',
         'success': function ({ file_contents, file_name, status }, textStatus, jqXHR) {
             let editor = ace.edit("editor");
             editor.getSession().setValue(atob(file_contents));
@@ -52,14 +89,7 @@ const load_source_code = function (options) {
             }
             let mode = ace.require("ace/ext/modelist").getModeForPath(get_mode_filename(file_name)).mode;
             editor.session.setMode(mode);
-            editor.setShowPrintMargin(false);
             editor.resize();
-            editor.setTheme("ace/theme/cobalt");
-            editor.setOptions({
-                'fontFamily': 'Inconsolata',
-                'fontSize': '14px',
-            });
-
             // Show the editor if needed
             $('#editor-container').removeClass('d-none');
 
@@ -69,13 +99,15 @@ const load_source_code = function (options) {
             //}
             //$('#editor-title .text').text(path_abbrev).attr('title', path);
 
-            if (options['file-location'] != '') {
+            if (options['file-location'] != undefined) {
                 ace.edit('editor').getSession().setAnnotations([{
                     row: options['file-location'] - 1,
                     column: 0,
                     text: options['finding-title'],
                     type: 'error'
                 }]);
+            } else {
+                ace.edit('editor').getSession().setAnnotations([]);
             }
 
             // @TODO Are these necessary?
@@ -89,9 +121,32 @@ const load_source_code = function (options) {
             //    ace.edit('editor').scrollToLine($row.data('line-number'), true, false);
             //    $('.bottom-row').css('opacity', 1.0);
             //}, 50);
+        },
+        'error': function (jqXHR, textStatus, errorThrown) {
+            set_editor_text(`Error ${jqXHR.status}: ${jqXHR.responseJSON.message}.`);
         }
     });
 };
+const initialize_editor = function () {
+    try {
+        let editor = ace.edit("editor");
+        editor.useWorker = false;
+        editor.setShowPrintMargin(false);
+        editor.setTheme("ace/theme/cobalt");
+        editor.setOptions({
+            'fontFamily': 'Inconsolata',
+            'fontSize': '14px',
+        });
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+const set_editor_text = function (text) {
+    let editor = ace.edit("editor");
+    editor.getSession().setValue(text);
+    editor.resize();
+}
 
 const load_file_listing = function (options) {
     $.ajax({

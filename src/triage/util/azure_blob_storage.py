@@ -138,11 +138,8 @@ class ToolshedBlobStorageAccessor:
             clean_filename = self.clean_filename(filename)
             full_path = os.path.join(self.get_toolshed_prefix(self.package_url), filename)
             contents = self.blob_accessor.get_blob_contents(full_path)
-            logger.info("Contents length: %d bytes", len(contents))
-            if contents:
-                return contents
-            else:
-                return None
+            logger.info("Content length: %d bytes", len(contents))
+            return contents
         except:
             logger.exception("Failed to get blob contents")
             return None

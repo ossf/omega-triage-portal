@@ -111,7 +111,9 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
     if scan_uuid:
         scan = get_object_or_404(Scan, uuid=scan_uuid)
         source_code = scan.get_file_contents(file_path)
-        if source_code:
+        if source_code is not None:
+            if source_code == b"":
+                source_code = b"<Empty File>"
             return JsonResponse(
                 {
                     "file_contents": b64encode(source_code).decode("utf-8"),
@@ -119,6 +121,7 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
                     "status": "ok",
                 }
             )
+        logger.info("Source code not found for %s", file_path)
         return JsonResponse({"status": "error", "message": "File not found"}, status=404)
 
     return JsonResponse({"status": "error"}, status=500)

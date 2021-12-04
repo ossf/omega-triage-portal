@@ -115,7 +115,7 @@
     <script type="text/javascript" src="{% static "triage/resources/datatables.net-keytable/js/dataTables.keyTable.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/datatables.net-keytable-bs5/js/keyTable.bootstrap5.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/datatables.net-select/js/dataTables.select.min.js" %}"></script>
-    <script type="text/javascript src="https://cdn.datatables.net/plug-ins/1.11.3/features/scrollResize/dataTables.scrollResize.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.11.3/features/scrollResize/dataTables.scrollResize.min.js"></script>
     <script type="text/javascript" src="{% static "triage/resources/tablesorter/dist/js/jquery.tablesorter.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/tablesorter/dist/js/jquery.tablesorter.widgets.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/ace-builds/src-min-noconflict/ace.js" %}"></script>
@@ -126,67 +126,10 @@
     <script type="text/javascript" src="{% static "triage/resources/select2/dist/js/select2.min.js" %}"></script>
     
     <script type="text/javascript" src="{% static "triage/omega.js" %}"></script>
-
-    <script type="text/javascript" charset="utf-8">
-      $(document).ready(function () {
-        // Initialize Bootstrap
-        $('[data-toggle="popover"]').popover();
-        $('[data-toggle="tooltip"]').tooltip();
-      });
-
-      function getCookie(name) {
-          var cookieValue = null;
-          if (document.cookie && document.cookie !== '') {
-              var cookies = document.cookie.split(';');
-              for (var i = 0; i < cookies.length; i++) {
-                  var cookie = jQuery.trim(cookies[i]);
-                  // Does this cookie string begin with the name we want?
-                  if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                      break;
-                  }
-              }
-          }
-          return cookieValue;
-      }
-      var faderHandle = null;
-      $.ajaxSetup({
-          'timeout': 15000,
-          'beforeSend': function(jqXHR, settings) {
-              if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type) && !this.crossDomain) {
-                jqXHR.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-              }
-              //faderHandle = window.setInterval(() => {
-              //  $('#brand-icon').attr('title', 'AJAX request in progress...');
-              //  var opacity = $('#brand-icon').css('opacity') == "1" ? 0.1 : 1.0;
-              //  $('#brand-icon').fadeTo(300, opacity);
-              //}, 300)
-          },
-          'complete': function() {
-            //$('#brand-icon').attr('title', '');
-            //window.clearInterval(faderHandle);
-            //$('#brand-icon').fadeTo(300, 1.0);
-            //faderHandle = null;
-          },
-          'error': function(jqXHR, textStatus, errorThrown) {
-              //show_toast(`Error: ${textStatus}`);
-              //$('#brand-icon').attr('title', '');
-              //window.clearInterval(faderHandle);
-              //$('#brand-icon').fadeTo(300, 1.0);
-              //faderHandle = null;
-          }
-      });
-    </script>
-
     <script type="text/javascript">
-    function show_toast(message) {
-        $('#toast-body').text(message);
-        $('#toast').toast('show');
-    }
       {% block javascript %}
       {% endblock javascript %}
     </script>
-
     {% block javascript_include %}
     {% endblock javascript_include %}
   </body>

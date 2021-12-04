@@ -16,3 +16,11 @@ from triage.models.scan import Scan
 from triage.models.tool import Tool
 from triage.models.tool_defect import ToolDefect
 from triage.models.triage import TriageRule
+
+# class File(models.Model):
+#    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+#    scan = models.ForeignKey(Scan, on_delete=models.CASCADE)#
+
+#    content = models.FileField(upload_to="file_archive")
+#    content_hash = models.CharField(max_length=128, db_index=True)
+#    path = models.CharField(max_length=4096)
