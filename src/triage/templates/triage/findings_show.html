@@ -33,6 +33,12 @@
                     <li>
                         <a class="dropdown-item" href="#"><i class="fas fa-download"></i>&nbsp;&nbsp;Download files</a>
                     </li>
+                    <li>
+                        <a class="dropdown-item" href="#"><i class="fab fa-github"></i>&nbsp;&nbsp;View Source (GitHub)</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#"><img src="https://sourcegraph.com/.assets/img/favicon.png?v=2" width="16" height="16" style="filter: grayscale(100%);"></i>&nbsp;&nbsp;View Source (SourceGraph)</a>
+                    </li>
                 </ul>
                 <p class="text-muted fw-bold mb-0">Files</p>
                 <div id="data" class="pr-0 mt-0 w-100" style="overflow:auto; padding-right: 0;"></div>
@@ -85,7 +91,25 @@
             </li>
             
             <li class="list-group-item">
-                <p class="text-muted fw-bold">True Positive</p>
+                <button class="btn dropdown-toggle float-end" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-briefcase"></i></button>
+                <ul class="dropdown-menu dropdown-menu-end shadow pt-0 pb-0" style="width: 280px; border:0">
+                    <li class="list-group-item">
+                        <div class="float-end"><a href="#">
+                            <i class="fas fa-plus"></i>&nbsp;&nbsp;New</a>
+                        </div>
+                        <strong>Add to Case</strong>
+                    </li>
+                    <li class="list-group-item">
+                        <input type="text" list="case_list" class="form-control"/>
+                        <datalist id="case_list">
+                            {% for case in case_list %}
+                                <option value="{{ case.uuid }}">{{ case.title }}</option>
+                            {% endfor %}
+                        </datalist>
+                    </li>
+                </ul>
+                
+                <p class="text-muted fw-bold">Triage Status</p>
                 <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" />
                     <label class="btn btn-outline-success" for="btnradio1">True</label>
