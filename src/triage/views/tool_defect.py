@@ -19,9 +19,16 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
 
-from triage.models.base import WorkItemState
-from triage.models.models import Case, Finding, Note, Project, ProjectVersion, Tool
-from triage.models.tool_defect import ToolDefect
+from triage.models import (
+    Case,
+    Finding,
+    Note,
+    Project,
+    ProjectVersion,
+    Tool,
+    ToolDefect,
+    WorkItemState,
+)
 from triage.util.azure_blob_storage import ToolshedBlobStorageAccessor
 from triage.util.finding_importers.sarif_importer import SARIFImporter
 from triage.util.search_parser import parse_query_to_Q

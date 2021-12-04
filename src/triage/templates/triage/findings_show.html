@@ -74,7 +74,7 @@
                         <strong>Choose an assignee</strong>
                     </li>
                     <li class="list-group-item">
-                        <input type="text" list="assignee_list" class="form-control"/>
+                        <input type="text" list="assignee_list" class="form-control" autocomplete="false"/>
                         <datalist id="assignee_list">
                             {% for assignee in assignee_list %}
                                 <option value="{{ assignee.username }}">{{ assignee.first_name }} {{ assignee.last_name }}</option>
@@ -121,24 +121,29 @@
                     <label class="btn btn-outline-info" for="btnradio3">???</label>
                   </div>
             </li>
-
             <li class="list-group-item">
                 <p class="text-muted fw-bold">Severity</p>
-                <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
-                    <input type="radio" class="btn-check" name="btnradio1" id="btnradio1a" autocomplete="off" />
-                    <label class="btn btn-outline-success" for="btnradio1">1</label>
+                <div id="severity_button_group" class="btn-group btn-group-sm" role="group" aria-label="Severity rating button group">
+                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_vh" autocomplete="off" value="VH" {% if finding.get_calculated_severity == "VH" %}checked{% endif %}/>
+                    <label class="btn btn-outline-danger" for="btn_severity_vh" title="Very High">VH</label>
                   
-                    <input type="radio" class="btn-check" name="btnradio1" id="btnradio2a" autocomplete="off" />
-                    <label class="btn btn-outline-danger" for="btnradio2">2</label>
+                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_h" autocomplete="off" value="H" {% if finding.get_calculated_severity == "H" %}checked{% endif %}/>
+                    <label class="btn btn-outline-danger" for="btn_severity_h" title="High">H</label>
                     
-                    <input type="radio" class="btn-check" name="btnradio1" id="btnradio3a" autocomplete="off" />
-                    <label class="btn btn-outline-info" for="btnradio3">3</label>
+                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_m" autocomplete="off" value="M" {% if finding.get_calculated_severity == "M" %}checked{% endif %}/>
+                    <label class="btn btn-outline-warning" for="btn_severity_m" title="Medium">M</label>
                     
-                    <input type="radio" class="btn-check" name="btnradio1" id="btnradio4a" autocomplete="off" />
-                    <label class="btn btn-outline-info" for="btnradio3">4</label>
+                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_l" autocomplete="off" value="L" {% if finding.get_calculated_severity == "L" %}checked{% endif %}/>
+                    <label class="btn btn-outline-info" for="btn_severity_l" title="Low">L</label>
 
-                    <input type="radio" class="btn-check" name="btnradio1" id="btnradio3" autocomplete="off" />
-                    <label class="btn btn-outline-info" for="btnradio3">FP</label>
+                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_vl" autocomplete="off" value="VL" {% if finding.get_calculated_severity == "VL" %}checked{% endif %}/>
+                    <label class="btn btn-outline-info" for="btn_severity_vl" title="Very Low">VL</label>
+
+                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_vl" autocomplete="off" value="IN" {% if finding.get_calculated_severity == "IN" %}checked{% endif %}/>
+                    <label class="btn btn-outline-info" for="btn_severity_vl" title="Informational">IN</label>
+                    
+                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_vl" autocomplete="off" value="NS" {% if finding.get_calculated_severity == "NS" %}checked{% endif %}/>
+                    <label class="btn btn-outline-light" for="btn_severity_ns" title="Not Specified / Unknown">NS</label>
                   </div>
             </li>
 
@@ -162,12 +167,25 @@
                 {% endwith %}
             </li>
             <li class="list-group-item">
-                <div class="float-end"><a href="#"><i class="fas fa-cog"></i></a></div>
+                <button class="btn dropdown-toggle float-end" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cog"></i></button>
+                <ul class="dropdown-menu dropdown-menu-end shadow pt-0 pb-0" style="width: 280px; border:0">
+                    <li class="list-group-item">
+                        <strong>Choose an assignee</strong>
+                    </li>
+                    <li class="list-group-item">
+                        <input type="text" list="label_list" class="form-control" autocomplete="false"/>
+                        <datalist id="assignee_list">
+                            {% for label in label_list %}
+                                <option value="{{ label.uuid }}">{{ label.title }}</option>
+                            {% endfor %}
+                        </datalist>
+                    </li>
+                </ul>
                 <p class="text-muted fw-bold">Labels</p>
                 {% for label in finding.labels %}
                     <span class="badge rounded-pill bg-secondary">{{ label }}</span>
                 {% empty %}
-                    No labels
+                    <i>No labels</i>
                 {% endfor %}
             </li>
             <li class="list-group-item">
@@ -211,4 +229,24 @@
         });
         $(window).trigger('resize');
     });
+
+    var update_finding = (options) => {
+        $.ajax({
+            url: `/api/1/findings/update`,
+            type: 'POST',
+            data: options,
+            success: (data) => {
+                console.log(data);
+            }
+        });
+    };
+
+    $('#severity_button_group input').on('click', (e) => {
+        let severity = $(e.target).val();
+        update_finding({
+            'finding_uuid': '{{ finding.uuid }}',
+            'analyst_severity_level': severity
+        });
+    });
+
 {% endblock %}

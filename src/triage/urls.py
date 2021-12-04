@@ -17,6 +17,7 @@ urlpatterns = [
     path("api/findings/get_source_code", findings.api_get_source_code),
     path("api/findings/get_file_list", findings.api_get_file_list),
     path("api/findings/get_blob_list", findings.api_get_blob_list),
+    path("api/1/findings/update", findings.api_update_finding),
     path("findings/<uuid:finding_uuid>", findings.show_finding_by_uuid),
     path("findings/upload", findings.show_upload),
     path("findings/", findings.show_findings),

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from triage.models.models import Finding, Package, PackageVersion, Scan
+from triage.models import Finding, Package, PackageVersion, Scan
 
 
 class ScimManager:

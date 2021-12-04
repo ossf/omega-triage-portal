@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from core import settings
+
 
 class BaseTimestampedModel(models.Model):
     """A mixin that adds a created/updated date field to a model."""
@@ -16,8 +18,12 @@ class BaseTimestampedModel(models.Model):
 class BaseUserTrackedModel(models.Model):
     """A mixin that adds a created/updated by field to a model."""
 
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
-    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+"
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+"
+    )
 
     class Meta:
         abstract = True

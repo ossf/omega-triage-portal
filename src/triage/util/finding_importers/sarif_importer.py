@@ -12,8 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from packageurl import PackageURL
 
-from triage.models.base import WorkItemState
-from triage.models.models import Finding, ProjectVersion, Scan, Tool
+from triage.models import Finding, ProjectVersion, Scan, Tool, WorkItemState
 from triage.util.general import get_complex
 
 logger = logging.getLogger(__name__)
