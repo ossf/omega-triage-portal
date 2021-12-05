@@ -79,3 +79,8 @@ class Scan(BaseTimestampedModel, BaseUserTrackedModel):
         """Retreives the contents of a file."""
         accessor = ToolshedBlobStorageAccessor(self)
         return accessor.get_file_contents(filename)
+
+    def get_package_contents(self, filename) -> Optional[str]:
+        """Retreives the contents of a file."""
+        accessor = ToolshedBlobStorageAccessor(self)
+        return accessor.get_package_contents(filename)

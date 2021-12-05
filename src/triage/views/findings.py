@@ -110,7 +110,14 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
     file_path = request.GET.get("file_path")
     if scan_uuid:
         scan = get_object_or_404(Scan, uuid=scan_uuid)
-        source_code = scan.get_file_contents(file_path)
+        if file_path.startswith("package/"):
+            source_code = scan.get_package_contents(file_path)
+        elif file_path.startswith("tools/"):
+            source_code = scan.get_file_contents(file_path)
+        else:
+            logger.warning("Invalid prefix for file_path: %s", file_path)
+            source_code = None
+
         if source_code is not None:
             if source_code == b"":
                 source_code = b"<Empty File>"

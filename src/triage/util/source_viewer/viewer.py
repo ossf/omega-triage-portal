@@ -23,7 +23,7 @@ file = u.get_files()
 
 class SourceViewer:
     def __init__(self, package_url):
-        self.package_url = package_url
+        self.package_url = str(package_url)
 
     def load_if_needed(self):
         """Call OSS-Download to retrieve the package, extract it, and the load it into memory."""

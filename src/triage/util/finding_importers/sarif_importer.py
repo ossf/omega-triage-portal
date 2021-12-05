@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import uuid
-from typing import Optional, Type, Union
+from typing import Optional, Type
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
@@ -39,7 +39,7 @@ class SARIFImporter:
 
     @classmethod
     def import_sarif_file(
-        cls, package_url: Union[PackageURL, str], sarif: dict, user: Optional[Type[AbstractUser]]
+        cls, package_url: PackageURL | str, sarif: dict, user: Optional[Type[AbstractUser]]
     ) -> bool:
         """
         Imports a SARIF file containing tool findings into the database.

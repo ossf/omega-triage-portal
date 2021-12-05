@@ -2,8 +2,9 @@ import io
 import logging
 import os
 import tarfile
+import urllib.parse
 import uuid
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from azure.storage.blob import BlobClient, BlobServiceClient
 from django.core.cache import cache
@@ -11,6 +12,7 @@ from packageurl import PackageURL
 
 import triage
 from core.settings import (
+    DEFAULT_CACHE_TIMEOUT,
     TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET,
     TOOLSHED_BLOB_STORAGE_URL_SECRET,
 )
@@ -47,7 +49,7 @@ class AzureBlobStorageAccessor:
         )
         self.name_prefix = name_prefix
 
-    def get_blob_list(self):
+    def get_blob_list(self) -> List[dict]:
         """Get list of blobs in the Toolshed container."""
         try:
             cache_key = f"AzureBlobStorageAccessor[name_prefix={self.name_prefix}].blob_list"
@@ -63,13 +65,13 @@ class AzureBlobStorageAccessor:
                         self.container.list_blobs(name_starts_with=self.name_prefix),
                     )
                 )
-                cache.set(cache_key, data, timeout=60 * 60)
+                cache.set(cache_key, data, timeout=DEFAULT_CACHE_TIMEOUT)
                 return data
         except:
             logger.exception("Failed to get blob list")
             return []
 
-    def get_blob_contents(self, blob_name: str) -> Union[str, bytes]:
+    def get_blob_contents(self, blob_name: str) -> str | bytes:
         """Load blob contents from Toolshed."""
         try:
             blob = self.container.get_blob_client(blob_name)
@@ -101,9 +103,15 @@ class ToolshedBlobStorageAccessor:
             return None
 
         if package_url.namespace:
-            return f"{package_url.type}/{package_url.namespace}/{package_url.name}/{package_url.version}"
+            parts = [package_url.type, package_url.namespace, package_url.name, package_url.version]
         else:
-            return f"{package_url.type}/{package_url.name}/{package_url.version}"
+            parts = [package_url.type, package_url.name, package_url.version]
+
+        # Escape reserved URL characters
+        prefix = "/".join(map(urllib.parse.quote, parts))
+
+        # TODO: Add validation based on https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
+        return prefix
 
     def get_tool_files(self, path_prefix="/tools"):
         """Retrieve all tool findings files from Toolshed."""
@@ -130,11 +138,41 @@ class ToolshedBlobStorageAccessor:
                 results.append(os.path.join(path_prefix, filename))
         return results
 
-    def get_file_contents(self, filename):
-        """Retrieve contents of a file from the Toolshed."""
+    def get_package_contents(self, filename):
+        """Retrieve package file contents from Toolshed.
+
+        TODO: Add Caching
+        """
         try:
             logger.info("Attempting to retrieve file contents for %s", filename)
-            filename = filename.replace("tools/", "")
+            filename = filename.replace("package/", "", 1)
+            clean_filename = self.clean_filename(filename)
+
+            for blob in self.blob_accessor.get_blob_list():
+                if not blob.get("relative_path").startswith("reference-binaries") or not blob.get(
+                    "relative_path"
+                ).endswith(".tgz"):
+                    continue
+                contents = self.blob_accessor.get_blob_contents(blob.get("full_path"))
+                tar = tarfile.open(fileobj=io.BytesIO(contents), mode="r")
+                for member in tar.getmembers():
+                    if member.name == clean_filename:
+                        contents = tar.extractfile(member).read()
+                        logger.info("Content length: %d bytes", len(contents))
+                        return contents
+            return None
+        except:
+            logger.exception("Failed to get blob contents")
+            return None
+
+    def get_file_contents(self, filename):
+        """Retrieve contents of a file from the Toolshed.
+
+        TODO: Add Caching
+        """
+        try:
+            logger.info("Attempting to retrieve file contents for %s", filename)
+            filename = filename.replace("tools/", "", 1)
             clean_filename = self.clean_filename(filename)
             full_path = os.path.join(self.get_toolshed_prefix(self.package_url), filename)
             contents = self.blob_accessor.get_blob_contents(full_path)

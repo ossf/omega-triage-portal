@@ -22,7 +22,9 @@ def parse_query_to_Q(query):
     severity_clause = pp.Group(
         pp.Keyword("severity").suppress()
         + pp.Suppress(":")
-        + pp.delimited_list(pp.one_of(["critical", "important", "moderate", "low"]))
+        + pp.delimited_list(
+            pp.one_of(["veryhigh", "high", "medium", "low", "verylow", "informational", "unknown"])
+        )
     ).setResultsName("severity")
     updated_dt_clause = pp.Group(
         pp.Keyword("updated:").suppress()
@@ -71,4 +73,6 @@ def parse_query_to_Q(query):
 
     if results.text_search:
         q = q & Q(title__icontains=results.text_search)
+
+    logger.debug("Query: %s", q)
     return q
