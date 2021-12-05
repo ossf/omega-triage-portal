@@ -4,6 +4,7 @@ import uuid
 from base64 import b64encode
 from typing import Any, List
 
+from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -26,6 +27,8 @@ from triage.util.source_viewer import path_to_graph
 from triage.util.source_viewer.viewer import SourceViewer
 
 
+@login_required
+@require_http_methods(["GET"])
 def show_cases(request: HttpRequest) -> HttpResponse:
     """Shows cases based on a query.
 
@@ -42,13 +45,31 @@ def show_cases(request: HttpRequest) -> HttpResponse:
     return render(request, "triage/case_show.html", c)
 
 
+@login_required
 @require_http_methods(["GET"])
 def new_case(request: HttpRequest) -> HttpResponse:
     """Shows the new case form."""
-    if request.method == "GET":
-        context = {
-            "case_states": WorkItemState.choices,
-            "reporting_partner": Case.CasePartner.choices,
-        }
-        return render(request, "triage/case_new.html", context)
-    return HttpResponseBadRequest()
+    context = {
+        "case_states": WorkItemState.choices,
+        "reporting_partner": Case.CasePartner.choices,
+    }
+    return render(request, "triage/case_new.html", context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def save_case(request: HttpRequest) -> HttpResponse:
+    case_uuid = request.POST.get("case_uuid")
+    if case_uuid is None:
+        case = Case()
+    else:
+        case = get_object_or_404(Case, uuid=case_uuid)
+    case.title = request.POST.get("title")
+    case.state = request.POST.get("state")
+    case.updated_by = request.user
+    case.created_by = request.user
+
+    case.full_clean()
+    case.save()
+
+    return HttpResponseRedirect(f"/case/{case_uuid}")

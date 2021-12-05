@@ -46,7 +46,7 @@
                         <tr style="cursor:pointer">
                             <td>{{ case.pk }}</td>
                             <td>{{ case.title }}</td>
-                            <td>{{ case.assigned_to }}</td>
+                            <td>{{ case.assigned_to|default:'<i>Unassigned</i>' }}</td>
                             <td>{{ case.get_status_display }}</td>
                         </tr>
                     {% empty %}

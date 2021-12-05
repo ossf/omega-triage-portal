@@ -16,6 +16,12 @@
     width: 0;
     background: transparent;
 }
+#file_info {
+    background-color:#d7e0e9; 
+    color: #333;
+    padding-left: 6px;
+    padding-right: 6px;
+}
 
 </style>
 <div class="row">
@@ -46,6 +52,19 @@
         </ul>
     </div>
     <div class="col-lg-8">
+        <div id="file_info">
+            <div class="float-end">
+                <a class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-bars"></i></a>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li><a class="dropdown-item" href="javascript:beautify_source_code()">Beautify</a></li>
+                    <li><a class="dropdown-item" href="javascript:toggle_word_wrap()">Toggle Word Wrap</a></li>
+                    <li><a class="dropdown-item" href="javascript:change_font_size(1.1)">Increase Font Size</a></li>
+                    <li><a class="dropdown-item" href="javascript:change_font_size(0.9)">Decrease Font Size</a></li>
+                </ul>
+            </div>
+            <i class="far fa-folder"></i>&nbsp;
+            <span id="file_path">{{ finding.file_path }}</span>
+        </div>
         <div class="card">
             <div id="editor" class="overflow-auto"></div>
         </div>
@@ -145,12 +164,6 @@
                     <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_vl" autocomplete="off" value="NS" {% if finding.get_calculated_severity == "NS" %}checked{% endif %}/>
                     <label class="btn btn-outline-light" for="btn_severity_ns" title="Not Specified / Unknown">NS</label>
                   </div>
-            </li>
-
-            <li class="list-group-item">
-                <div class="float-end"><a href="#"><i class="fas fa-cog"></i></a></div>
-                <p class="text-muted fw-bold">Severity</p>
-                <span class="badge rounded-pill bg-primary">{{ finding.get_severity_display }}</span>
             </li>
 
             <li class="list-group-item">

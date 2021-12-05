@@ -103,6 +103,9 @@ const load_source_code = function (options) {
             // Show the editor if needed
             $('#editor-container').removeClass('d-none');
 
+            // Set the editor title
+            $('#file_path').text(file_name);
+
             //var path_abbrev = path;
             //if (path_abbrev.length > 150) {
             //    path_abbrev = '...' + path_abbrev.substring(path_abbrev.length - 150, path_abbrev.length);
@@ -153,7 +156,7 @@ const initialize_editor = function () {
         editor.setReadOnly(true)
         editor.setOptions({
             'fontFamily': 'Inconsolata',
-            'fontSize': '14px',
+            'fontSize': localStorage.getItem('last-used-editor-font-size') || '1.1rem',
         });
     } catch (e) {
         console.log(e);
@@ -228,4 +231,33 @@ const get_file_for_issue = function ($row) {
         'file-path': $row.data('file-path'),
         'file-location': $row.data('file-location'),
     });
+}
+
+const beautify_source_code = () => {
+    const beautify = ace.require("ace/ext/beautify");
+    const editor = ace.edit("editor");
+    if (!!beautify && !!editor) {
+        beautify.beautify(editor.session);
+    }
+};
+
+const toggle_word_wrap = () => {
+    const session = ace.edit('editor').getSession();
+    session.setUseWrapMode(!session.getUseWrapMode());
+}
+
+const change_font_size = (size) => {
+    const editor = ace.edit('editor');
+    let fontSize = editor.getFontSize();
+    if (fontSize.indexOf('rem') > -1) {
+        fontSize = fontSize.replace('rem', '');
+        fontSize = parseFloat(fontSize) * size;
+        fontSize = fontSize + 'rem';
+    } else if (fontSize.indexOf('px') > -1) {
+        fontSize = fontSize.replace('px', '');
+        fontSize = parseFloat(fontSize) * size;
+        fontSize = fontSize + 'px';
+    }
+    editor.setFontSize(fontSize);
+    localStorage.setItem('last-used-editor-font-size', fontSize);
 }
