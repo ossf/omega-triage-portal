@@ -20,12 +20,12 @@
 </style>
 <div class="row">
     <div class="col-12 mt-4 mb-2">
-        <div class="fs-2">
+        <div class="fs-3 text-truncate">
             {{ finding.title }}
             <span class="text-muted">#{{ finding.pk }}</span>
         </div>
     </div>
-    <div id="file_listing" class="col-2 border-end">
+    <div id="file_listing" class="col-lg-2 border-end">
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
                 <button class="btn dropdown-toggle float-end pe-0" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cog"></i></button>
@@ -45,12 +45,12 @@
             </li>
         </ul>
     </div>
-    <div class="col-8">
+    <div class="col-lg-8">
         <div class="card">
-            <div id="editor" class="overflow-auto">{{ finding.get_source_code }}</div>
+            <div id="editor" class="overflow-auto"></div>
         </div>
     </div>
-    <div class="col-2">
+    <div class="col-lg-2">
         <div class="text-end">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-bars"></i></button>
             <ul class="dropdown-menu dropdown-menu-end shadow ">

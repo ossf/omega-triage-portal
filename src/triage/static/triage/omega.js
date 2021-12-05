@@ -13,7 +13,6 @@ $(document).ready(function () {
         }
     });
 
-
     /*
      * Initialize the DataTable (finding list)
      */
@@ -41,8 +40,8 @@ $(document).ready(function () {
                 if (type === 'row' && indexes.length === 1) {
                     let row = $('#finding_list').DataTable().rows(indexes).nodes().to$();
                     let finding_uuid = row.data('finding-uuid');
-                    window.open(`/findings/${finding_uuid}`, 'omega_findings');
-                    //get_file_for_issue($('#finding_list').DataTable().rows(indexes).nodes().to$());
+                    document.location.href = `/findings/${finding_uuid}`;
+                    //window.open(`/findings/${finding_uuid}`, 'omega_findings');
                 }
             });
         }
@@ -50,6 +49,17 @@ $(document).ready(function () {
 
     // Initialize the ACE editor
     initialize_editor();
+
+    // Auto-open single-child nodes
+    $("#data").on("open_node.jstree", function (e, data) {
+        try {
+            if (data.node.children.length == 1) {
+                $('#data').jstree().open_node(data.node.children[0])
+            }
+        } catch (e) {
+            console.log(`Error: ${e}`);
+        }
+    });
 })
 
 // General Purpose Helper Functions
@@ -100,14 +110,16 @@ const load_source_code = function (options) {
             //$('#editor-title .text').text(path_abbrev).attr('title', path);
 
             if (options['file-location'] != undefined) {
-                ace.edit('editor').getSession().setAnnotations([{
+                let session = ace.edit('editor').getSession();
+                session.clearAnnotations();
+                session.setAnnotations([{
                     row: options['file-location'] - 1,
                     column: 0,
                     text: options['finding-title'],
                     type: 'error'
                 }]);
             } else {
-                ace.edit('editor').getSession().setAnnotations([]);
+                ace.edit('editor').getSession().clearAnnotations();
             }
 
             // @TODO Are these necessary?
@@ -123,16 +135,22 @@ const load_source_code = function (options) {
             //}, 50);
         },
         'error': function (jqXHR, textStatus, errorThrown) {
+            ace.edit('editor').getSession().clearAnnotations();
+            ace.edit('editor').getSession().setMode('ace/mode/text')
             set_editor_text(`Error ${jqXHR.status}: ${jqXHR.responseJSON.message}.`);
         }
     });
 };
 const initialize_editor = function () {
     try {
-        let editor = ace.edit("editor");
-        editor.useWorker = false;
+        let editor = ace.edit("editor"),
+            session = editor.getSession();
+        editor.setOptions({
+            useWorker: false
+        });
         editor.setShowPrintMargin(false);
         editor.setTheme("ace/theme/cobalt");
+        editor.setReadOnly(true)
         editor.setOptions({
             'fontFamily': 'Inconsolata',
             'fontSize': '14px',
