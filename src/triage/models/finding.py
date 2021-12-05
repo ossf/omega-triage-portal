@@ -30,24 +30,53 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
         VERY_HIGH = "VH", _("Very High")
 
         @classmethod
-        def parse(cls, severity: str):
-            if severity is None:
+        def parse(cls, severity: str, strict: bool = False) -> "Finding.SeverityLevel":
+            """Convert a string into a SeverityLevel.
+
+            Args:
+                severity (str): The string to parse.
+                strict (bool): If True, then only parse strict equality (case-insensitive) values.
+
+            Returns:
+                SeverityLevel: The SeverityLevel corresponding to the string.
+                If the string is not a valid SeverityLevel, returns SeverityLevel.NOT_SPECIFIED.
+
+            If strict is False (default), then this method maps related strings to a close
+            approximation, so "very high" and "critical" are both mapped to "VERY_HIGH", etc.
+            """
+            if severity is None or not isinstance(severity, str):
                 return cls.NOT_SPECIFIED
             severity = severity.lower().strip()
-            if severity == "critical":
-                return cls.VERY_HIGH
-            if severity in ["important", "error"]:
-                return cls.HIGH
-            if severity in ["moderate", "warn", "warning"]:
-                return cls.MEDIUM
-            if severity in ["low"]:
-                return cls.LOW
-            if severity in ["defense-in-depth"]:
-                return cls.VERY_LOW
-            if severity in ["info", "informational"]:
-                return cls.INFORMATIONAL
-            if severity in ["fp", "false positive"]:
-                return cls.NONE
+            if strict:
+                if severity == "very_high":
+                    return cls.VERY_HIGH
+                if severity == "high":
+                    return cls.HIGH
+                if severity == "medium":
+                    return cls.MEDIUM
+                if severity == "low":
+                    return cls.LOW
+                if severity == "very_low":
+                    return cls.VERY_LOW
+                if severity == "informational":
+                    return cls.INFORMATIONAL
+                if severity == "none":
+                    return cls.NONE
+            else:
+                if severity in ["critical", "fatal", "very high", "very_high", "veryhigh", "vh"]:
+                    return cls.VERY_HIGH
+                if severity in ["important", "error", "high", "h"]:
+                    return cls.HIGH
+                if severity in ["moderate", "warn", "warning", "medium", "m"]:
+                    return cls.MEDIUM
+                if severity in ["low", "l"]:
+                    return cls.LOW
+                if severity in ["defense-in-depth", "verylow", "very_low", "very low"]:
+                    return cls.VERY_LOW
+                if severity in ["info", "informational"]:
+                    return cls.INFORMATIONAL
+                if severity in ["fp", "false positive"]:
+                    return cls.NONE
             return cls.NOT_SPECIFIED
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
