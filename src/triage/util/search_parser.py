@@ -19,25 +19,61 @@ def parse_query_to_Q(query):
         + pp.Suppress(":")
         + pp.Word(pp.alphanums).setResultsName("username")
     ).setResultsName("assigned_to")
+
     severity_clause = pp.Group(
         pp.Keyword("severity").suppress()
         + pp.Suppress(":")
         + pp.delimited_list(
-            pp.one_of(["veryhigh", "high", "medium", "low", "verylow", "informational", "unknown"])
+            pp.one_of(
+                [
+                    "critical",
+                    "very high",
+                    "vh",
+                    "veryhigh",
+                    "high",
+                    "h",
+                    "medium",
+                    "m",
+                    "low",
+                    "very low",
+                    "very_low",
+                    "verylow",
+                    "vl",
+                    "informational",
+                    "unknown",
+                ]
+            )
         )
     ).setResultsName("severity")
+
     updated_dt_clause = pp.Group(
         pp.Keyword("updated:").suppress()
         + pp.one_of(["<", ">", "<=", ">=", "=="]).setResultsName("op")
         + pp.pyparsing_common.iso8601_date("datetime")
     ).setResultsName("updated_dt")
+
+    created_dt_clause = pp.Group(
+        pp.Keyword("created:").suppress()
+        + pp.one_of(["<", ">", "<=", ">=", "=="]).setResultsName("op")
+        + pp.pyparsing_common.iso8601_date("datetime")
+    ).setResultsName("created_dt")
+
     purl_clause = pp.Group(
         pp.Keyword("purl").suppress()
         + pp.Suppress(":")
         + pp.Word(pp.alphanums + ":@/?=-.").setResultsName("purl")
     ).setResultsName("purl")
+
     other_clause = pp.Word(pp.alphas).setResultsName("text_search")
-    clause = assigned_to_clause | severity_clause | updated_dt_clause | purl_clause | other_clause
+
+    clause = (
+        assigned_to_clause
+        | severity_clause
+        | created_dt_clause
+        | updated_dt_clause
+        | purl_clause
+        | other_clause
+    )
     full_clause = pp.OneOrMore(clause)
 
     # Parse the query
@@ -67,6 +103,18 @@ def parse_query_to_Q(query):
             q = q & Q(updated_at__gte=results.updated_dt.datetime)
         elif results.updated_dt.op == "==":
             q = q & Q(updated_at__exact=results.updated_dt.datetime)
+
+    if results.created_dt:
+        if results.created_dt.op == "<":
+            q = q & Q(updated_at__lt=results.created_dt.datetime)
+        elif results.created_dt.op == ">":
+            q = q & Q(updated_at__gt=results.created_dt.datetime)
+        elif results.created_dt.op == "<=":
+            q = q & Q(updated_at__lte=results.created_dt.datetime)
+        elif results.created_dt.op == ">=":
+            q = q & Q(updated_at__gte=results.created_dt.datetime)
+        elif results.created_dt.op == "==":
+            q = q & Q(updated_at__exact=results.created_dt.datetime)
 
     if results.purl:
         q = q & Q(scan__project_version__project__package_url=results.purl.purl)

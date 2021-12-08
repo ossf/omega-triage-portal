@@ -4,6 +4,7 @@ import uuid
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from taggit.managers import TaggableManager
 
 from triage.models import BaseTimestampedModel, BaseUserTrackedModel, WorkItemState
 
@@ -109,6 +110,8 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
     # Who the finding is currently assigned to
     assigned_to = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     assigned_dt = models.DateTimeField(auto_now_add=True)
+
+    tags = TaggableManager()
 
     def get_absolute_url(self):
         return f"/finding/{self.uuid}"

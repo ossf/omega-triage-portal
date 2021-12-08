@@ -1,5 +1,7 @@
 {% extends "./base.html" %}
 
+{% load gravatar %}
+
 {% block body %}
     {% block main %}
 <style>
@@ -22,7 +24,12 @@
     padding-left: 6px;
     padding-right: 6px;
 }
-
+.gravatar {
+    border-radius: 16px;
+}
+.file_tree_context_menu_item {
+    font-size: 75%;
+}
 </style>
 <div class="row">
     <div class="col-12 mt-4 mb-2">
@@ -102,11 +109,14 @@
                     </li>
                 </ul>
                 <p class="text-muted fw-bold">Assignee</p>
-                {% if finding.assigned_to %}
-                    <a href="#">{{ finding.assigned_to }}</a>
-                {% else %}
-                    No one&#8212;<a href="#">assign yourself</a>
-                {% endif %}
+                <div id="assigned_to_content">
+                    {% if finding.assigned_to %}
+                        <img class="gravatar" src="{{ finding.assigned_to|gravatar }}" width="32" height="32" alt="{{ finding.assigned_to.username }}" />
+                        <span class="text-muted">{{ finding.assigned_to.first_name }} {{ finding.assigned_to.last_name }}</span>
+                    {% else %}
+                        No one&#8212;<a id="assign_self" href="#">assign yourself</a>
+                    {% endif %}
+                </div>
             </li>
             
             <li class="list-group-item">
@@ -226,6 +236,29 @@
         if (finding_uuid !== undefined) {
             document.location.href = `/tool_defect/new?finding_uuid=${finding_uuid}`;
         }
+    });
+    $('#assign_self').on('click', (e) => {
+        const finding_uuid = '{{ finding.uuid }}';
+        $.ajax({
+            url: `/api/1/findings/update`,
+            data: {
+                'finding_uuid': finding_uuid,
+                'assigned_to': '$self'
+            },
+            type: 'POST',
+            success: (data) => {
+                if (data.status === 'success') {
+                    $('#assigned_to_content').clear();
+                    const anchor = $('<a>');
+                    anchor.attr('href', '#');
+                    anchor.text(data.assigned_to);
+                    $('#assigned_to_content').append(anchor);
+                }
+                else {
+                    alert(data.message);
+                }
+            }
+        });
     });
     $(document).ready(() => {
         load_file_listing({"finding_uuid": "{{ finding.uuid }}"});

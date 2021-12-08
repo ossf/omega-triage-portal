@@ -16,6 +16,7 @@ from core.settings import (
     TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET,
     TOOLSHED_BLOB_STORAGE_URL_SECRET,
 )
+from triage.util.source_viewer.pathsimilarity import PathSimilarity
 from triage.util.source_viewer.viewer import SourceViewer
 
 logger = logging.getLogger(__name__)
@@ -139,13 +140,15 @@ class ToolshedBlobStorageAccessor:
         return results
 
     def get_package_contents(self, filename):
-        """Retrieve package file contents from Toolshed.
+        """Retrieve package file contents from Toolshed."""
+        cache_key = f"Storage[purl={self.package_url}].filename={filename}"
+        if cache.has_key(cache_key):
+            return cache.get(cache_key)
 
-        TODO: Add Caching
-        """
         try:
             logger.info("Attempting to retrieve file contents for %s", filename)
-            filename = filename.replace("package/", "", 1)
+            if filename.startswith("package/"):
+                filename = filename[len("package/") :]
             clean_filename = self.clean_filename(filename)
 
             for blob in self.blob_accessor.get_blob_list():
@@ -159,27 +162,45 @@ class ToolshedBlobStorageAccessor:
                     if member.name == clean_filename:
                         contents = tar.extractfile(member).read()
                         logger.info("Content length: %d bytes", len(contents))
+                        cache.set(cache_key, contents, timeout=DEFAULT_CACHE_TIMEOUT)
                         return contents
+
+                # No exact match, try for fuzzy ones
+                member_names = [t.name for t in tar.getmembers()]
+                most_similar = PathSimilarity.find_most_similar_path(member_names, clean_filename)
+                if most_similar:
+                    logger.info("Most similar path: %s", most_similar)
+                    contents = tar.extractfile(most_similar).read()
+                    logger.info("Content length: %d bytes", len(contents))
+                    cache.set(cache_key, contents, timeout=DEFAULT_CACHE_TIMEOUT)
+                    return contents
+
+            logger.warning("File %s not found in package", filename)
+            cache.set(cache_key, "", timeout=DEFAULT_CACHE_TIMEOUT)
             return None
         except:
             logger.exception("Failed to get blob contents")
+            cache.set(cache_key, "", timeout=DEFAULT_CACHE_TIMEOUT)
             return None
 
     def get_file_contents(self, filename):
-        """Retrieve contents of a file from the Toolshed.
-
-        TODO: Add Caching
-        """
+        """Retrieve contents of a file from the Toolshed."""
+        cache_key = f"Storage[purl={self.package_url}].filename={filename}"
+        if cache.has_key(cache_key):
+            return cache.get(cache_key)
         try:
             logger.info("Attempting to retrieve file contents for %s", filename)
-            filename = filename.replace("tools/", "", 1)
+            if filename.startswith("tools/"):
+                filename = filename[len("tools/") :]
             clean_filename = self.clean_filename(filename)
             full_path = os.path.join(self.get_toolshed_prefix(self.package_url), filename)
             contents = self.blob_accessor.get_blob_contents(full_path)
             logger.info("Content length: %d bytes", len(contents))
+            cache.set(cache_key, contents, timeout=DEFAULT_CACHE_TIMEOUT)
             return contents
         except:
             logger.exception("Failed to get blob contents")
+            cache.set(cache_key, "", timeout=DEFAULT_CACHE_TIMEOUT)
             return None
 
     def get_all_files(self):

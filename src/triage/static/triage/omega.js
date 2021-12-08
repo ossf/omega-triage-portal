@@ -191,7 +191,7 @@ const load_file_listing = function (options) {
                     }
                 },
                 'animation': 40,
-                'plugins': ['sort'],
+                'plugins': ['sort', 'contextmenu'],
                 'sort': function (a, b) {
                     a1 = this.get_node(a);
                     b1 = this.get_node(b);
@@ -203,6 +203,31 @@ const load_file_listing = function (options) {
                         return -1;
                     } else {
                         return a1.text.localeCompare(b1.text);
+                    }
+                },
+                'contextmenu': {
+                    items: function (node) {
+                        var tree = $('#data').jstree(true);
+                        if (node.id == '#') {
+                            return {};
+                        }
+                        return {
+                            "Download": {
+                                "separator_before": false,
+                                "separator_after": false,
+                                "label": "Download",
+                                "icon": "fa fa-download",
+                                "_class": "file_tree_context_menu_item",
+                                "action": function (obj) {
+                                    var node = tree.get_node(obj.reference);
+                                    if (node.children.length === 0) {
+                                        document.location.href = `/api/findings/download_file?finding_uuid=${options.finding_uuid}&file_path=${node.id}`;
+                                    } else {
+                                        document.location.href = `/api/findings/download_file?finding_uuid=${options.finding_uuid}&file_path=${node.id}&recursive=true`;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             });

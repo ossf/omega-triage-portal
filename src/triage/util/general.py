@@ -1,5 +1,6 @@
 from packageurl import PackageURL
 
+
 def get_complex(obj, key, default_value=""):
     """Get a value from the dictionary d by nested.key.value.
     If keys contain periods, then use key=['a','b','c'] instead."""
@@ -14,6 +15,7 @@ def get_complex(obj, key, default_value=""):
         return _data
     except Exception:
         return default_value
+
 
 def modify_purl(purl: PackageURL, **kwargs) -> PackageURL:
     """Modify a PackageURL by adding or replacing values in kwargs."""

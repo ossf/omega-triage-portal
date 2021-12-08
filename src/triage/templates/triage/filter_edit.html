@@ -1,0 +1,57 @@
+{% extends "./base.html" %}
+
+{% block body %}
+    {% block main %}
+
+<style>
+    #filterCondition, #filterAction {
+        font-family: 'Inconsolata', monospace;
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <form class="row g-3" method="post" action="/filters/save">
+            {% csrf_token %}
+            <input type="hidden" name="filter_uuid" value="{{ filter.uuid }}"/>
+
+            <div class="col-12">
+                <label for="filterTitle" class="form-label">Title</label>
+                <input type="text" class="form-control" id="filterTitle" name="title" value="{{ filter.title }}" required />
+            </div>
+            <div class="col-md-4">
+                <label for="filterActive" class="form-label">Active</label>
+                <select id="filterActive" class="form-select" name="active">
+                    {% if not filter.active %}
+                        <option value="true">Active</option>
+                        <option value="false" selected>Inactive</option>
+                    {% else %}
+                        <option value="true" selected>Active</option>
+                        <option value="false">Inactive</option>
+                    {% endif %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="filterPriority" class="form-label">Priority</label>
+                <input type="number" class="form-control" id="filterPriority" name="priority" value="{{ filter.priority }}" required min="0" max="1000"/>
+                <small id="filterPriority" class="form-text text-muted">0=highest priority, 1000=lowest priority</small>
+            </div>            
+            <div class="col-md-12">
+                <label for="filterCondition" class="form-label">Condition</label>
+                <div id="filterConditionDiv"></div>
+                <textarea id="filterCondition" class="form-control" rows="8" placeholder="Add a condition evaluator..." name="condition" required>{{ filter.condition }}</textarea>
+            </div>
+            <div class="col-md-12">
+                <label for="filterAction" class="form-label">Action</label>
+                <textarea id="filterAction" class="form-control" rows="8" placeholder="Add an action to take..." name="action" required>{{ filter.action }}</textarea>
+            </div>
+            
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+    
+    {% endblock %}
+{% endblock %}

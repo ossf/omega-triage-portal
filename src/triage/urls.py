@@ -19,6 +19,7 @@ urlpatterns = [
     path("api/findings/add", findings.api_add),
     path("api/findings/get_files", findings.api_get_files),
     path("api/findings/get_source_code", findings.api_get_source_code),
+    path("api/findings/download_file", findings.api_download_file),
     path("api/findings/get_file_list", findings.api_get_file_list),
     path("api/findings/get_blob_list", findings.api_get_blob_list),
     path("api/1/findings/update", findings.api_update_finding),
@@ -26,7 +27,9 @@ urlpatterns = [
     path("findings/upload", findings.show_upload),
     path("findings/", findings.show_findings),
     # Filters
+    path("filters/<uuid:filter_uuid>", filters.show_filter),
     path("filters/new", filters.new_filter),
-    path("filters", filters.index),
+    path("filters/save", filters.save_filter),
+    path("filters/", filters.show_filters),
     path("", home.home),
 ]

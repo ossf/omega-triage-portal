@@ -16,6 +16,10 @@
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/select2/dist/css/select2.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/source-code-pro/source-code-pro.css" %}" />
     <style type="text/css">
+      @font-face {
+        font-family: 'Inconsolata';
+        src:  url('{% static "triage/resources/inconsolata/inconsolata.woff" %}') format('woff');
+      }
       body { background-color: #fcfefd!important;}
       a.navbar-brand { font-size: 50px; font-weight: bold; color: #222!important; text-shadow: 0 0 5px #ddd; margin-left: 12px; padding-top: 0 }
       button.navbar-toggler { margin-left: 8px }
@@ -77,6 +81,14 @@
                 <a class="nav-link" href="/findings/">Findings</a>
               {% endif %}
             </li>
+            <ul class="navbar-nav ml-auto" style="font-size: 1.18rem">
+              <li class="nav-item">
+                {% if '/filters/' in request.path %}
+                  <a class="nav-link active" href="/filters/">Filters</a>
+                {% else %}
+                  <a class="nav-link" href="/filters/">Filters</a>
+                {% endif %}
+              </li>            
             <li class="nav-item">
               {% if '/cases/' in request.path %}
                 <a class="nav-link active" href="/cases/">Cases</a>

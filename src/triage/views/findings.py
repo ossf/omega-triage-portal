@@ -88,11 +88,14 @@ def api_update_finding(request: HttpRequest) -> JsonResponse:
     #    return HttpResponseForbidden()
 
     # Modify only these fields, if provided
-    fields = ["analyst_impact", "confidence", "analyst_severity_level"]
+    fields = ["analyst_impact", "confidence", "analyst_severity_level", "assigned_to"]
     is_modified = False
     for field in fields:
         if field in request.POST:
             value = request.POST.get(field)
+            if field == "assigned_to" and value == "$self":
+                value = request.user
+
             if getattr(finding, field) != value:
                 setattr(finding, field, value)
                 is_modified = True
@@ -110,7 +113,7 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
     file_path = request.GET.get("file_path")
     if scan_uuid:
         scan = get_object_or_404(Scan, uuid=scan_uuid)
-        if file_path.startswith("package/"):
+        if file_path.startswith("package/") or file_path.startswith("/opt/"):
             source_code = scan.get_package_contents(file_path)
         elif file_path.startswith("tools/"):
             source_code = scan.get_file_contents(file_path)
@@ -124,7 +127,7 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
             return JsonResponse(
                 {
                     "file_contents": b64encode(source_code).decode("utf-8"),
-                    "file_name": os.path.basename(file_path),
+                    "file_name": file_path,
                     "status": "ok",
                 }
             )
@@ -161,6 +164,11 @@ def api_get_file_list(request: HttpRequest) -> JsonResponse:
     source_graph = path_to_graph(source_code, finding.scan.project_version.package_url)
 
     return JsonResponse({"data": source_graph, "status": "ok"})
+
+
+def api_download_file(request: HttpRequest) -> HttpResponse:
+    """Returns a list of files in a project."""
+    return HttpResponse("Not implemented.")
 
 
 def api_get_blob_list(request: HttpRequest) -> JsonResponse:
