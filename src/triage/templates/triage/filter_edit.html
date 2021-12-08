@@ -10,6 +10,25 @@
 </style>
 
 <div class="row">
+    <div class="mb-3"></div>
+    
+    {% if error_messages %}
+        <div class="alert alert-primary" role="alert">
+            <strong>Error: </strong>
+            {% for error_message in error_messages %}
+                <div>{{ error_message }}</div>
+            {% endfor %}
+            
+        </div>
+    {% endif %}
+
+    <div class="fs-4">
+        {% if filter %}
+            Modify Filter
+        {% else %}
+            Create a New Filter
+        {% endif %}
+    </div>
     <div class="col-12">
         <form class="row g-3" method="post" action="/filters/save">
             {% csrf_token %}
@@ -39,11 +58,11 @@
             <div class="col-md-12">
                 <label for="filterCondition" class="form-label">Condition</label>
                 <div id="filterConditionDiv"></div>
-                <textarea id="filterCondition" class="form-control" rows="8" placeholder="Add a condition evaluator..." name="condition" required>{{ filter.condition }}</textarea>
+                <textarea data-editor="python" data-gutter="6" id="filterCondition" style="opacity:0" rows="8" placeholder="Add a condition evaluator..." name="condition" required>{{ filter.condition }}</textarea>
             </div>
             <div class="col-md-12">
                 <label for="filterAction" class="form-label">Action</label>
-                <textarea id="filterAction" class="form-control" rows="8" placeholder="Add an action to take..." name="action" required>{{ filter.action }}</textarea>
+                <textarea data-editor="python" data-gutter="6" id="filterAction" style="opacity:0" rows="8" placeholder="Add an action to take..." name="action" required>{{ filter.action }}</textarea>
             </div>
             
             <div class="col-12">
@@ -52,6 +71,41 @@
         </form>
     </div>
 </div>
-    
+
     {% endblock %}
 {% endblock %}
+
+{% block javascript %}
+
+// Source: https://stackoverflow.com/a/19513428/1384352
+// Hook up ACE editor to all textareas with data-editor attribute
+$(function() {
+    $('textarea[data-editor]').each(function() {
+    var textarea = $(this);
+    var mode = textarea.data('editor') || 'text';
+    var editDiv = $('<div>', {
+        position: 'absolute',
+        width: '100%',
+        height: textarea.height(),
+    }).insertBefore(textarea);
+    textarea.css('display', 'none');
+    var editor = ace.edit(editDiv[0]);
+    editor.setShowPrintMargin(false);
+    editor.renderer.setShowGutter(textarea.data('gutter'));
+    editor.getSession().setValue(textarea.val());
+    editor.getSession().setMode("ace/mode/" + mode);
+    editor.setOptions({
+        'fontFamily': 'Inconsolata',
+        'fontSize': localStorage.getItem('last-used-editor-font-size') || '1.1rem',
+        tabSize: 2,
+        useSoftTabs: true
+    });    
+    editor.setTheme("ace/theme/cobalt");
+
+    // copy back to textarea on form submit...
+    textarea.closest('form').on('submit', () => {
+        textarea.val(editor.getSession().getValue());
+    });
+    });
+});
+{% endblock javascript %}

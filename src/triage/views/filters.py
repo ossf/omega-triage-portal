@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from django.core.exceptions import ValidationError
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -48,6 +49,20 @@ def show_filter(request: HttpRequest, filter_uuid: UUID) -> HttpResponse:
         return HttpResponseNotFound()
 
 
+def execute_filter(request: HttpRequest) -> JsonResponse:
+    """Execute a filter."""
+    if request.method == "GET":
+        filter_uuid = request.GET.get("filter_uuid")
+        if filter_uuid:
+            filter = Filter.objects.get(uuid=str(filter_uuid))
+            filter.execute()
+            return JsonResponse({"status": "success"})
+        else:
+            return HttpResponseBadRequest()
+    else:
+        return HttpResponseBadRequest()
+
+
 @require_http_methods(["POST"])
 def save_filter(request: HttpRequest) -> HttpResponse:
     """Edit a filter."""
@@ -65,7 +80,12 @@ def save_filter(request: HttpRequest) -> HttpResponse:
     filter.priority = int(request.POST.get("priority"))
     filter.updated_by = request.user
 
-    filter.full_clean()
+    try:
+        filter.full_clean()
+    except ValidationError as e:
+        return render(
+            request, "triage/filter_edit.html", {"filter": filter, "error_messages": e.messages}
+        )
     filter.save()
 
     return HttpResponseRedirect("/filters")

@@ -30,6 +30,7 @@ urlpatterns = [
     path("filters/<uuid:filter_uuid>", filters.show_filter),
     path("filters/new", filters.new_filter),
     path("filters/save", filters.save_filter),
+    path("filters/execute", filters.execute_filter),
     path("filters/", filters.show_filters),
     path("", home.home),
 ]
