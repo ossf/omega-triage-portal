@@ -3,6 +3,7 @@ import os
 import uuid
 from base64 import b64encode
 from typing import Any, List
+from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
 from django.http import (
@@ -35,14 +36,32 @@ def show_cases(request: HttpRequest) -> HttpResponse:
     Params:
         q: query to search for, or all findings if not provided
     """
-    query = request.GET.get("q", "")
-    c = {
+    query = request.GET.get("q", "").strip()
+    cases = Case.objects.all()  # Default
+    if query:
+        query_object = parse_query_to_Q(query)
+        if query_object:
+            cases = cases.filter(query_object)
+
+    context = {
         "query": query,
-        "cases": Case.objects.all(),
+        "cases": cases,
         "case_states": WorkItemState.choices,
         "reporting_partner": Case.CasePartner.choices,
     }
-    return render(request, "triage/case_show.html", c)
+
+    return render(request, "triage/case_list.html", context)
+
+
+def show_case(request: HttpRequest, case_uuid: UUID) -> HttpResponse:
+    """Shows a case."""
+    case = get_object_or_404(Case, uuid=str(case_uuid))
+    context = {
+        "case": case,
+        "case_states": WorkItemState.choices,
+        "reporting_partner": Case.CasePartner.choices,
+    }
+    return render(request, "triage/case_show.html", context)
 
 
 @login_required

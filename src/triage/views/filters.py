@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import (
     HttpRequest,
@@ -9,10 +10,11 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
 )
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
 from triage.models import Filter
+from triage.util.general import strtobool
 from triage.util.search_parser import parse_query_to_Q
 
 
@@ -49,20 +51,33 @@ def show_filter(request: HttpRequest, filter_uuid: UUID) -> HttpResponse:
         return HttpResponseNotFound()
 
 
+@login_required
+@require_http_methods(["GET"])
 def execute_filter(request: HttpRequest) -> JsonResponse:
     """Execute a filter."""
-    if request.method == "GET":
-        filter_uuid = request.GET.get("filter_uuid")
-        if filter_uuid:
-            filter = Filter.objects.get(uuid=str(filter_uuid))
-            filter.execute()
-            return JsonResponse({"status": "success"})
-        else:
-            return HttpResponseBadRequest()
+    filter_uuid = request.GET.get("filter_uuid")
+    if filter_uuid:
+        filter = Filter.objects.get(uuid=str(filter_uuid))
+        filter.execute()
+        return JsonResponse({"status": "success"})
     else:
         return HttpResponseBadRequest()
 
 
+@login_required
+@require_http_methods(["POST"])
+def delete_filter(request: HttpRequest) -> HttpResponse:
+    """Delete a filter."""
+    filter_uuid = request.POST.get("filter_uuid")
+    if filter_uuid:
+        filter = get_object_or_404(Filter, uuid=str(filter_uuid))
+        filter.delete()
+        return HttpResponseRedirect("/filters")
+    else:
+        return HttpResponseBadRequest()
+
+
+@login_required
 @require_http_methods(["POST"])
 def save_filter(request: HttpRequest) -> HttpResponse:
     """Edit a filter."""
@@ -76,7 +91,7 @@ def save_filter(request: HttpRequest) -> HttpResponse:
     filter.title = request.POST.get("title")
     filter.condition = request.POST.get("condition")
     filter.action = request.POST.get("action")
-    filter.active = bool(request.POST.get("active"))
+    filter.active = strtobool(request.POST.get("active"), True)
     filter.priority = int(request.POST.get("priority"))
     filter.updated_by = request.user
 

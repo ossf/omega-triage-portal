@@ -1,11 +1,8 @@
 import logging
 import uuid
-from typing import Optional
 
-from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from packageurl import PackageURL
 
 from triage.models.base import BaseTimestampedModel, BaseUserTrackedModel, WorkItemState
 
@@ -28,7 +25,7 @@ class Tool(BaseTimestampedModel, BaseUserTrackedModel):
     type = models.CharField(max_length=2, choices=ToolType.choices, default=ToolType.NOT_SPECIFIED)
     active = models.BooleanField(default=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         parts = []
         if self.friendly_name:
             parts.append(self.friendly_name)
@@ -38,7 +35,7 @@ class Tool(BaseTimestampedModel, BaseUserTrackedModel):
             parts.append(self.version)
         return " ".join(parts)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if self.friendly_name is None:
             self.friendly_name = self.name
         super().save(*args, **kwargs)

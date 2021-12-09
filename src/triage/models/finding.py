@@ -1,4 +1,5 @@
 import logging
+import os
 import uuid
 
 from django.contrib.auth.models import User
@@ -9,6 +10,17 @@ from taggit.managers import TaggableManager
 from triage.models import BaseTimestampedModel, BaseUserTrackedModel, WorkItemState
 
 logger = logging.getLogger(__name__)
+
+
+class ActiveFindingsManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                state__in=[WorkItemState.NEW, WorkItemState.ACTIVE, WorkItemState.NOT_SPECIFIED]
+            )
+        )
 
 
 class Finding(BaseTimestampedModel, BaseUserTrackedModel):
@@ -113,13 +125,19 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
 
     tags = TaggableManager()
 
+    active_findings = ActiveFindingsManager()
+    objects = models.Manager()
+
     def get_absolute_url(self):
         return f"/finding/{self.uuid}"
 
     @property
     def get_filename_display(self):
         """Render the filename or a placeholder where one does not exist."""
-        return self.file_path or "-"
+        if self.file_path:
+            return os.path.basename(self.file_path)
+        else:
+            return "-"
 
     @property
     def get_calculated_severity(self):

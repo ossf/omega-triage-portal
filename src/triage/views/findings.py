@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
 
-from triage.models import Finding, Scan
+from triage.models import Finding, Scan, WorkItemState
 from triage.util.azure_blob_storage import ToolshedBlobStorageAccessor
 from triage.util.finding_importers.sarif_importer import SARIFImporter
 from triage.util.search_parser import parse_query_to_Q
@@ -34,8 +34,10 @@ def show_findings(request: HttpRequest) -> HttpResponse:
         q: query to search for, or all findings if not provided
     """
     query = request.GET.get("q", "").strip()
-    findings = Finding.objects.all()  # Default
+    findings = Finding.active_findings.all()
+
     if query:
+        findings = Finding.objects.exclude(state=WorkItemState.DELETED)
         query_object = parse_query_to_Q(query)
         if query_object:
             findings = findings.filter(query_object)

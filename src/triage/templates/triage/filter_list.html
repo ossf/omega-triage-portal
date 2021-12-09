@@ -30,6 +30,9 @@
 </div>
 <div class="row" style="margin-top: 8px">
     <div class="col-lg-12">
+        <div class="float-end">
+            <a class="btn btn-primary" href="/filters/new"><i class="fas fa-plus me-2"></i>New Filter</a>
+        </div>
         <h4>Filters</h4>
         {% if filters %}
             <table id="filter_list" class="table table-sm table-hover" style="overflow-y:auto">
@@ -38,6 +41,8 @@
                         <th class="text-nowrap">Title</th>
                         <th class="text-nowrap">Active</th>
                         <th class="text-nowrap">Priority</th>
+                        <th class="text-nowrap">Last Updated</th>
+                        <th class="text-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody style="word-break: break-word;white-space:normal;word-wrap:break-word">
@@ -46,6 +51,10 @@
                             <td>{{ filter.title }}</td>
                             <td>{{ filter.active }}</td>
                             <td>{{ filter.priority }}</td>
+                            <td>{{ filter.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+                            <td>
+                                <a href="/filters/execute?filter_uuid={{ filter.uuid }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-running me-2"></i>Execute</a>
+                            </td>
                         </tr>
                     {% empty %}
                         <tr>

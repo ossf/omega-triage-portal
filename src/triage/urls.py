@@ -7,6 +7,7 @@ from triage.views import cases, filters, findings, home, tool_defect
 
 urlpatterns = [
     # Cases
+    path("cases/<uuid:case_uuid>", cases.show_case),
     path("cases/new", cases.new_case),
     path("cases/save", cases.save_case),
     path("cases/", cases.show_cases),
@@ -31,6 +32,7 @@ urlpatterns = [
     path("filters/new", filters.new_filter),
     path("filters/save", filters.save_filter),
     path("filters/execute", filters.execute_filter),
+    path("filters/delete", filters.delete_filter),
     path("filters/", filters.show_filters),
     path("", home.home),
 ]

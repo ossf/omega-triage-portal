@@ -41,13 +41,8 @@
             <div class="col-md-4">
                 <label for="filterActive" class="form-label">Active</label>
                 <select id="filterActive" class="form-select" name="active">
-                    {% if not filter.active %}
-                        <option value="true">Active</option>
-                        <option value="false" selected>Inactive</option>
-                    {% else %}
-                        <option value="true" selected>Active</option>
-                        <option value="false">Inactive</option>
-                    {% endif %}
+                    <option value="true"  {% if filter.active %}selected{% endif %}>Active</option>
+                    <option value="false" {% if not filter.active %}selected{% endif %}>Inactive</option>
                 </select>
             </div>
             <div class="col-md-4">
@@ -58,15 +53,17 @@
             <div class="col-md-12">
                 <label for="filterCondition" class="form-label">Condition</label>
                 <div id="filterConditionDiv"></div>
-                <textarea data-editor="python" data-gutter="6" id="filterCondition" style="opacity:0" rows="8" placeholder="Add a condition evaluator..." name="condition" required>{{ filter.condition }}</textarea>
+                <textarea data-editor="python" data-gutter="6" id="filterCondition" style="opacity:0" rows="8" placeholder="Add a condition evaluator..." name="condition">{{ filter.condition }}</textarea>
             </div>
             <div class="col-md-12">
                 <label for="filterAction" class="form-label">Action</label>
-                <textarea data-editor="python" data-gutter="6" id="filterAction" style="opacity:0" rows="8" placeholder="Add an action to take..." name="action" required>{{ filter.action }}</textarea>
+                <textarea data-editor="python" data-gutter="6" id="filterAction" style="opacity:0" rows="8" placeholder="Add an action to take..." name="action">{{ filter.action }}</textarea>
             </div>
             
             <div class="col-12">
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary me-3"><i class="far fa-save me-2"></i>Save</button>
+                <a id="delete_filter" class="btn btn-danger me-4" href="#"><i class="fas fa-trash me-2"></i>Delete</a>
+                
             </div>
         </form>
     </div>
@@ -81,31 +78,49 @@
 // Hook up ACE editor to all textareas with data-editor attribute
 $(function() {
     $('textarea[data-editor]').each(function() {
-    var textarea = $(this);
-    var mode = textarea.data('editor') || 'text';
-    var editDiv = $('<div>', {
-        position: 'absolute',
-        width: '100%',
-        height: textarea.height(),
-    }).insertBefore(textarea);
-    textarea.css('display', 'none');
-    var editor = ace.edit(editDiv[0]);
-    editor.setShowPrintMargin(false);
-    editor.renderer.setShowGutter(textarea.data('gutter'));
-    editor.getSession().setValue(textarea.val());
-    editor.getSession().setMode("ace/mode/" + mode);
-    editor.setOptions({
-        'fontFamily': 'Inconsolata',
-        'fontSize': localStorage.getItem('last-used-editor-font-size') || '1.1rem',
-        tabSize: 2,
-        useSoftTabs: true
-    });    
-    editor.setTheme("ace/theme/cobalt");
+        var textarea = $(this);
+        var mode = textarea.data('editor') || 'text';
+        var editDiv = $('<div>', {
+            position: 'absolute',
+            width: '100%',
+            height: textarea.height(),
+        }).insertBefore(textarea);
+        textarea.css('display', 'none');
+        var editor = ace.edit(editDiv[0]);
+        editor.setShowPrintMargin(false);
+        editor.renderer.setShowGutter(textarea.data('gutter'));
+        editor.getSession().setValue(textarea.val());
+        editor.getSession().setMode("ace/mode/" + mode);
+        editor.setOptions({
+            'fontFamily': 'Inconsolata',
+            'fontSize': localStorage.getItem('last-used-editor-font-size') || '1.1rem',
+            tabSize: 2,
+            useSoftTabs: true
+        });    
+        editor.setTheme("ace/theme/cobalt");
 
-    // copy back to textarea on form submit...
-    textarea.closest('form').on('submit', () => {
-        textarea.val(editor.getSession().getValue());
+        // copy back to textarea on form submit...
+        textarea.closest('form').on('submit', () => {
+            textarea.val(editor.getSession().getValue());
+        });
     });
+    $('a#delete_filter').on('click', (e) => {
+        e.preventDefault();
+        if (confirm('Are you sure you want to delete this filter? This action cannot be undone.')) {
+            $.ajax({
+                url: '/filters/delete',
+                type: 'POST',
+                data: {
+                    filter_uuid: '{{ filter.uuid }}'
+                },
+                success: function(data) {
+                    window.location.href = '/filters';
+                },
+                error: function(data) {
+                    alert('Error deleting filter: ' + data.responseText);
+                }
+            });
+        }
     });
 });
 {% endblock javascript %}
