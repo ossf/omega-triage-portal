@@ -88,7 +88,7 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
                     return cls.VERY_LOW
                 if severity in ["info", "informational"]:
                     return cls.INFORMATIONAL
-                if severity in ["fp", "false positive"]:
+                if severity in ["fp", "false positive", "none"]:
                     return cls.NONE
             return cls.NOT_SPECIFIED
 
@@ -101,9 +101,8 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
     file_line = models.PositiveIntegerField(null=True, blank=True)
 
     # Impact showing how important a finding is to the larger community.
-    impact_usage = models.PositiveBigIntegerField(null=True, blank=True)
-    impact_context = models.PositiveBigIntegerField(null=True, blank=True)
-    analyst_impact = models.PositiveBigIntegerField(null=True, blank=True)
+    # The larger the number, the higher the impact. Used for sorting.
+    estimated_impact = models.PositiveIntegerField(null=True, blank=True)
 
     # Confidence showing how certain a finding is.
     confidence = models.CharField(
@@ -117,6 +116,7 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
     analyst_severity_level = models.CharField(
         max_length=2, choices=SeverityLevel.choices, default=SeverityLevel.NOT_SPECIFIED
     )
+
     state = models.CharField(max_length=2, choices=WorkItemState.choices, default=WorkItemState.NEW)
 
     # Who the finding is currently assigned to
@@ -156,9 +156,10 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
     @property
     def get_impact_display(self):
         """Gets the best impact level (analyst estimate taking precedence)"""
-        if self.analyst_impact is not None:
-            return self.analyst_impact
-        return (self.impact_context or 0) * (self.impact_usage or 0)
+        if self.estimated_impact is not None:
+            return self.estimated_impact
+        else:
+            return None
 
     def get_source_code(self):
         """Retrieve source code pertaining to this finding."""

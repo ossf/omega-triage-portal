@@ -58,7 +58,7 @@
             </li>
         </ul>
     </div>
-    <div class="col-lg-8">
+    <div id="finding_center" class="col-lg-8">
         <div id="file_info">
             <div class="float-end">
                 <a class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-bars"></i></a>
@@ -70,13 +70,17 @@
                 </ul>
             </div>
             <i class="far fa-folder"></i>&nbsp;
-            <span id="file_path">{{ finding.file_path }}</span>
+            <span id="file_path">{{ finding.file_path }}
+                {% if finding.file_line %}
+                    :{{finding.file_line }}
+                {% endif %}
+            </span>
         </div>
         <div class="card">
             <div id="editor" class="overflow-auto"></div>
         </div>
     </div>
-    <div class="col-lg-2">
+    <div id="finding_right" class="col-lg-2">
         <div class="text-end">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-bars"></i></button>
             <ul class="dropdown-menu dropdown-menu-end shadow ">
@@ -100,8 +104,9 @@
                         <strong>Choose an assignee</strong>
                     </li>
                     <li class="list-group-item">
-                        <input type="text" list="assignee_list" class="form-control" autocomplete="false"/>
+                        <input id="assigned_to" type="text" list="assignee_list" class="form-control" autocomplete="false"/>
                         <datalist id="assignee_list">
+                            <option value="$clear">Remove assignee</option>
                             {% for assignee in assignee_list %}
                                 <option value="{{ assignee.username }}">{{ assignee.first_name }} {{ assignee.last_name }}</option>
                             {% endfor %}
@@ -152,7 +157,8 @@
             </li>
             <li class="list-group-item">
                 <p class="text-muted fw-bold">Severity</p>
-                <div id="severity_button_group" class="btn-group btn-group-sm" role="group" aria-label="Severity rating button group">
+                <div class="btn-toolbar" role="toolbar" aria-label="Severity rating button toolbar">
+                <div id="severity_button_group" class="btn-group btn-group-sm me-2" role="group" aria-label="Severity rating button group">
                     <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_vh" autocomplete="off" value="VH" {% if finding.get_calculated_severity == "VH" %}checked{% endif %}/>
                     <label class="btn btn-outline-danger" for="btn_severity_vh" title="Very High">VH</label>
                   
@@ -167,27 +173,32 @@
 
                     <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_vl" autocomplete="off" value="VL" {% if finding.get_calculated_severity == "VL" %}checked{% endif %}/>
                     <label class="btn btn-outline-info" for="btn_severity_vl" title="Very Low">VL</label>
-
-                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_vl" autocomplete="off" value="IN" {% if finding.get_calculated_severity == "IN" %}checked{% endif %}/>
-                    <label class="btn btn-outline-info" for="btn_severity_vl" title="Informational">IN</label>
+                </div>
+                <div id="severity_button_group" class="btn-group btn-group-sm" role="group" aria-label="Severity rating button group">
+                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_in" autocomplete="off" value="IN" {% if finding.get_calculated_severity == "IN" %}checked{% endif %}/>
+                    <label class="btn btn-outline-info" for="btn_severity_in" title="Informational">IN</label>
                     
-                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_vl" autocomplete="off" value="NS" {% if finding.get_calculated_severity == "NS" %}checked{% endif %}/>
-                    <label class="btn btn-outline-light" for="btn_severity_ns" title="Not Specified / Unknown">NS</label>
+                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_ns" autocomplete="off" value="NS" {% if finding.get_calculated_severity == "NS" %}checked{% endif %}/>
+                    <label class="btn btn-outline-info" for="btn_severity_ns" title="Not Specified / Unknown">??</label>
+
+                    <input type="radio" class="btn-check" name="btn_severity" id="btn_severity_no" autocomplete="off" value="NO" {% if finding.get_calculated_severity == "NO" %}checked{% endif %}/>
+                    <label class="btn btn-outline-info" style="background-color: lightgoldenrodyellow" for="btn_severity_no" title="None (False Positive)">N/A</label>
                   </div>
+                </div>
             </li>
 
             <li class="list-group-item">
                 <div class="float-end"><a href="#"><i class="fas fa-cog"></i></a></div>
-                <p class="text-muted fw-bold">Impact</p>
-                {% with impact=finding.get_impact_display %}
-                    {% if impact == 0 %}
-                        <span class="badge rounded-pill bg-info">Low ({{ impact }})</span>
-                    {% elif impact < 1000 %}
-                        <span class="badge rounded-pill bg-warning">Medium ({{ finding.get_impact_display }})</span>
-                    {% else %}
-                        <span class="badge rounded-pill bg-danger">High ({{ impact }})</span>
-                    {% endif %}
-                {% endwith %}
+                <p class="text-muted fw-bold">Estimated Impact</p>
+                {% if finding.estimated_impact is None %}
+                    <span class="badge rounded-pill bg-warning" title="No impact information is available.">Unknown</span>
+                {% elif finding.estimated_impact == 0 %}
+                    <span class="badge rounded-pill bg-info">Low ({{ finding.estimated_impact }})</span>
+                {% elif finding.estimated_impact < 1000 %}
+                    <span class="badge rounded-pill bg-warning">Medium ({{ finding.estimated_impact }})</span>
+                {% else %}
+                    <span class="badge rounded-pill bg-danger">High ({{ finding.estimated_impact }})</span>
+                {% endif %}
             </li>
             <li class="list-group-item">
                 <button class="btn dropdown-toggle float-end" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cog"></i></button>
@@ -226,9 +237,10 @@
 
 {% block javascript %}
     /* Stash some page-level data */
-    $.data(document.body, 'current_finding', {
+    $(document.body).data('current_finding', {
         'finding_uuid': '{{ finding.uuid }}',
-        'scan_uuid': '{{ finding.scan.uuid }}'
+        'scan_uuid': '{{ finding.scan.uuid }}',
+        'file_line': '{{ finding.file_line }}'
     });
     /* Handle clicks of the "New Tool Finding" button */
     $('#action_new_tooling_bug').on('click', (e) => {
@@ -237,6 +249,10 @@
             document.location.href = `/tool_defect/new?finding_uuid=${finding_uuid}`;
         }
     });
+
+    /**
+     * Responds to the "assign self" link.
+     */
     $('#assign_self').on('click', (e) => {
         const finding_uuid = '{{ finding.uuid }}';
         $.ajax({
@@ -247,7 +263,7 @@
             },
             type: 'POST',
             success: (data) => {
-                if (data.status === 'success') {
+                if (IS_SUCCESS(data)) {
                     $('#assigned_to_content').clear();
                     const anchor = $('<a>');
                     anchor.attr('href', '#');
@@ -255,17 +271,43 @@
                     $('#assigned_to_content').append(anchor);
                 }
                 else {
-                    alert(data.message);
+                    console.log('Error: Unsuccessful response from server.');
                 }
             }
         });
     });
+
+    $('#assigned_to').on('change', (e) => {
+        const finding_uuid = '{{ finding.uuid }}';
+        $.ajax({
+            url: `/api/1/findings/update`,
+            data: {
+                'finding_uuid': finding_uuid,
+                'assigned_to': $(e.target).val()
+            },
+            type: 'POST',
+            success: (data) => {
+                if (IS_SUCCESS(data)) {
+                    $('#assigned_to_content').clear();
+                    const anchor = $('<a>');
+                    anchor.attr('href', '#');
+                    anchor.text(data.assigned_to);
+                    $('#assigned_to_content').append(anchor);
+                }
+                else {
+                    console.log('Error: Unsuccessful response from server.');
+                }
+            }
+        });
+    });
+
     $(document).ready(() => {
         load_file_listing({"finding_uuid": "{{ finding.uuid }}"});
         
         load_source_code({
             'scan_uuid': "{{ finding.scan.uuid }}",
-            'file_path': "{{ finding.file_path }}"
+            'file_path': "{{ finding.file_path }}",
+            'first': true
         });
         
         /* Resize the file and editor */

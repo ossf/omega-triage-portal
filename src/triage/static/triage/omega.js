@@ -104,7 +104,12 @@ const load_source_code = function (options) {
             $('#editor-container').removeClass('d-none');
 
             // Set the editor title
-            $('#file_path').text(file_name);
+            const file_line = $(document.body).data('current_finding').file_line;
+            if (file_line !== undefined && options['first']) {
+                $('#file_path').text(file_name + ":" + file_line);
+            } else {
+                $('#file_path').text(file_name);
+            }
 
             //var path_abbrev = path;
             //if (path_abbrev.length > 150) {
@@ -238,6 +243,8 @@ const load_file_listing = function (options) {
                 "changed.jstree": function (event, data) {
                     if (data.node.children.length === 0) {
                         const scan_uuid = $.data(document.body, 'current_finding').scan_uuid;
+                        $('#finding_center').removeClass('col-lg-8').addClass('col-lg-10');
+                        $('#finding_right').remove();
                         load_source_code({
                             'scan_uuid': scan_uuid,
                             'file_path': data.node.id
@@ -285,4 +292,12 @@ const change_font_size = (size) => {
     }
     editor.setFontSize(fontSize);
     localStorage.setItem('last-used-editor-font-size', fontSize);
+}
+
+const IS_SUCCESS = (data) => {
+    if (!data) return false;
+    const status = data.status + '';
+    if (status === 'success') return true;
+    if (status === 'ok' || status.startsWith('ok')) return true;
+    return false;
 }

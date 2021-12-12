@@ -3,6 +3,7 @@ import logging
 import os
 from base64 import b64encode
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpRequest,
@@ -27,6 +28,7 @@ from triage.util.source_viewer.viewer import SourceViewer
 logger = logging.getLogger(__name__)
 
 
+@login_required
 def show_findings(request: HttpRequest) -> HttpResponse:
     """Shows findings based on a query.
 
@@ -71,6 +73,7 @@ def show_upload(request: HttpRequest) -> HttpResponse:
         return redirect("/findings/upload?status=success")
 
 
+@login_required
 def show_finding_by_uuid(request: HttpRequest, finding_uuid) -> HttpResponse:
     finding = get_object_or_404(Finding, uuid=finding_uuid)
     from django.contrib.auth.models import User
@@ -80,6 +83,7 @@ def show_finding_by_uuid(request: HttpRequest, finding_uuid) -> HttpResponse:
     return render(request, "triage/findings_show.html", context)
 
 
+@login_required
 @require_http_methods(["POST"])
 def api_update_finding(request: HttpRequest) -> JsonResponse:
     """Updates a Finding."""
@@ -95,8 +99,15 @@ def api_update_finding(request: HttpRequest) -> JsonResponse:
     for field in fields:
         if field in request.POST:
             value = request.POST.get(field)
-            if field == "assigned_to" and value == "$self":
-                value = request.user
+            if field == "assigned_to":
+                if value == "$self":  # Special case: set to current user
+                    value = request.user
+                if value == "$clear":  # Special case: clear the field
+                    value = None
+                else:
+                    value = get_user_model().objects.filter(username=value).first()
+                    if value is None:
+                        continue  # No action, invalid user passed in
 
             if getattr(finding, field) != value:
                 setattr(finding, field, value)
@@ -109,6 +120,7 @@ def api_update_finding(request: HttpRequest) -> JsonResponse:
         return JsonResponse({"status": "ok, not modified"})
 
 
+@login_required
 def api_get_source_code(request: HttpRequest) -> JsonResponse:
     """Returns the source code for a finding."""
     scan_uuid = request.GET.get("scan_uuid")
@@ -139,6 +151,7 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"status": "error"}, status=500)
 
 
+@login_required
 @cache_page(60 * 5)
 def api_get_files(request: HttpRequest) -> JsonResponse:
     """Returns a list of files related to a finding."""
@@ -158,6 +171,7 @@ def api_get_files(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"data": source_graph, "status": "ok"})
 
 
+@login_required
 def api_get_file_list(request: HttpRequest) -> JsonResponse:
     """Returns a list of files in a project."""
     finding_uuid = request.GET.get("finding_uuid")
@@ -168,11 +182,13 @@ def api_get_file_list(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"data": source_graph, "status": "ok"})
 
 
+@login_required
 def api_download_file(request: HttpRequest) -> HttpResponse:
     """Returns a list of files in a project."""
     return HttpResponse("Not implemented.")
 
 
+@login_required
 def api_get_blob_list(request: HttpRequest) -> JsonResponse:
     """Returns a list of files in a project."""
     finding_uuid = request.GET.get("finding_uuid")
@@ -185,6 +201,7 @@ def api_get_blob_list(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"data": source_graph, "status": "ok"})
 
 
+@login_required
 @csrf_exempt
 @require_http_methods(["POST"])
 def api_add(request: HttpRequest) -> JsonResponse:
