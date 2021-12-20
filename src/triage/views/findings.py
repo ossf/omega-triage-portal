@@ -43,6 +43,8 @@ def show_findings(request: HttpRequest) -> HttpResponse:
         query_object = parse_query_to_Q(query)
         if query_object:
             findings = findings.filter(query_object)
+        findings = findings[0:100]
+
     context = {"query": query, "findings": findings}
 
     return render(request, "triage/findings_list.html", context)
@@ -201,7 +203,6 @@ def api_get_blob_list(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"data": source_graph, "status": "ok"})
 
 
-@login_required
 @csrf_exempt
 @require_http_methods(["POST"])
 def api_add(request: HttpRequest) -> JsonResponse:
@@ -228,5 +229,6 @@ def api_add(request: HttpRequest) -> JsonResponse:
     except ValueError:
         return JsonResponse({"error": "Invalid or missing package url"})
 
-    SARIFImporter.import_sarif_file(package_url, sarif_content, scan_artifact.read())
+    user = get_user_model().objects.get(pk=1)
+    SARIFImporter.import_sarif_file(package_url, sarif_content, user)
     return JsonResponse({"success": True})

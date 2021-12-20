@@ -47,76 +47,68 @@
                     </select>
                 </div>
                 <div class="col-lg-12">
-                    <label for="toolDefectFindings" class="form-label">Associated Findings</label>
-                    {% if tool_defect.finding or finding %}
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>State</th>
-                                    <th>Tool</th>
-                                    <th>Severity</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% if finding %}
-                                <tr>
-                                    <td><a href="{{ finding.get_absolute_url }}" aria-label="Access this finding">{{ finding.title }}</a></td>
-                                    <td>{{ finding.get_state_display }}</td>
-                                    <td>{{ finding.scan.tool }}</td>
-                                    <td>{{ finding.get_severity_display }}</td>
-                                    <td class="text-center">
-                                        <a href="#" title="View" aria-label="View this finding"><i class="far fa-eye"></i></a>
-                                            &nbsp;&nbsp;
-                                        <a href="#" title="Delete" aria-label="Delete this finding"><i class="far fa-trash-alt"></i></a>
-                                    </td>
-                                </tr>
-                            {% endif %}
-                            {% for finding in tool_defect.finding.all %}
-                                <tr>
-                                    <td><a href="{{ finding.get_absolute_url }}" aria-label="Access this finding">{{ finding.title }}</a></td>
-                                    <td>{{ finding.get_state_display }}</td>
-                                    <td>{{ finding.get_severity_display }}</td>
-                                    <td class="text-center">
-                                        <a href="#" title="View" aria-label="View this finding"><i class="far fa-eye"></i></a>
-                                            &nbsp;&nbsp;
-                                        <a href="#" title="Delete" aria-label="Delete this finding"><i class="far fa-trash-alt"></i></a>
-                                    </td>
-                                        
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <p><i>No findings associated with this defect.</i></p>
-                    {% endif %}
-
-
+                    <label for="toolDefectDescription" class="form-label">Description</label>
+                    <textarea id="toolDefectDescription" class="form-control" name="description" rows="7">{{ tool.description }}</textarea>
                 </div>
+                <div class="col-lg-12">
+                    <h5>Notes</h5>
+                    <label class="form-label sr-only" aria-title="Notes">Notes</label>
+                    {% if tool_defect.notes.all %}
+                        <div class="notes border rounded p-1 mb-2" style="max-height: 800px; overflow-y:auto">
+                            {% for note in tool_defect.notes.all %}
+                                <div class="note pb-2">
+                                    <div class="text-muted" style="font-size: 70%">{{ note.created_at }} | {{ note.created_by }}</div>
+                                    {{ note.content }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+        
+                    <label for="toolDefectNoteNew" class="form-label sr-only">New Note</label>
+                    <textarea id="toolDefectNoteNew" class="form-control" placeholder="Add a note..." name="note_content"></textarea>    
+                </div>      
             </div>
         </div>
+
         <div class="col-lg-6">
-            <h5>Notes</h5>
-            <label class="form-label sr-only" aria-title="Notes">Notes</label>
-            {% if tool_defect.notes %}
-                <div class="notes border rounded p-1 mb-2" style="max-height: 800px; overflow-y:auto">
-                    {% for note in tool_defect.notes.all %}
-                        <div class="note pb-2">
-                            <div class="text-muted" style="font-size: 70%">{{ note.created_at }} | {{ note.created_by }}</div>
-                            {{ note.content }}
-                        </div>
+            <label for="toolDefectFindings" class="form-label">Associated Findings</label>
+            {% if tool_defect.finding or finding %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if finding %}
+                        <tr>
+                            <td>{{ finding.title }}</td>
+                            <td class="text-center">
+                                <a href="#" title="View" aria-label="View this finding"><i class="far fa-eye"></i></a>
+                                    &nbsp;&nbsp;
+                                <a href="#" title="Delete" aria-label="Remove this finding"><i class="far fa-trash-alt"></i></a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% for finding in tool_defect.finding.all %}
+                        <tr>
+                            <td><a href="{{ finding.get_absolute_url }}" aria-label="Access this finding">{{ finding.title }}</a></td>
+                            <td>{{ finding.get_state_display }}</td>
+                            <td>{{ finding.get_severity_display }}</td>
+                            <td class="text-center">
+                                <a href="#" title="View" aria-label="View this finding"><i class="far fa-eye"></i></a>
+                                    &nbsp;&nbsp;
+                                <a href="#" title="Delete" aria-label="Delete this finding"><i class="far fa-trash-alt"></i></a>
+                            </td>
+                                
+                        </tr>
                     {% endfor %}
-                </div>
+                    </tbody>
+                </table>
+            {% else %}
+                <p><i>No findings associated with this defect.</i></p>
             {% endif %}
-
-            <label for="toolDefectNoteNew" class="form-label sr-only">New Note</label>
-            <textarea id="toolDefectNoteNew" class="form-control" placeholder="Add a note..." name="note_content"></textarea>    
-        </div>            
-    </div>
-    <div class="row">
-        <div class="col-12">
-
         </div>
     </div>
 </form>

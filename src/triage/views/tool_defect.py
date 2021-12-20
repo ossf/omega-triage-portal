@@ -4,6 +4,7 @@ import uuid
 from base64 import b64encode
 from typing import Any, List
 
+from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -36,6 +37,7 @@ from triage.util.source_viewer import path_to_graph
 from triage.util.source_viewer.viewer import SourceViewer
 
 
+@login_required
 def show_tool_defects(request: HttpRequest) -> HttpResponse:
     """Shows tool_defectsbased on a query.
 
@@ -48,9 +50,10 @@ def show_tool_defects(request: HttpRequest) -> HttpResponse:
         "tool_defects": ToolDefect.objects.all(),
         "tool_defect_states": WorkItemState.choices,
     }
-    return render(request, "triage/tool_defect_show.html", c)
+    return render(request, "triage/tool_defect_list.html", c)
 
 
+@login_required
 @never_cache
 def show_tool_defect(request: HttpRequest, tool_defect_uuid: uuid.UUID) -> HttpResponse:
     """Shows a tool defect."""
@@ -63,6 +66,7 @@ def show_tool_defect(request: HttpRequest, tool_defect_uuid: uuid.UUID) -> HttpR
     return render(request, "triage/tool_defect_new.html", context)
 
 
+@login_required
 def show_add_tool_defect(request: HttpRequest) -> HttpResponse:
     """Shows the add tool defect form."""
     finding_uuid = request.GET.get("finding_uuid")
@@ -75,6 +79,7 @@ def show_add_tool_defect(request: HttpRequest) -> HttpResponse:
     return render(request, "triage/tool_defect_new.html", c)
 
 
+@login_required
 @require_http_methods(["POST"])
 def save_tool_defect(request: HttpRequest) -> HttpResponse:
     """Saves a tool defect."""

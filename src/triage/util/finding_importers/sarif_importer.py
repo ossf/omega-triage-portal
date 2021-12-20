@@ -158,6 +158,15 @@ class SARIFImporter:
                         finding.created_by = user
                         finding.updated_by = user
 
+                        if Finding.objects.filter(
+                            title=finding.title,
+                            file_path=finding.file_path,
+                            file_line=finding.file_line,
+                            scan__project_version=project_version,
+                        ).exists():
+                            logger.debug("Duplicate finding, skipping.")
+                            continue
+
                         # try:
                         #    result_copy = json.dumps(result).replace("\\u0000", "")
                         #    result_copy = json.loads(result_copy)

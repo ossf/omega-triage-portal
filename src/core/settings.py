@@ -19,6 +19,10 @@ except Exception:
 SECRET_KEY = get_env_variable("SECRET_KEY")
 DEBUG = to_bool(get_env_variable("DEBUG"))
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -32,9 +36,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "taggit",
     "triage",
+    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

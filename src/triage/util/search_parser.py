@@ -20,6 +20,12 @@ def parse_query_to_Q(query):
         + pp.Word(pp.alphanums).setResultsName("username")
     ).setResultsName("assigned_to")
 
+    priority_clause = pp.Group(
+        pp.Keyword("priority:").suppress()
+        + pp.one_of(["<", ">", "<=", ">=", "=="]).setResultsName("op")
+        + pp.Word(pp.nums).setResultsName("value")
+    ).setResultsName("priority")
+
     severity_clause = pp.Group(
         pp.Keyword("severity").suppress()
         + pp.Suppress(":")
@@ -69,6 +75,7 @@ def parse_query_to_Q(query):
     clause = (
         assigned_to_clause
         | severity_clause
+        | priority_clause
         | created_dt_clause
         | updated_dt_clause
         | purl_clause
@@ -116,11 +123,26 @@ def parse_query_to_Q(query):
         elif results.created_dt.op == "==":
             q = q & Q(updated_at__exact=results.created_dt.datetime)
 
+    if results.priority:
+        if results.priority.op == "<":
+            q = q & Q(priority__lt=results.priority.value)
+        elif results.priority.op == ">":
+            q = q & Q(priority__gt=results.priority.value)
+        elif results.priority.op == "<=":
+            q = q & Q(priority__lte=results.priority.value)
+        elif results.priority.op == ">=":
+            q = q & Q(priority__gte=results.priority.value)
+        elif results.priority.op == "==":
+            q = q & Q(priority__exact=results.priority.value)
+
     if results.purl:
         q = q & Q(scan__project_version__project__package_url=results.purl.purl)
 
     if results.text_search:
-        q = q & Q(title__icontains=results.text_search)
+        q = q & (
+            Q(scan__project_version__package_url__icontains=results.text_search)
+            | Q(title__icontains=results.text_search)
+        )
 
     logger.debug("Query: %s", q)
     return q

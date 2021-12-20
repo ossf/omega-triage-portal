@@ -41,6 +41,7 @@
                         <th class="text-nowrap">Title</th>
                         <th class="text-nowrap">Active</th>
                         <th class="text-nowrap">Priority</th>
+                        <th class="text-nowrap">Last Executed</th>
                         <th class="text-nowrap">Last Updated</th>
                         <th class="text-nowrap">Actions</th>
                     </tr>
@@ -51,6 +52,7 @@
                             <td>{{ filter.title }}</td>
                             <td>{{ filter.active }}</td>
                             <td>{{ filter.priority }}</td>
+                            <td>{{ filter.last_executed|date:"SHORT_DATETIME_FORMAT" }}</td>
                             <td>{{ filter.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td>
                             <td>
                                 <a href="/filters/execute?filter_uuid={{ filter.uuid }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-running me-2"></i>Execute</a>

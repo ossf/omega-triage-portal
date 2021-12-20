@@ -1,3 +1,4 @@
+import datetime
 import logging
 import uuid
 from typing import Any
@@ -6,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from wrapt import synchronized
 
 from triage.models import BaseTimestampedModel, BaseUserTrackedModel
 
@@ -36,6 +38,7 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
     action = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=True)
     priority = models.PositiveSmallIntegerField(default=1000)
+    last_executed = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.title
@@ -114,11 +117,13 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
         for filter in Filter.objects.filter(active=True).order_by("priority"):
             filter.execute()
 
+    @synchronized
     def execute(self):
         """
         Execute the filter's condition and action.
         """
         if not self.active:
+            logger.info("Filter #%d is not active.", self.pk)
             return
 
         from triage.models import Finding
@@ -146,3 +151,6 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
                     )
         except Exception as msg:
             logger.exception("Error executing filter %s: %s", self.title, msg)
+
+        self.last_executed = datetime.datetime.now()
+        self.save()
