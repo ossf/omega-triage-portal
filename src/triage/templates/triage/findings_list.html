@@ -53,7 +53,7 @@
                             {% include "triage/widgets/project_name_pretty.html" with project=finding.scan.project_version only %}
                         </td>
                         <td>{{ finding.title|truncatechars:100 }}</td>
-                        <td>{{ finding.get_filename_display }}</td>
+                        <td>{{ finding.get_filename_display }}:{{ finding.file_line }}</td>
                         <td>{{ finding.get_severity_display }}</td>
                         <td>{{ finding.get_state_display }}</td>
                     </tr>

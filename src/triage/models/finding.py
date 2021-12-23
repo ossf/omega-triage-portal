@@ -97,7 +97,7 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
 
     title = models.CharField(max_length=1024)
 
-    file_path = models.CharField(max_length=2048)
+    file = models.ForeignKey("File", null=True, blank=True, on_delete=models.SET_NULL)
     file_line = models.PositiveIntegerField(null=True, blank=True)
 
     # Impact showing how important a finding is to the larger community.
@@ -134,8 +134,8 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
     @property
     def get_filename_display(self):
         """Render the filename or a placeholder where one does not exist."""
-        if self.file_path:
-            return os.path.basename(self.file_path)
+        if self.file:
+            return self.file.name or "-"
         else:
             return "-"
 
@@ -163,8 +163,8 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
 
     def get_source_code(self):
         """Retrieve source code pertaining to this finding."""
-        if self.file_path:
-            return self.scan.get_source_code(self.file_path)
+        if self.file:
+            return self.file.content
 
-        logger.debug("No source code available (file_path is empty)")
+        logger.debug("No source code available (file is empty)")
         return None

@@ -38,6 +38,7 @@ class ProjectVersion(BaseTimestampedModel, BaseUserTrackedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     project = models.ForeignKey("Project", on_delete=models.CASCADE)
     package_url = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
+    files = models.ManyToManyField("File", blank=True, editable=False)
     metadata = models.JSONField(null=True)
 
     def __str__(self):
@@ -55,9 +56,15 @@ class ProjectVersion(BaseTimestampedModel, BaseUserTrackedModel):
             raise ValueError("'package_url' cannot be None.")
 
         package_url_no_version = modify_purl(package_url, version=None)
+
+        if package_url.namespace:
+            package_name = f"{package_url.namespace}/{package_url.name}"
+        else:
+            package_name = package_url.name
+
         project, _ = Project.objects.get_or_create(
             package_url=str(package_url_no_version),
-            defaults={"name": package_url.name, "created_by": created_by, "updated_by": created_by},
+            defaults={"name": package_name, "created_by": created_by, "updated_by": created_by},
         )
         project_version, _ = cls.objects.get_or_create(
             project=project,

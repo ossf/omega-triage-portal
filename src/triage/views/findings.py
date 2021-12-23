@@ -43,7 +43,8 @@ def show_findings(request: HttpRequest) -> HttpResponse:
         query_object = parse_query_to_Q(query)
         if query_object:
             findings = findings.filter(query_object)
-        findings = findings[0:100]
+        findings = findings.select_related("scan__project_version")
+        findings = findings[0:1000]
 
     context = {"query": query, "findings": findings}
 
@@ -133,6 +134,9 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
             source_code = scan.get_package_contents(file_path)
         elif file_path.startswith("tools/"):
             source_code = scan.get_file_contents(file_path)
+        elif "/package/" in file_path:
+            file_path = file_path[file_path.index("/package/") + 9 :]
+            source_code = scan.get_package_contents(file_path)
         else:
             logger.warning("Invalid prefix for file_path: %s", file_path)
             source_code = None
@@ -140,6 +144,8 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
         if source_code is not None:
             if source_code == b"":
                 source_code = b"<Empty File>"
+            if isinstance(source_code, str):
+                source_code = source_code.encode("utf-8")
             return JsonResponse(
                 {
                     "file_contents": b64encode(source_code).decode("utf-8"),
@@ -160,28 +166,36 @@ def api_get_files(request: HttpRequest) -> JsonResponse:
     finding_uuid = request.GET.get("finding_uuid")
     finding = get_object_or_404(Finding, uuid=finding_uuid)
 
-    accessor = ToolshedBlobStorageAccessor(finding.scan)
-    file_listing = accessor.get_all_files()
-
+    files = finding.scan.files
     source_graph = path_to_graph(
-        file_listing,
+        map(lambda f: f.path, files),
         finding.scan.project_version.package_url,
         separator="/",
         root="Root",
     )
 
+    # accessor = ToolshedBlobStorageAccessor(finding.scan)
+    # file_listing = accessor.get_all_files()
+
+    # source_graph = path_to_graph(
+    #    file_listing,
+    #    finding.scan.project_version.package_url,
+    #    separator="/",
+    #    root="Root",
+    # )
+
     return JsonResponse({"data": source_graph, "status": "ok"})
 
 
-@login_required
-def api_get_file_list(request: HttpRequest) -> JsonResponse:
-    """Returns a list of files in a project."""
-    finding_uuid = request.GET.get("finding_uuid")
-    finding = get_object_or_404(Finding, uuid=finding_uuid)
-    source_code = finding.scan.get_file_list()
-    source_graph = path_to_graph(source_code, finding.scan.project_version.package_url)
-
-    return JsonResponse({"data": source_graph, "status": "ok"})
+# @login_required
+# def api_get_file_list(request: HttpRequest) -> JsonResponse:
+#    """Returns a list of files in a project."""
+#    finding_uuid = request.GET.get("finding_uuid")
+#    finding = get_object_or_404(Finding, uuid=finding_uuid)
+#    source_code = finding.scan.get_file_list()
+#    source_graph = path_to_graph(source_code, finding.scan.project_version.package_url)#
+#
+#    return JsonResponse({"data": source_graph, "status": "ok"})
 
 
 @login_required
@@ -231,4 +245,50 @@ def api_add(request: HttpRequest) -> JsonResponse:
 
     user = get_user_model().objects.get(pk=1)
     SARIFImporter.import_sarif_file(package_url, sarif_content, user)
+    return JsonResponse({"success": True})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_add_artifact(request: HttpRequest) -> JsonResponse:
+    """Inserts data into the database.
+
+    Required:
+    - artifact_type => "scan" or "package"
+    - action => "add" or "replace" (only used for package)
+    - package_url => the package URL (must include version)
+    - artifact => file contents to import
+    """
+    action = request.FILES.get("action")
+    if action not in ["add", "update"]:
+        return JsonResponse({"error": "Invalid action"})
+
+    artifact_type = request.FILES.get("artifact_type")
+    if artifact_type is None:
+        return JsonResponse({"error": "No artifact type provided"})
+
+    try:
+        package_url = PackageURL.from_string(request.POST.get("package_url"))
+        if package_url.version is None:
+            raise ValueError("Missing version")
+    except ValueError:
+        return JsonResponse({"error": "Invalid or missing package url"})
+
+    # TODO: Make this better
+    user = get_user_model().objects.get(pk=1)
+
+    if artifact_type == "sarif":
+        sarif = request.FILES.get("sarif")
+        sarif_content = json.load(sarif)
+        SARIFImporter.import_sarif_file(package_url, sarif_content, user)
+
+    """
+    Source code files are usually archives that contain source code or other
+    artifacts. They'll be automatically extracted during the import process. They
+    are associated with a ProjectVersion"""
+    if "source_code" in request.FILES:
+        source_code = request.FILES.get("source_code")
+        source_code_content = source_code.read()
+        FileImporter.import_artifact(package_url, source_code_content, user)
+
     return JsonResponse({"success": True})

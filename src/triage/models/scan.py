@@ -26,6 +26,8 @@ class Scan(BaseTimestampedModel, BaseUserTrackedModel):
 
     artifact_url_base = models.CharField(max_length=1024, null=True, blank=True)
     active = models.BooleanField(default=True)
+
+    files = models.ManyToManyField("File", blank=True)
     created_dt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

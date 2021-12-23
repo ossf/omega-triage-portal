@@ -25,17 +25,9 @@ class SARIFImporter:
 
     @classmethod
     def save_file_archive(cls, file_archive: bytes) -> Optional[uuid.UUID]:
-        """Save a file archive (bits) somewhere."""
-        # REMOV
+        """Extract a file archive and save it to the database."""
         if file_archive is None:
             return None
-        # TODO Remove SARIFImporter.safe_file_archive
-
-        filename = uuid.uuid4()
-        os.makedirs("temp-data", exist_ok=True)
-        with open(os.path.join("temp-data", str(filename)), "wb") as output_file:
-            output_file.write(file_archive)
-        return filename
 
     @classmethod
     def import_sarif_file(
