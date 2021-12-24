@@ -239,8 +239,10 @@
     /* Stash some page-level data */
     $(document.body).data('current_finding', {
         'finding_uuid': '{{ finding.uuid }}',
-        'scan_uuid': '{{ finding.scan.uuid }}',
-        'file_line': '{{ finding.file_line }}'
+        'project_version_uuid': '{{ finding.project_version.uuid }}',
+        'file_line': '{{ finding.file_line }}',
+        'file_path': '{{ finding.file.path }}',
+        'file_uuid': '{{ finding.file.uuid }}'
     });
     /* Handle clicks of the "New Tool Finding" button */
     $('#action_new_tooling_bug').on('click', (e) => {
@@ -302,12 +304,11 @@
     });
 
     $(document).ready(() => {
-        load_file_listing({"finding_uuid": "{{ finding.uuid }}"});
-        
-        load_source_code({
-            'scan_uuid': "{{ finding.scan.uuid }}",
-            'file_path': "{{ finding.file_path }}",
-            'first': true
+        load_file_listing({"project_version_uuid": "{{ finding.project_version.uuid }}"});
+        $('#data').on({
+            "loaded.jstree": function (event, data) {
+                $('#data').jstree('select_node', '{{ finding.file.path }}', false);
+            }
         });
         
         /* Resize the file and editor */

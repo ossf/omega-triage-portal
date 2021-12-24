@@ -80,12 +80,12 @@ let getCookie = function (name) {
 }
 
 const load_source_code = function (options) {
+    $('#finding_center').css('opacity', '0.20');
     $.ajax({
         'url': '/api/findings/get_source_code',
         'method': 'GET',
         'data': {
-            'scan_uuid': options['scan_uuid'],
-            'file_path': options['file_path']
+            'file_uuid': options['file_uuid']
         },
         'dataType': 'json',
         'success': function ({ file_contents, file_name, status }, textStatus, jqXHR) {
@@ -93,7 +93,7 @@ const load_source_code = function (options) {
             editor.getSession().setValue(atob(file_contents));
             var get_mode_filename = (file_name) => {
                 if (file_name.indexOf('.sarif')) {
-                    return `file_name${".json"}`
+                    return `${file_name}.json`;
                 }
                 return file_name;
             }
@@ -146,6 +146,9 @@ const load_source_code = function (options) {
             ace.edit('editor').getSession().clearAnnotations();
             ace.edit('editor').getSession().setMode('ace/mode/text')
             set_editor_text(`Error ${jqXHR.status}: ${jqXHR.responseJSON.message}.`);
+        },
+        'complete': function () {
+            $('#finding_center').css('opacity', '1.0');
         }
     });
 };
@@ -174,7 +177,7 @@ const set_editor_text = function (text) {
     editor.resize();
 }
 
-const load_file_listing = function (options) {
+const load_file_listing = function (options, callback) {
     $.ajax({
         'url': '/api/findings/get_files',
         'method': 'GET',
@@ -183,10 +186,9 @@ const load_file_listing = function (options) {
             if ($('#data').jstree(true)) {
                 $('#data').jstree(true).destroy();
             }
-            let tree_data = data.data;
             $('#data').jstree({
                 'core': {
-                    'data': tree_data,
+                    'data': data.data,
                     'multiple': false,
                     'themes': {
                         'dblclick_toggle': false,
@@ -226,9 +228,10 @@ const load_file_listing = function (options) {
                                 "action": function (obj) {
                                     var node = tree.get_node(obj.reference);
                                     if (node.children.length === 0) {
-                                        document.location.href = `/api/findings/download_file?finding_uuid=${options.finding_uuid}&file_path=${node.id}`;
+                                        document.location.href = `/api/findings/download_file?file_uuid=${node.original.file_uuid}`;
                                     } else {
-                                        document.location.href = `/api/findings/download_file?finding_uuid=${options.finding_uuid}&file_path=${node.id}&recursive=true`;
+                                        //document.location.href = `/api/findings/download_file?finding_uuid=${options.finding_uuid}&file_path=${node.id}&recursive=true`;
+                                        alert('not implemented');
                                     }
                                 }
                             }
@@ -241,27 +244,19 @@ const load_file_listing = function (options) {
                     $(this).jstree("open_node", $(this).find('li:first'));
                 },
                 "changed.jstree": function (event, data) {
-                    if (data.node.children.length === 0) {
-                        const scan_uuid = $.data(document.body, 'current_finding').scan_uuid;
-                        $('#finding_center').removeClass('col-lg-8').addClass('col-lg-10');
-                        $('#finding_right').remove();
+                    if (data && data.node && data.node.children && data.node.children.length === 0) {
+                        const original_file_uuid = $.data(document.body, 'current_finding').file_uuid;
+                        if (data.node.original.file_uuid != original_file_uuid) {
+                            $('#finding_center').removeClass('col-lg-8').addClass('col-lg-10');
+                            $('#finding_right').remove();
+                        }
                         load_source_code({
-                            'scan_uuid': scan_uuid,
-                            'file_path': data.node.id
+                            'file_uuid': data.node.original.file_uuid
                         });
                     }
                 }
             });
         }
-    });
-}
-
-const get_file_for_issue = function ($row) {
-    load_source_code({
-        'finding-uuid': $row.data('finding-uuid'),
-        'finding-title': $row.data('finding-title'),
-        'file-path': $row.data('file-path'),
-        'file-location': $row.data('file-location'),
     });
 }
 

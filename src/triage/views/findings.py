@@ -18,7 +18,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
 
-from triage.models import Finding, Scan, WorkItemState
+from triage.models import (
+    File,
+    FileContent,
+    Finding,
+    ProjectVersion,
+    Scan,
+    WorkItemState,
+)
 from triage.util.azure_blob_storage import ToolshedBlobStorageAccessor
 from triage.util.finding_importers.sarif_importer import SARIFImporter
 from triage.util.search_parser import parse_query_to_Q
@@ -43,7 +50,7 @@ def show_findings(request: HttpRequest) -> HttpResponse:
         query_object = parse_query_to_Q(query)
         if query_object:
             findings = findings.filter(query_object)
-        findings = findings.select_related("scan__project_version")
+        findings = findings.select_related("project_version", "file")
         findings = findings[0:1000]
 
     context = {"query": query, "findings": findings}
@@ -124,52 +131,36 @@ def api_update_finding(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
+@cache_page(60 * 30)
 def api_get_source_code(request: HttpRequest) -> JsonResponse:
     """Returns the source code for a finding."""
-    scan_uuid = request.GET.get("scan_uuid")
-    file_path = request.GET.get("file_path")
-    if scan_uuid:
-        scan = get_object_or_404(Scan, uuid=scan_uuid)
-        if file_path.startswith("package/") or file_path.startswith("/opt/"):
-            source_code = scan.get_package_contents(file_path)
-        elif file_path.startswith("tools/"):
-            source_code = scan.get_file_contents(file_path)
-        elif "/package/" in file_path:
-            file_path = file_path[file_path.index("/package/") + 9 :]
-            source_code = scan.get_package_contents(file_path)
-        else:
-            logger.warning("Invalid prefix for file_path: %s", file_path)
-            source_code = None
-
-        if source_code is not None:
-            if source_code == b"":
-                source_code = b"<Empty File>"
-            if isinstance(source_code, str):
-                source_code = source_code.encode("utf-8")
-            return JsonResponse(
-                {
-                    "file_contents": b64encode(source_code).decode("utf-8"),
-                    "file_name": file_path,
-                    "status": "ok",
-                }
-            )
-        logger.info("Source code not found for %s", file_path)
+    file_uuid = request.GET.get("file_uuid")
+    if file_uuid:
+        file = File.objects.filter(uuid=file_uuid).select_related("content").first()
+        return JsonResponse(
+            {
+                "file_contents": b64encode(file.content.data).decode("utf-8"),
+                "file_name": file.path,
+                "status": "ok",
+            }
+        )
+    else:
+        logger.info("Source code not found for %s", file_uuid)
         return JsonResponse({"status": "error", "message": "File not found"}, status=404)
 
-    return JsonResponse({"status": "error"}, status=500)
+    # return JsonResponse({"status": "error"}, status=500)
 
 
 @login_required
 @cache_page(60 * 5)
 def api_get_files(request: HttpRequest) -> JsonResponse:
     """Returns a list of files related to a finding."""
-    finding_uuid = request.GET.get("finding_uuid")
-    finding = get_object_or_404(Finding, uuid=finding_uuid)
+    project_version_uuid = request.GET.get("project_version_uuid")
+    project_version = get_object_or_404(ProjectVersion, uuid=project_version_uuid)
 
-    files = finding.scan.files
     source_graph = path_to_graph(
-        map(lambda f: f.path, files),
-        finding.scan.project_version.package_url,
+        project_version.files.all(),
+        project_version.package_url,
         separator="/",
         root="Root",
     )

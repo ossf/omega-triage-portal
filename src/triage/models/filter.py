@@ -6,6 +6,7 @@ from typing import Any
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from wrapt import synchronized
 
@@ -152,5 +153,5 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
         except Exception as msg:
             logger.exception("Error executing filter %s: %s", self.title, msg)
 
-        self.last_executed = datetime.datetime.now()
+        self.last_executed = timezone.now()
         self.save()

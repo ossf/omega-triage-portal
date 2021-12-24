@@ -38,7 +38,7 @@ class ProjectVersion(BaseTimestampedModel, BaseUserTrackedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     project = models.ForeignKey("Project", on_delete=models.CASCADE)
     package_url = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
-    files = models.ManyToManyField("File", blank=True, editable=False)
+    files = models.ManyToManyField("File", blank=True, editable=True)
     metadata = models.JSONField(null=True)
 
     def __str__(self):

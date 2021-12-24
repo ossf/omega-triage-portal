@@ -1,5 +1,7 @@
 import logging
 
+from django.db.models.query import QuerySet
+
 logger = logging.getLogger(__name__)
 
 """
@@ -15,7 +17,7 @@ output:
 """
 
 
-def path_to_graph(paths, package_url, separator="/", root=None):
+def path_to_graph(files: QuerySet, package_url, separator="/", root=None):
     """
     Converts a list of paths into a graph suitable for jstree.
 
@@ -28,7 +30,7 @@ def path_to_graph(paths, package_url, separator="/", root=None):
      a list of dictionaries containing the relevant
      fields for jstree.
     """
-    if not paths:
+    if not files:
         return []
 
     result = []
@@ -49,7 +51,8 @@ def path_to_graph(paths, package_url, separator="/", root=None):
     else:
         root = "#"
 
-    for path in paths:
+    for file in files:
+        path = file.path
         if not isinstance(path, str) or not path or path.startswith("pkg:"):
             logger.debug("Ignoring invalid path [%s]", path)
             continue
@@ -77,6 +80,7 @@ def path_to_graph(paths, package_url, separator="/", root=None):
                         "text": node_name,
                         "parent": parent_id,
                         "package_url": package_url,
+                        "file_uuid": file.uuid,
                         "li_attr": {"package_url": package_url},
                         "path": node_id,
                         "icon": get_icon_for_path(node_name, part_id == len(path_parts)),

@@ -48,11 +48,11 @@
             </thead>
             <tbody style="word-break: break-word;white-space:normal;word-wrap:break-word">
                 {% for finding in findings %}
-                    <tr data-finding-uuid="{{ finding.uuid }}" data-finding-title="{{ finding.title }}" data-file-path="{{ finding.file_path}}" data-file-location="{{ finding.file_line }}" style="cursor:pointer">
+                    <tr data-finding-uuid="{{ finding.uuid }}" data-finding-title="{{ finding.normalized_title }}" data-file-path="{{ finding.file.path}}" data-file-location="{{ finding.file_line }}" style="cursor:pointer">
                         <td>
-                            {% include "triage/widgets/project_name_pretty.html" with project=finding.scan.project_version only %}
+                            {% include "triage/widgets/project_name_pretty.html" with project=finding.project_version only %}
                         </td>
-                        <td>{{ finding.title|truncatechars:100 }}</td>
+                        <td>{{ finding.normalized_title|truncatechars:100 }}</td>
                         <td>{{ finding.get_filename_display }}:{{ finding.file_line }}</td>
                         <td>{{ finding.get_severity_display }}</td>
                         <td>{{ finding.get_state_display }}</td>

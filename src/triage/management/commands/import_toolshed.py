@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import re
 from functools import lru_cache
 
@@ -66,7 +67,9 @@ class Command(BaseCommand):
             blobs = self.container.list_blobs(name_starts_with=prefix)
         elif options.get("import_all"):
             package_url = None
-            blobs = self.container.list_blobs(name_starts_with="npm")  # TODO: temporary
+            blobs = self.container.list_blobs(
+                name_starts_with="npm",
+            )  # TODO: temporary
         else:
             raise ValueError("Must specify either --package or --import-all")
 
@@ -101,9 +104,15 @@ class Command(BaseCommand):
             if blob.name.endswith(".sarif"):
                 logger.debug("Importing %s", blob.name)
                 try:
-                    pass
-                    # sarif = json.loads(self.container.download_blob(blob.name).content_as_text())
-                    # SARIFImporter.import_sarif_file(package_url, sarif, user)
+                    blob_contents = self.container.download_blob(blob.name).content_as_text()
+                    sarif = json.loads(blob_contents)
+                    SARIFImporter.import_sarif_file(package_url, sarif, user)
+                    FileImporter.import_file(
+                        f"tool/{os.path.basename(blob.name)}",
+                        blob.name,
+                        blob_contents.encode("utf-8", errors="ignore"),
+                        user,
+                    )
                 except Exception as msg:
                     logger.error("Unable to import %s: %s", blob.name, msg, exc_info=True)
                     continue

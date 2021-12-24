@@ -136,11 +136,14 @@ def parse_query_to_Q(query):
             q = q & Q(priority__exact=results.priority.value)
 
     if results.purl:
-        q = q & Q(scan__project_version__project__package_url=results.purl.purl)
+        q = q & (
+            Q(project_version__project__package_url=results.purl.purl)
+            | Q(project_version__package_url=results.purl.purl)
+        )
 
     if results.text_search:
         q = q & (
-            Q(scan__project_version__package_url__icontains=results.text_search)
+            Q(project_version__package_url__icontains=results.text_search)
             | Q(title__icontains=results.text_search)
         )
 

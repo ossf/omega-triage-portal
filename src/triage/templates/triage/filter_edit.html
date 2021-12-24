@@ -41,13 +41,13 @@
             <div class="col-md-4">
                 <label for="filterActive" class="form-label">Active</label>
                 <select id="filterActive" class="form-select" name="active">
-                    <option value="true"  {% if filter.active %}selected{% endif %}>Active</option>
-                    <option value="false" {% if not filter.active %}selected{% endif %}>Inactive</option>
+                    <option value="true"  {% if not filter or filter.active %}selected{% endif %}>Active</option>
+                    <option value="false" {% if filter and not filter.active %}selected{% endif %}>Inactive</option>
                 </select>
             </div>
             <div class="col-md-4">
                 <label for="filterPriority" class="form-label">Priority</label>
-                <input type="number" class="form-control" id="filterPriority" name="priority" value="{{ filter.priority }}" required min="0" max="1000"/>
+                <input type="number" class="form-control" id="filterPriority" name="priority" value="{{ filter.priority|default:"500" }}" required min="0" max="1000"/>
                 <small id="filterPriority" class="form-text text-muted">0=highest priority, 1000=lowest priority</small>
             </div>            
             <div class="col-md-12">

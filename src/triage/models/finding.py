@@ -93,9 +93,12 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
             return cls.NOT_SPECIFIED
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
-    scan = models.ForeignKey("Scan", on_delete=models.CASCADE)
+    project_version = models.ForeignKey(
+        "ProjectVersion", on_delete=models.CASCADE, null=True, blank=True
+    )
 
     title = models.CharField(max_length=1024)
+    normalized_title = models.CharField(max_length=1024, null=True, blank=True)
 
     file = models.ForeignKey("File", null=True, blank=True, on_delete=models.SET_NULL)
     file_line = models.PositiveIntegerField(null=True, blank=True)
@@ -119,6 +122,8 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
 
     state = models.CharField(max_length=2, choices=WorkItemState.choices, default=WorkItemState.NEW)
 
+    tool = models.ForeignKey("Tool", null=True, blank=True, on_delete=models.SET_NULL)
+
     # Who the finding is currently assigned to
     assigned_to = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     assigned_dt = models.DateTimeField(auto_now_add=True)
@@ -127,6 +132,9 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
 
     active_findings = ActiveFindingsManager()
     objects = models.Manager()
+
+    def __str__(self):
+        return f"{self.normalized_title} in {self.file.name}:{self.file_line}"
 
     def get_absolute_url(self):
         return f"/finding/{self.uuid}"
