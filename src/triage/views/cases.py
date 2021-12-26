@@ -39,7 +39,7 @@ def show_cases(request: HttpRequest) -> HttpResponse:
     query = request.GET.get("q", "").strip()
     cases = Case.objects.all()  # Default
     if query:
-        query_object = parse_query_to_Q(query)
+        query_object = parse_query_to_Q(Case, query)
         if query_object:
             cases = cases.filter(query_object)
 

@@ -28,7 +28,7 @@ def show_filters(request: HttpRequest) -> HttpResponse:
     query = request.GET.get("q", "").strip()
     filters = Filter.objects.all()  # Default
     if query:
-        query_object = parse_query_to_Q(query)
+        query_object = parse_query_to_Q(Filter, query)
         if query_object:
             filters = filters.filter(query_object)
     context = {"query": query, "filters": filters}

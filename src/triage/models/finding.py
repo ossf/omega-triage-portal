@@ -97,8 +97,8 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
         "ProjectVersion", on_delete=models.CASCADE, null=True, blank=True
     )
 
-    title = models.CharField(max_length=1024)
-    normalized_title = models.CharField(max_length=1024, null=True, blank=True)
+    title = models.CharField(max_length=1024, db_index=True)
+    normalized_title = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
 
     file = models.ForeignKey("File", null=True, blank=True, on_delete=models.SET_NULL)
     file_line = models.PositiveIntegerField(null=True, blank=True)
@@ -114,15 +114,25 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
 
     # Severity showing how important a finding is to the security quality of a project.
     severity_level = models.CharField(
-        max_length=2, choices=SeverityLevel.choices, default=SeverityLevel.NOT_SPECIFIED
+        max_length=2,
+        choices=SeverityLevel.choices,
+        default=SeverityLevel.NOT_SPECIFIED,
+        db_index=True,
     )
     analyst_severity_level = models.CharField(
-        max_length=2, choices=SeverityLevel.choices, default=SeverityLevel.NOT_SPECIFIED
+        max_length=2,
+        choices=SeverityLevel.choices,
+        default=SeverityLevel.NOT_SPECIFIED,
+        db_index=True,
     )
 
-    state = models.CharField(max_length=2, choices=WorkItemState.choices, default=WorkItemState.NEW)
+    state = models.CharField(
+        max_length=2, choices=WorkItemState.choices, default=WorkItemState.NEW, db_index=True
+    )
 
-    tool = models.ForeignKey("Tool", null=True, blank=True, on_delete=models.SET_NULL)
+    tool = models.ForeignKey(
+        "Tool", null=True, blank=True, on_delete=models.SET_NULL, db_index=True
+    )
 
     # Who the finding is currently assigned to
     assigned_to = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)

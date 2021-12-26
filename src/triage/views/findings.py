@@ -47,7 +47,7 @@ def show_findings(request: HttpRequest) -> HttpResponse:
 
     if query:
         findings = Finding.objects.exclude(state=WorkItemState.DELETED)
-        query_object = parse_query_to_Q(query)
+        query_object = parse_query_to_Q(Finding, query)
         if query_object:
             findings = findings.filter(query_object)
         findings = findings.select_related("project_version", "file")
