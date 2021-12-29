@@ -42,6 +42,7 @@
                     <th class="text-nowrap">Package</th>
                     <th class="text-nowrap">Issue</th>
                     <th class="text-nowrap">Filename</th>
+                    <th class="text-nowrap">Tool</th>
                     <th class="text-nowrap">Severity</th>
                     <th class="text-nowrap">State</th>
                 </tr>
@@ -54,6 +55,7 @@
                         </td>
                         <td>{{ finding.normalized_title|truncatechars:100 }}</td>
                         <td>{{ finding.get_filename_display }}:{{ finding.file_line }}</td>
+                        <td>{{ finding.tool.name }}</td>
                         <td>{{ finding.get_severity_display }}</td>
                         <td>{{ finding.get_state_display }}</td>
                     </tr>
