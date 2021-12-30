@@ -55,12 +55,12 @@
                 <div class="input-group">
                   <input id="vulnerability_query" type="text" class="form-control" placeholder="Search..." name="query"/>
                   <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-primary vulnerability_search rounded-0" data-target="nvd.nist.gov">NVD</button>
+                    <button type="button" class="btn btn-primary vulnerability_search rounded-0 pt-0 pb-0" style="background-color:#000" data-target="nvd.nist.gov"><img src="{% static "triage/images/icon-nvd.nist.gov.png" %}" height="22"/></button>
                     <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                       <span class="visually-hidden">Dropdown</span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                      <li><a class="dropdown-item vulnerability_search" href="#" data-target="nvd.nist.gov">NVD</a></li>
+                      <li><a class="dropdown-item vulnerability_search" href="#" data-target="nvd.nist.gov">NVD/CVE</a></li>
                       <li><a class="dropdown-item vulnerability_search" href="#" data-target="cve.circl.lu">CIRCL CVE Search</a></li>
                       <li><a class="dropdown-item vulnerability_search" href="#" data-target="exploit-db.com">Exploit Database</a></li>
                     </ul>
@@ -106,7 +106,20 @@
             <div class="card-body">
               <h5 class="card-title">My Work</h5>
               <p class="card-text">
-                <i>Add links to your work here.</i>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">
+                    <a href="/cases?q=assigned_to:{{ user.username }}">My Cases</a>
+                    <span class="badge rounded-pill bg-primary float-end">{{ my_work.num_cases|floatformat:"g" }}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <a href="/findings?q=assigned_to:{{ user.username }}">My Findings</a>
+                    <span class="badge rounded-pill bg-primary float-end">{{ my_work.num_findings|floatformat:"g" }}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <a href="/tool_defect?q=assigned_to:{{ user.username }}">My Tool Defects</a>
+                    <span class="badge rounded-pill bg-primary float-end">{{ my_work.num_tool_defects|floatformat:"g" }}</span>
+                  </li>
+                </ul>
               </p>
             </div>
           </div>
@@ -117,7 +130,20 @@
             <div class="card-body">
               <h5 class="card-title">Metrics</h5>
               <p class="card-text">
-                <i>Add operational metrics, breakdown of findings by severity, and more.</i>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">
+                    <a href="/findings?q=">Total Findings</a>
+                    <span class="badge rounded-pill bg-primary float-end">{{ metrics.num_findings|floatformat:"g" }}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <a href="/findings?q=state:new,active,not_specified,">Active Findings</a>
+                    <span class="badge rounded-pill bg-primary float-end">{{ metrics.num_active_findings|floatformat:"g" }}</span>
+                  </li>
+                  <li class="list-group-item">
+                    <a href="/findings?q=created:>={{ last_week|date:"Y-m-d" }}">New This Week</a>
+                    <span class="badge rounded-pill bg-primary float-end">{{ metrics.num_new_findings|floatformat:"g" }}</span>
+                  </li>                  
+                </ul>
               </p>
             </div>
           </div>

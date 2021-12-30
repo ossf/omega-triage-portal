@@ -188,17 +188,18 @@
             </li>
 
             <li class="list-group-item">
-                <div class="float-end"><a href="#"><i class="fas fa-cog"></i></a></div>
+                <button class="btn dropdown-toggle float-end" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cog"></i></button>
+                <ul class="dropdown-menu dropdown-menu-end shadow pt-0 pb-0" style="width: 280px; border:0">
+                    <li class="list-group-item">
+                        <strong>Update Impact</strong>
+                    </li>
+                    <li class="list-group-item">
+                        <input id="estimated_impact" type="number" class="form-control" autocomplete="false" value="{{ finding.estimated_impact|default:"0" }}" min="0" max="32767" />
+                        <small>Values range from 0 (no impact) to 32,767 (highest possible impact), leave blank for unknown.</small>.
+                    </li>
+                </ul>
                 <p class="text-muted fw-bold">Estimated Impact</p>
-                {% if finding.estimated_impact is None %}
-                    <span class="badge rounded-pill bg-warning" title="No impact information is available.">Unknown</span>
-                {% elif finding.estimated_impact == 0 %}
-                    <span class="badge rounded-pill bg-info">Low ({{ finding.estimated_impact }})</span>
-                {% elif finding.estimated_impact < 1000 %}
-                    <span class="badge rounded-pill bg-warning">Medium ({{ finding.estimated_impact }})</span>
-                {% else %}
-                    <span class="badge rounded-pill bg-danger">High ({{ finding.estimated_impact }})</span>
-                {% endif %}
+                <span id="estimated_impact_content" class="badge rounded-pill bg-info">{{ finding.estimated_impact }}</span>
             </li>
             <li class="list-group-item">
                 <button class="btn dropdown-toggle float-end" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-cog"></i></button>
@@ -301,6 +302,32 @@
                 }
             }
         });
+    });
+    $('#estimated_impact').on('keypress', (e) => { 
+        if (e.keyCode === 13) { 
+            e.preventDefault(); 
+            $('#estimated_impact').trigger('change');
+        }
+    });
+    $('#estimated_impact').on('change', (e) => {
+        const finding_uuid = '{{ finding.uuid }}';
+        $.ajax({
+            url: `/api/1/findings/update`,
+            data: {
+                'finding_uuid': finding_uuid,
+                'estimated_impact': $(e.target).val()
+            },
+            type: 'POST',
+            success: (data) => {
+                if (IS_SUCCESS(data)) {
+                    $('#estimated_impact_content').text($(e.target).val());
+                }
+                else {
+                    console.log('Error: Unsuccessful response from server.');
+                }
+            }
+        });
+        $('ul.dropdown-menu.show').hide()')
     });
 
     $(document).ready(() => {

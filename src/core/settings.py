@@ -82,7 +82,7 @@ DATABASES = {
         "PASSWORD": get_env_variable("DATABASE_PASSWORD"),
         "HOST": get_env_variable("DATABASE_HOST"),
         "PORT": get_env_variable("DATABASE_PORT"),
-        "OPTIONS": {},
+        "OPTIONS": {"options": "-c statement_timeout=5000"},
     }
 }
 
@@ -174,6 +174,15 @@ LOGGING = {
             "formatter": "verbose",
             "encoding": "utf-8",
         },
+        "database-log": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "..", "logs", "database.log"),
+            "maxBytes": 1024 * 1024 * 50,  # 50 MB
+            "backupCount": 1,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
     },
     "loggers": {
         "": {
@@ -185,6 +194,11 @@ LOGGING = {
             "level": "WARNING",
             "handlers": ["console", "file"],
             "propagate": False,
+        },
+        "django.db": {
+            "level": "DEBUG",
+            "handlers": ["database-log"],
+            "propagate": True,
         },
         "triage": {
             "handlers": ["console", "file"],

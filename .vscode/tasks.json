@@ -46,7 +46,6 @@
         {
             "label": "Django: Make Migrations (Triage)",
             "type": "shell",
-            "detail": "Make migrations for the Triage app.",
             "command": "${config:python.defaultInterpreterPath}",
             "args": [
                 "manage.py",
@@ -59,13 +58,31 @@
             },
         },
         {
-            "label": "Django: Migrate Database",
+            "label": "Django: Migrate Database (Triage)",
             "type": "shell",
-            "detail": "Migrate the Triage app.",
             "command": "${config:python.defaultInterpreterPath}",
             "args": [
                 "manage.py",
                 "migrate"
+            ],
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/src"
+            },
+        },
+        {
+            "label": "Redis: Clear Local Cache",
+            "type": "shell",
+            "presentation": {
+                "reveal": "never",
+                "panel": "shared"
+            },
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "manage.py",
+                "shell",
+                "-c",
+                "from django.core.cache import cache; cache.clear()"
             ],
             "problemMatcher": [],
             "options": {

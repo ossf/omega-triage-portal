@@ -43,6 +43,12 @@ def show_findings(request: HttpRequest) -> HttpResponse:
         q: query to search for, or all findings if not provided
     """
     query = request.GET.get("q", "").strip()
+    limit = request.GET.get("limit", 500)
+    if limit > 500:
+        limit = 500
+    if limit <= 0:
+        limit = 100
+
     findings = Finding.active_findings.all()
 
     if query:
@@ -50,8 +56,9 @@ def show_findings(request: HttpRequest) -> HttpResponse:
         query_object = parse_query_to_Q(Finding, query)
         if query_object:
             findings = findings.filter(query_object)
-        findings = findings.select_related("project_version", "file")
-        findings = findings[0:1000]
+
+    findings = findings.select_related("project_version", "tool", "file")
+    findings = findings[0:limit]
 
     context = {"query": query, "findings": findings}
 
@@ -104,9 +111,15 @@ def api_update_finding(request: HttpRequest) -> JsonResponse:
     #    return HttpResponseForbidden()
 
     # Modify only these fields, if provided
-    fields = ["analyst_impact", "confidence", "analyst_severity_level", "assigned_to"]
+    permitted_fields = [
+        "analyst_impact",
+        "confidence",
+        "analyst_severity_level",
+        "assigned_to",
+        "estimated_impact",
+    ]
     is_modified = False
-    for field in fields:
+    for field in permitted_fields:
         if field in request.POST:
             value = request.POST.get(field)
             if field == "assigned_to":
@@ -162,18 +175,8 @@ def api_get_files(request: HttpRequest) -> JsonResponse:
         project_version.files.all(),
         project_version.package_url,
         separator="/",
-        root="Root",
+        root=str(project_version.package_url),
     )
-
-    # accessor = ToolshedBlobStorageAccessor(finding.scan)
-    # file_listing = accessor.get_all_files()
-
-    # source_graph = path_to_graph(
-    #    file_listing,
-    #    finding.scan.project_version.package_url,
-    #    separator="/",
-    #    root="Root",
-    # )
 
     return JsonResponse({"data": source_graph, "status": "ok"})
 
