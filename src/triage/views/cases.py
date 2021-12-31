@@ -5,6 +5,7 @@ from base64 import b64encode
 from typing import Any, List
 from uuid import UUID
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpRequest,
@@ -16,6 +17,8 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
@@ -59,7 +62,8 @@ def show_case(request: HttpRequest, case_uuid: UUID) -> HttpResponse:
     context = {
         "case": case,
         "case_states": WorkItemState.choices,
-        "reporting_partner": Case.CasePartner.choices,
+        "reporting_partners": Case.CasePartner.choices,
+        "users": get_user_model().objects.all(),
     }
     return render(request, "triage/case_show.html", context)
 
@@ -85,10 +89,30 @@ def save_case(request: HttpRequest) -> HttpResponse:
         case = get_object_or_404(Case, uuid=case_uuid)
     case.title = request.POST.get("title")
     case.state = request.POST.get("state")
+    case.description = request.POST.get("description")
+
+    assigned_to = request.POST.get("assigned_to")
+    if assigned_to:
+        case.assigned_to = get_user_model().objects.get(username=assigned_to)
+    else:
+        case.assigned_to = None
+
+    case.reported_to = request.POST.get("reported_to")
+    case.reporting_partner = request.POST.get("reporting_partner")
+    case.reporting_reference = request.POST.get("reporting_reference")
+    case.resolved_target_dt = timezone.make_aware(
+        parse_date(request.POST.get("resolved_target_dt"))
+    )
+    case.resolved_actual_dt = timezone.make_aware(
+        parse_date(request.POST.get("resolved_actual_dt"))
+    )
+
     case.updated_by = request.user
-    case.created_by = request.user
+
+    if not case.created_by:
+        case.created_by = request.user
 
     case.full_clean()
     case.save()
 
-    return HttpResponseRedirect(f"/case/{case_uuid}")
+    return HttpResponseRedirect(f"/cases/{case.uuid}")

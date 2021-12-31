@@ -26,13 +26,16 @@
     <div class="col-12">
         <form class="row g-3" method="post" action="/cases/save">
             {% csrf_token %}
-            <input type="hidden" name="uuid" value="{{ case.uuid }}"/>
-
+            <input type="hidden" name="case_uuid" value="{{ case.uuid }}"/>
             <div class="col-12">
                 <label for="caseTitle" class="form-label">Title</label>
                 <input type="text" class="form-control" id="caseTitle" name="title" value="{{ case.title|default:"" }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-12">
+                <label for="case_description" class="form-label">Description</label>
+                <textarea id="case_description" class="form-control" name="description" rows="7">{{ case.description|default:"" }}</textarea>
+            </div>            
+            <div class="col-md-3">
                 <label for="caseState" class="form-label">State</label>
                 <select id="caseState" class="form-select" name="state">
                     {% for state in case_states|dictsort:1 %}
@@ -40,31 +43,47 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-4">
-                <label for="caseAssignedTo" class="form-label">Assigned To</label>
-                <input type="text" class="form-control" id="caseAssignedTo" name="assigned_to" value="{{ case.assigned_to|default:"" }}">
-            </div>
-            <div class="col-md-4">
-                <label for="caseReportedTo" class="form-label">Reported To</label>
-                <input type="text" class="form-control" id="caseReportedTo" name="reported_to" value="{{ case.reported_to|default:"" }}">
-            </div>
-            
-            <div class="col-md-4">
-                <label for="caseReportingPartner" class="form-label">Reporting Partner</label>
-                <select id="caseReportingPartner" class="form-select" name="reporting_partner">
-                    {% for partner in reporting_partner|dictsort:1 %}
-                        <option value="{{ partner.0 }}" {% if partner.0 == case.reporting_partner %}selected{% endif %}>{{ partner.1 }}</option>
+            <div class="col-md-3">
+                <label for="case_assigned_to" class="form-label">Assigned To</label>
+                <select id="case_assigned_to" class="form-select" name="assigned_to">
+                    <option value="" {% if not case.assigned_to %}selected{% endif %}>--Select Assignee--</option>
+                    {% for user in users %}
+                        <option value="{{ user.username }}" {% if case.assigned_to == user %}selected{% endif %}>{{ user.get_full_name }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label for="case_resolved_target_dt" class="form-label">Resolution Target</label>
+                <input type="date" class="form-control" id="case_resolved_target_dt" name="resolved_target_dt" value="{{ case.resolved_target_dt|date:"Y-m-d" }}">
+            </div>
+
+            <div class="col-md-3">
+                <label for="case_resolved_actual_dt" class="form-label">Resolution Actual</label>
+                <input type="date" class="form-control" id="case_resolved_actual_dt" name="resolved_actual_dt" value="{{ case.resolved_actual_dt|date:"Y-m-d" }}">
+            </div>            
+            <div class="col-md-3">
+                <label for="case_reporting_partner" class="form-label">Reporting Partner</label>
+                <select id="case_reporting_partner" class="form-select" name="reporting_partner">
+                    <option value="" {% if not case.reporting_partner %}selected{% endif %}>--Select Reporting Partner--</option>
+                    {% for partner in reporting_partners %}
+                        <option value="{{ partner.0 }}" {% if case.reporting_partner == partner.0 %}selected{% endif %}>{{ partner.1 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="case_reported_to" class="form-label">Reported To</label>
+                <input type="text" class="form-control" id="case_reported_to" name="reported_to" value="{{ case.reported_to|default:"" }}">
+            </div>            
+            <div class="col-md-3">
                 <label for="caseReportingReference" class="form-label">Reporting Reference</label>
                 <input type="text" class="form-control" id="caseReportingReference" name="reporting_reference" value="{{ case.reporting_reference|default:"" }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="caseReportedTo" class="form-label">Reported To</label>
                 <input type="text" class="form-control" id="caseReportedTo" value="{{ case.reported_to|default:"" }}">
             </div>
+
+
             
             <div class="col-12">
                 <h5>Notes</h5>
@@ -89,10 +108,17 @@
             </div>
             
             <div class="col-12">
-                <button type="submit" class="btn btn-primary">Save</button>
+                {% if case %}
+                    <button type="submit" class="btn btn-primary">Save</button>
+                {% else %}
+                    <button type="submit" class="btn btn-primary">Create</button>
+                {% endif %}
             </div>
         </form>
     </div>
 </div>
     {% endblock %}
 {% endblock %}
+
+resolved_dt = models.DateTimeField(null=True, blank=True)
+notes = models.ManyToManyField("Note", related_name="cases")
