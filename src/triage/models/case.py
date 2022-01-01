@@ -35,6 +35,7 @@ class Case(BaseTimestampedModel, BaseUserTrackedModel):
         on_delete=models.SET_NULL,
     )
     reported_to = models.CharField(max_length=2048, null=True, blank=True)
+    reported_dt = models.DateTimeField(null=True, blank=True)
     reporting_partner = models.CharField(
         max_length=2,
         choices=CasePartner.choices,
@@ -46,6 +47,7 @@ class Case(BaseTimestampedModel, BaseUserTrackedModel):
     resolved_target_dt = models.DateTimeField(null=True, blank=True)
     resolved_actual_dt = models.DateTimeField(null=True, blank=True)
     notes = models.ManyToManyField("Note", related_name="cases")
+    attachments = models.ManyToManyField("Attachment", related_name="cases")
 
     def __str__(self):
         return self.title

@@ -4,6 +4,8 @@ This file is required so that individual modules can be referenced from files wi
 this directory.
 """
 
+from triage.models.attachment import Attachment
+
 # import triage.models.project
 # import triage.models.tool_defect
 from triage.models.base import BaseTimestampedModel, BaseUserTrackedModel, WorkItemState

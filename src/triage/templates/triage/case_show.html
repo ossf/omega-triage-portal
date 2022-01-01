@@ -27,14 +27,59 @@
         <form class="row g-3" method="post" action="/cases/save">
             {% csrf_token %}
             <input type="hidden" name="case_uuid" value="{{ case.uuid }}"/>
-            <div class="col-12">
-                <label for="caseTitle" class="form-label">Title</label>
-                <input type="text" class="form-control" id="caseTitle" name="title" value="{{ case.title|default:"" }}">
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-12">
+                        <label for="caseTitle" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="caseTitle" name="title" value="{{ case.title|default:"" }}">
+                    </div>
+                    <div class="col-lg-12">
+                        <label for="case_description" class="form-label">Description</label>
+                        <textarea id="case_description" class="form-control" name="description" rows="7">{{ case.description|default:"" }}</textarea>
+                    </div>            
+                </div>
             </div>
-            <div class="col-lg-12">
-                <label for="case_description" class="form-label">Description</label>
-                <textarea id="case_description" class="form-control" name="description" rows="7">{{ case.description|default:"" }}</textarea>
-            </div>            
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-12">
+                        <label for="case_findings" class="form-label">Findings</label>
+                        <table class="table table-sm" id="case_findings">
+                            <thead>
+                                <th>Finding Name</th>
+                            </thead>
+                            <tbody>
+                                {% for finding in case.findings.all %}
+                                    <tr>
+                                        <td>{{ finding }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="upload_container" data-target_type="case" data-target_uuid="{{ case.uuid }}" class="col-12">
+                        <div class="float-end"><i class="text-secondary fas fa-cloud-upload-alt"></i></div>
+                        <label for="case_attachments" class="form-label">Attachments</label>
+                        <table class="table table-sm" id="case_attachments">
+                            <tbody>
+                                {% for attachment in case.attachments.all %}
+                                    <tr>
+                                        <td>
+                                            <a href="/cases/attachment/{{ attachment.uuid }}">
+                                                {% include "triage/widgets/icon_for_file.html" with filename=attachment.filename only %}
+                                                {{ attachment.filename }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td><i>No attachments</i></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             <div class="col-md-3">
                 <label for="caseState" class="form-label">State</label>
                 <select id="caseState" class="form-select" name="state">
@@ -73,14 +118,14 @@
             <div class="col-md-3">
                 <label for="case_reported_to" class="form-label">Reported To</label>
                 <input type="text" class="form-control" id="case_reported_to" name="reported_to" value="{{ case.reported_to|default:"" }}">
-            </div>            
+            </div>
+            <div class="col-md-3">
+                <label for="case_reported_dt" class="form-label">Reported Date</label>
+                <input type="date" class="form-control" id="case_reported_dt" name="reported_dt" value="{{ case.reported_dt|date:"Y-m-d" }}">
+            </div>                        
             <div class="col-md-3">
                 <label for="caseReportingReference" class="form-label">Reporting Reference</label>
                 <input type="text" class="form-control" id="caseReportingReference" name="reporting_reference" value="{{ case.reporting_reference|default:"" }}">
-            </div>
-            <div class="col-md-3">
-                <label for="caseReportedTo" class="form-label">Reported To</label>
-                <input type="text" class="form-control" id="caseReportedTo" value="{{ case.reported_to|default:"" }}">
             </div>
 
 
@@ -120,5 +165,50 @@
     {% endblock %}
 {% endblock %}
 
-resolved_dt = models.DateTimeField(null=True, blank=True)
-notes = models.ManyToManyField("Note", related_name="cases")
+{% block javascript %}
+    $(document).ready(function() {
+        $('.upload_container')
+            .on('drop', dropHandler)
+            .on('dragover', dragOver)
+            .on('dragleave', dragEnd);
+    });
+    function dragEnd(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(e.target).closest('.upload_container').css('border', '');
+    }
+    function dragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.originalEvent.dataTransfer.dropEffect = 'copy';
+        $(e.target).closest('.upload_container').css('border', '2px dashed #ccc');
+    }
+    function dropHandler(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        const container = $(e.target).closest('.upload_container');
+        container.css('border', '');
+
+        var files = e.originalEvent.dataTransfer.files;
+        var formData = new FormData();
+        for (var i = 0; i < files.length; i++) {
+            formData.append('attachment', files[i]);
+        }
+        formData.append('target_type', container.data('target_type'));
+        formData.append('target_uuid', container.data('target_uuid'));
+        $.ajax({
+            url: '/api/upload',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                $('#case_attachments').append(
+                    '<tr>' +
+                        '<td>' + data.name + '</td>' +
+                    '</tr>'
+                );
+            }
+        });
+    }
+{% endblock %}

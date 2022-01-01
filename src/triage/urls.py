@@ -21,6 +21,7 @@ urlpatterns = [
     path("api/findings/get_files", findings.api_get_files),
     path("api/findings/get_source_code", findings.api_get_source_code),
     path("api/findings/download_file", findings.api_download_file),
+    path("api/upload", findings.api_upload_attachment),
     # path("api/findings/get_file_list", findings.api_get_file_list),
     path("api/findings/get_blob_list", findings.api_get_blob_list),
     path("api/1/findings/update", findings.api_update_finding),

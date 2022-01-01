@@ -17,8 +17,6 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, render
-from django.utils import timezone
-from django.utils.dateparse import parse_date
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
@@ -26,6 +24,7 @@ from packageurl import PackageURL
 from triage.models import Case, Project, ProjectVersion, WorkItemState
 from triage.util.azure_blob_storage import ToolshedBlobStorageAccessor
 from triage.util.finding_importers.sarif_importer import SARIFImporter
+from triage.util.general import parse_date
 from triage.util.search_parser import parse_query_to_Q
 from triage.util.source_viewer import path_to_graph
 from triage.util.source_viewer.viewer import SourceViewer
@@ -100,12 +99,9 @@ def save_case(request: HttpRequest) -> HttpResponse:
     case.reported_to = request.POST.get("reported_to")
     case.reporting_partner = request.POST.get("reporting_partner")
     case.reporting_reference = request.POST.get("reporting_reference")
-    case.resolved_target_dt = timezone.make_aware(
-        parse_date(request.POST.get("resolved_target_dt"))
-    )
-    case.resolved_actual_dt = timezone.make_aware(
-        parse_date(request.POST.get("resolved_actual_dt"))
-    )
+    case.reported_dt = parse_date(request.POST.get("reported_dt"))
+    case.resolved_target_dt = parse_date(request.POST.get("resolved_target_dt"))
+    case.resolved_actual_dt = parse_date(request.POST.get("resolved_actual_dt"))
 
     case.updated_by = request.user
 

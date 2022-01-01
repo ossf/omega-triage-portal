@@ -1,4 +1,11 @@
+import logging
+from datetime import datetime
+
+from django.utils import timezone
+from django.utils.dateparse import parse_date as django_parse_date
 from packageurl import PackageURL
+
+logger = logging.getLogger(__name__)
 
 
 def get_complex(obj, key, default_value=""):
@@ -36,3 +43,17 @@ def strtobool(value: str, default: bool) -> bool:
     elif value in ("n", "no", "f", "false", "off", "0"):
         return False
     return default
+
+
+def parse_date(date_str: str) -> datetime:
+    """Converts a date string to a timezone-aware datetime object."""
+    if date_str:
+        try:
+            parsed = django_parse_date(date_str)
+            if parsed:
+                parsed_dt = datetime(parsed.year, parsed.month, parsed.day)
+                if parsed_dt:
+                    return timezone.make_aware(parsed_dt)
+        except Exception as msg:
+            logger.warning(f"Failed to parse date: {msg}")
+    return None

@@ -19,6 +19,8 @@ from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
 
 from triage.models import (
+    Attachment,
+    Case,
     File,
     FileContent,
     Finding,
@@ -286,3 +288,29 @@ def api_add_artifact(request: HttpRequest) -> JsonResponse:
         FileImporter.import_artifact(package_url, source_code_content, user)
 
     return JsonResponse({"success": True})
+
+
+def api_upload_attachment(request: HttpRequest) -> JsonResponse:
+    """Handles uploads (attachments)"""
+    target_type = request.POST.get("target_type")
+    target_uuid = request.POST.get("target_uuid")
+    if target_uuid is None or target_uuid == "":
+        return JsonResponse({"error": "No target_uuid provided"})
+
+    if target_type == "case":
+        obj = get_object_or_404(Case, uuid=target_uuid)
+    else:
+        return JsonResponse({"error": "Invalid target_type"})
+
+    attachments = request.FILES.getlist("attachment")
+    for attachment in attachments:
+        obj.attachments.create(
+            filename=attachment.name,
+            content_type=attachment.content_type,
+            content=attachment.read(),
+        )
+
+    results = []
+    for attachment in obj.attachments.all():
+        results.append({"filename": attachment.filename})
+    return JsonResponse({"success": True, "attachments": results})
