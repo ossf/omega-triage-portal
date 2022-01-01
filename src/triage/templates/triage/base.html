@@ -24,7 +24,8 @@
       a.navbar-brand { font-size: 50px; font-weight: bold; color: #222!important; text-shadow: 0 0 5px #ddd; margin-left: 12px; padding-top: 0 }
       button.navbar-toggler { margin-left: 8px }
       li.nav-item { margin-left: 12px }
-      a { color: inherit; text-decoration: none }
+      a { color: #0f0f8a; text-decoration: none }
+      a:hover { color: #5C5CD7 }
 
       #editor-title, #note-title, #file-listing-title { color:#fff;font-size:0.85em;padding-top:4px;padding-bottom:4px;padding-left: 7px; margin-bottom:2px;}
       #issue_list tr { cursor: pointer; }
@@ -67,7 +68,7 @@
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Open Navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a class="navbar-brand" href="/" style="">&#x1D6C0;</a>
+      <a class="navbar-brand" href="/">&#x1D6C0;</a>
       <div class="collapse navbar-collapse" id="navbarCollapse">
           <ul class="navbar-nav mr-auto">
             {% block topbar %}
@@ -81,14 +82,13 @@
                 <a class="nav-link" href="/findings/">Findings</a>
               {% endif %}
             </li>
-            <ul class="navbar-nav ml-auto" style="font-size: 1.18rem">
-              <li class="nav-item">
-                {% if '/filters/' in request.path %}
-                  <a class="nav-link active" href="/filters/">Filters</a>
-                {% else %}
-                  <a class="nav-link" href="/filters/">Filters</a>
-                {% endif %}
-              </li>            
+            <li class="nav-item">
+              {% if '/filters/' in request.path %}
+                <a class="nav-link active" href="/filters/">Filters</a>
+              {% else %}
+                <a class="nav-link" href="/filters/">Filters</a>
+              {% endif %}
+            </li>            
             <li class="nav-item">
               {% if '/cases/' in request.path %}
                 <a class="nav-link active" href="/cases/">Cases</a>
@@ -107,7 +107,7 @@
       </div>
     </nav>
 
-    <main role="main" class="container-fluid">
+    <main class="container-fluid">
       {% block body %}
       {% endblock body %}
     </main>

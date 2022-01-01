@@ -303,14 +303,13 @@ def api_upload_attachment(request: HttpRequest) -> JsonResponse:
         return JsonResponse({"error": "Invalid target_type"})
 
     attachments = request.FILES.getlist("attachment")
+    results = []
     for attachment in attachments:
-        obj.attachments.create(
+        new_attachment = obj.attachments.create(
             filename=attachment.name,
             content_type=attachment.content_type,
             content=attachment.read(),
         )
+        results.append({"filename": new_attachment.filename, "uuid": new_attachment.uuid})
 
-    results = []
-    for attachment in obj.attachments.all():
-        results.append({"filename": attachment.filename})
     return JsonResponse({"success": True, "attachments": results})

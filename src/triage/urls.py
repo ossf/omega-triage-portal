@@ -3,7 +3,7 @@
 
 from django.urls import path
 
-from triage.views import cases, filters, findings, home, tool_defect
+from triage.views import attachments, cases, filters, findings, home, tool_defect
 
 urlpatterns = [
     # Cases
@@ -25,6 +25,8 @@ urlpatterns = [
     # path("api/findings/get_file_list", findings.api_get_file_list),
     path("api/findings/get_blob_list", findings.api_get_blob_list),
     path("api/1/findings/update", findings.api_update_finding),
+    # Attachments
+    path("attachment/<uuid:attachment_uuid>", attachments.download_attachment),
     path("findings/<uuid:finding_uuid>", findings.show_finding_by_uuid),
     path("findings/upload", findings.show_upload),
     path("findings/", findings.show_findings),

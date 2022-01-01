@@ -102,7 +102,6 @@ def save_case(request: HttpRequest) -> HttpResponse:
     case.reported_dt = parse_date(request.POST.get("reported_dt"))
     case.resolved_target_dt = parse_date(request.POST.get("resolved_target_dt"))
     case.resolved_actual_dt = parse_date(request.POST.get("resolved_actual_dt"))
-
     case.updated_by = request.user
 
     if not case.created_by:
@@ -110,5 +109,9 @@ def save_case(request: HttpRequest) -> HttpResponse:
 
     case.full_clean()
     case.save()
+
+    note_text = request.POST.get("note_text")
+    if note_text and note_text.strip():
+        case.notes.create(content=note_text, created_by=request.user, updated_by=request.user)
 
     return HttpResponseRedirect(f"/cases/{case.uuid}")

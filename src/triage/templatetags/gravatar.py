@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 @register.filter
-def gravatar(user, size=32):
+def gravatar(user, size=128):
     """Convert the user's email address passed in into a gravatar URL."""
     root = "https://gravatar.com/avatar/{0}?r=g&d=mp&s={1}&{2}"
     if user and user.email:

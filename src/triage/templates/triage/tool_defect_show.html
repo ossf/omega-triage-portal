@@ -60,17 +60,9 @@
                 <div class="col-lg-12">
                     <h5>Notes</h5>
                     <label class="form-label sr-only" aria-title="Notes">Notes</label>
-                    {% if tool_defect.notes.all %}
-                        <div class="notes border rounded p-1 mb-2" style="max-height: 800px; overflow-y:auto">
-                            {% for note in tool_defect.notes.all %}
-                                <div class="note pb-2">
-                                    <div class="text-muted" style="font-size: 70%">{{ note.created_at }} | {{ note.created_by }}</div>
-                                    {{ note.content }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-        
+
+                    {% include "triage/widgets/notes.html" with notes=tool_defect.notes.all %}
+
                     <label for="toolDefectNoteNew" class="form-label sr-only">New Note</label>
                     <textarea id="toolDefectNoteNew" class="form-control" placeholder="Add a note..." name="note_content"></textarea>    
                 </div>      

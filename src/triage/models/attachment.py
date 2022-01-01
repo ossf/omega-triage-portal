@@ -14,3 +14,6 @@ class Attachment(models.Model):
 
     def __str__(self):
         return self.filename
+
+    def get_absolute_url(self):
+        return f"/attachment/{self.uuid}"
