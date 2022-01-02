@@ -38,7 +38,7 @@ def show_filters(request: HttpRequest) -> HttpResponse:
 @require_http_methods(["GET"])
 def new_filter(request: HttpRequest) -> HttpResponse:
     """Show a form to create a new filter."""
-    return render(request, "triage/filter_edit.html")
+    return render(request, "triage/filter_show.html")
 
 
 @require_http_methods(["GET"])
@@ -46,7 +46,7 @@ def show_filter(request: HttpRequest, filter_uuid: UUID) -> HttpResponse:
     """Show a filter."""
     if filter_uuid:
         filter = Filter.objects.get(uuid=str(filter_uuid))
-        return render(request, "triage/filter_edit.html", {"filter": filter})
+        return render(request, "triage/filter_show.html", {"filter": filter})
     else:
         return HttpResponseNotFound()
 
@@ -72,7 +72,7 @@ def delete_filter(request: HttpRequest) -> HttpResponse:
     if filter_uuid:
         filter = get_object_or_404(Filter, uuid=str(filter_uuid))
         filter.delete()
-        return HttpResponseRedirect("/filters")
+        return HttpResponseRedirect("/filter")
     else:
         return HttpResponseBadRequest()
 
@@ -103,4 +103,4 @@ def save_filter(request: HttpRequest) -> HttpResponse:
         )
     filter.save()
 
-    return HttpResponseRedirect("/filters")
+    return HttpResponseRedirect(f"/filter/{filter.uuid}")

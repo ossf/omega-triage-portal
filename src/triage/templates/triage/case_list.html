@@ -15,13 +15,15 @@
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Queries</button>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><h6 class="dropdown-header">Shared Queries</h6></li>
-                    <li><a class="dropdown-item" href="/cases?q=status:active">Active Cases</a></li>
+                    <li><a class="dropdown-item" href="/cases?q=state:active">Active Cases</a></li>
                     <li><a class="dropdown-item" href="/cases?q=assigned_to:@me">Assigned to Me</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><h6 class="dropdown-header">My Queries</h6></li>
                     <li><a class="dropdown-item" href="/cases?q=assigned_to:@me">Assigned to Me</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="#">Save Current Query As...</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/wiki/Query_Syntax_Info">Query Syntax Info</a></li>
                 </ul>
             </div>
         </form>

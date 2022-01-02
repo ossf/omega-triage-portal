@@ -22,11 +22,12 @@
                 {% else %}
                     <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-plus me-2"></i>Add</button>
                 {% endif %}
-                <a class="btn btn-sm btn-secondary" href="/cases/"><i class="fas fa-list me-2"></i>Back to List</a>
+                <a class="btn btn-sm btn-secondary" href="/cases/new"><i class="fas fa-plus me-2"></i>New</a>
+                <a class="btn btn-sm btn-secondary" href="/cases"><i class="fas fa-list me-2"></i>Back to List</a>
             </div>
 
             {% if case %}
-                <h4>Edit Case</h4>
+                <h4>Modify Case</h4>
             {% else %}
                 <h4>Add Case</h4>
             {% endif %}
@@ -68,10 +69,10 @@
                             </div>
                         </div>
                         <div class="col-12 upload_container mt-2" data-target_type="case" data-target_uuid="{{ case.uuid }}">
-                            <div class="float-end"><i class="text-secondary fas fa-cloud-upload-alt"></i></div>
+                            <div class="float-end"><a href="/wiki/How_To_Upload_Attachments" target="_blank"><i class="fas fa-cloud-upload-alt"></i></a></div>
                             <label class="form-label">Attachments</label>
                             <div style="max-height:150px;overflow:auto">
-                                <ul id="case_attachments" class="list-group small">
+                                <ul id="case_attachments" class="list-group small list-group-flush">
                                 {% for attachment in case.attachments.all %}
                                         <li class="list-group-item p-1">
                                             <a href="{{ attachment.get_absolute_url }}">

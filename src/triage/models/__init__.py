@@ -19,6 +19,7 @@ from triage.models.scan import Scan
 from triage.models.tool import Tool
 from triage.models.tool_defect import ToolDefect
 from triage.models.triage import TriageRule
+from triage.models.wiki import WikiArticle, WikiArticleRevision
 
 # class File(models.Model):
 #    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

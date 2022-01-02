@@ -83,10 +83,10 @@
               {% endif %}
             </li>
             <li class="nav-item">
-              {% if '/filters/' in request.path %}
-                <a class="nav-link active" href="/filters/">Filters</a>
+              {% if '/filter/' in request.path %}
+                <a class="nav-link active" href="/filter/">Filters</a>
               {% else %}
-                <a class="nav-link" href="/filters/">Filters</a>
+                <a class="nav-link" href="/filter/">Filters</a>
               {% endif %}
             </li>            
             <li class="nav-item">
@@ -102,7 +102,14 @@
               {% else %}
                 <a class="nav-link" href="/tool_defect">Tool Defects</a>
               {% endif %}
-            </li>            
+            </li>
+            <li class="nav-item">
+              {% if '/wiki/' in request.path %}
+                <a class="nav-link active" href="/wiki">Wiki</a>
+              {% else %}
+                <a class="nav-link" href="/wiki">Wiki</a>
+              {% endif %}
+            </li>                  
           </ul>
       </div>
     </nav>

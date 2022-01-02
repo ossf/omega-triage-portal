@@ -3,7 +3,7 @@
 
 from django.urls import path
 
-from triage.views import attachments, cases, filters, findings, home, tool_defect
+from triage.views import attachments, cases, filters, findings, home, tool_defect, wiki
 
 urlpatterns = [
     # Cases
@@ -31,11 +31,18 @@ urlpatterns = [
     path("findings/upload", findings.show_upload),
     path("findings/", findings.show_findings),
     # Filters
-    path("filters/<uuid:filter_uuid>", filters.show_filter),
-    path("filters/new", filters.new_filter),
-    path("filters/save", filters.save_filter),
-    path("filters/execute", filters.execute_filter),
-    path("filters/delete", filters.delete_filter),
-    path("filters/", filters.show_filters),
+    path("filter/<uuid:filter_uuid>", filters.show_filter),
+    path("filter/new", filters.new_filter),
+    path("filter/save", filters.save_filter),
+    path("filter/execute", filters.execute_filter),
+    path("filter/delete", filters.delete_filter),
+    path("filter/", filters.show_filters),
+    # Wiki
+    path("wiki/save", wiki.save_wiki_article),
+    path("wiki/<str:slug>", wiki.show_wiki_article),
+    path("wiki/<str:slug>/<uuid:wiki_article_revision_uuid>", wiki.show_wiki_article_revision),
+    path("wiki/<str:slug>/edit", wiki.edit_wiki_article),
+    path("wiki/<str:slug>/<uuid:wiki_article_revision_uuid>/edit", wiki.edit_wiki_article_revision),
+    path("wiki/", wiki.home),
     path("", home.home),
 ]
