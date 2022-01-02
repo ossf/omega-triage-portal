@@ -73,19 +73,22 @@ def new_case(request: HttpRequest) -> HttpResponse:
     """Shows the new case form."""
     context = {
         "case_states": WorkItemState.choices,
-        "reporting_partner": Case.CasePartner.choices,
+        "reporting_partners": Case.CasePartner.choices,
+        "users": get_user_model().objects.all(),
     }
-    return render(request, "triage/case_new.html", context)
+    return render(request, "triage/case_show.html", context)
 
 
 @login_required
 @require_http_methods(["POST"])
 def save_case(request: HttpRequest) -> HttpResponse:
     case_uuid = request.POST.get("case_uuid")
-    if case_uuid is None:
+    if case_uuid is None or case_uuid == "":
         case = Case()
+        case.created_by = request.user
     else:
         case = get_object_or_404(Case, uuid=case_uuid)
+
     case.title = request.POST.get("title")
     case.state = request.POST.get("state")
     case.description = request.POST.get("description")

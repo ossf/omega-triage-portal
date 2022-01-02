@@ -1,7 +1,10 @@
+import datetime
 import logging
 
+import django.db.models.base
 import pyparsing as pp
 from django.db.models import Model, Q
+from django.utils import timezone
 
 from triage.models import Finding, WorkItemState
 
@@ -16,19 +19,20 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
     # Define the grammar
     assigned_to_clause = pp.Group(
         pp.Keyword("assigned_to").suppress()
-        + pp.Suppress(":")
+        + pp.Literal(":").suppress()
         + pp.Word(pp.alphanums).setResultsName("username")
     ).setResultsName("assigned_to")
 
     priority_clause = pp.Group(
-        pp.Keyword("priority:").suppress()
+        pp.Keyword("priority").suppress()
+        + pp.Literal(":").suppress()
         + pp.one_of(["<", ">", "<=", ">=", "=="]).setResultsName("op")
         + pp.Word(pp.nums).setResultsName("value")
     ).setResultsName("priority")
 
     severity_clause = pp.Group(
         pp.Keyword("severity").suppress()
-        + pp.Suppress(":")
+        + pp.Literal(":").suppress()
         + pp.delimited_list(
             pp.one_of(
                 [
@@ -53,7 +57,8 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
     ).setResultsName("severity")
 
     updated_dt_clause = pp.Group(
-        pp.Keyword("updated:").suppress()
+        pp.Keyword("updated").suppress()
+        + pp.Literal(":").suppress()
         + pp.one_of(["<", ">", "<=", ">=", "=="]).setResultsName("op")
         + pp.pyparsing_common.iso8601_date("datetime")
     ).setResultsName("updated_dt")
@@ -62,7 +67,14 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
         pp.Keyword("created").suppress()
         + pp.Literal(":").suppress()
         + pp.one_of(["<", ">", "<=", ">=", "=="]).setResultsName("op")
-        + pp.pyparsing_common.iso8601_date("datetime")
+        + (
+            pp.pyparsing_common.iso8601_date("datetime")
+            ^ (
+                pp.one_of(["@today"]).setResultsName("anchor")
+                + pp.one_of(["+", "-"]).setResultsName("anchor_op")
+                + pp.Word(pp.nums).setResultsName("anchor_value")
+            )
+        )
     ).setResultsName("created_dt")
 
     state_clause = pp.Group(
@@ -74,29 +86,22 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
                 + [str(c[1]) for c in WorkItemState.choices],
                 caseless=True,
             )
-        )
+        ).setResultsName("states")
     ).setResultsName("state")
 
     purl_clause = pp.Group(
         pp.Keyword("purl").suppress()
-        + pp.Suppress(":")
+        + pp.Literal(":").suppress()
         + pp.Word(pp.alphanums + ":@/?=-.").setResultsName("purl")
     ).setResultsName("purl")
 
-    other_clause = pp.Word(pp.alphas).setResultsName("text_search")
-
-    import django.db.models.base
-
-    import triage.models
-
-    # triage_models = [item[1] for item in triage.models.__dict__.items() if isinstance(item[1], django.db.models.base.ModelBase) and not item[1]._meta.abstract]
+    other_clause = pp.Word(pp.alphanums).setResultsName("text_search")
 
     available_attributes = [
         getattr(model, key).field.name
         for key in dir(model)
         if isinstance(getattr(model, key), django.db.models.query_utils.DeferredAttribute)
     ]
-    from pyparsing import ParserElement
 
     parser_elements = []
     if "assigned_to" in available_attributes:
@@ -113,25 +118,18 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
         parser_elements.append(state_clause)
     if "package_url" in available_attributes:
         parser_elements.append(purl_clause)
+    if model == Finding:  # Special case for foreign key
+        parser_elements.append(purl_clause)
 
     parser_elements.append(other_clause)
+    parser_elements = list(set(parser_elements))  # Unique only
+
     clause = parser_elements[0]
 
     if len(parser_elements) > 1:
         for element in parser_elements[1:]:
             clause |= element
 
-    """clause = (
-        assigned_to_clause
-        | severity_clause
-        | priority_clause
-        | created_dt_clause
-        | updated_dt_clause
-        | purl_clause
-        | state_clause
-        | other_clause
-    )
-    """
     full_clause = pp.OneOrMore(clause)
 
     # Parse the query
@@ -154,29 +152,58 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
         states = map(WorkItemState.parse, results.state.asList())
         q = q & Q(state__in=list(states))
 
+    # Handle updated:$op$date or updated:$op@today[+-]$num
     if results.updated_dt:
+        if results.updated_dt.datetime:
+            target = results.updated_dt.datetime
+        elif results.updated_dt.anchor:
+            if results.updated_dt.anchor == "@today":
+                target = timezone.now()
+                if results.updated_dt.anchor_op == "-":
+                    target -= datetime.timedelta(days=int(results.updated_dt.anchor_value))
+                elif results.updated_dt.anchor_op == "+":
+                    target += datetime.timedelta(days=int(results.updated_dt.anchor_value))
+            else:
+                raise ValueError("Unknown anchor: %s" % results.updated_dt.anchor)
+        else:
+            raise ValueError("Unknown updated_dt: %s" % results.updated_dt)
+
         if results.updated_dt.op == "<":
-            q = q & Q(updated_at__lt=results.updated_dt.datetime)
+            q = q & Q(updated_at__lt=target)
         elif results.updated_dt.op == ">":
-            q = q & Q(updated_at__gt=results.updated_dt.datetime)
+            q = q & Q(updated_at__gt=target)
         elif results.updated_dt.op == "<=":
-            q = q & Q(updated_at__lte=results.updated_dt.datetime)
+            q = q & Q(updated_at__lte=target)
         elif results.updated_dt.op == ">=":
-            q = q & Q(updated_at__gte=results.updated_dt.datetime)
+            q = q & Q(updated_at__gte=target)
         elif results.updated_dt.op == "==":
-            q = q & Q(updated_at__exact=results.updated_dt.datetime)
+            q = q & Q(updated_at__exact=target)
 
     if results.created_dt:
+        if results.created_dt.datetime:
+            target = results.created_dt.datetime
+        elif results.created_dt.anchor:
+            if results.created_dt.anchor == "@today":
+                target = timezone.now()
+                if results.created_dt.anchor_op == "-":
+                    target -= datetime.timedelta(days=int(results.created_dt.anchor_value))
+                elif results.created_dt.anchor_op == "+":
+                    target += datetime.timedelta(days=int(results.created_dt.anchor_value))
+            else:
+                raise ValueError("Unknown anchor: %s" % results.created_dt.anchor)
+        else:
+            raise ValueError("Unknown created_dt: %s" % results.created_dt)
+
         if results.created_dt.op == "<":
-            q = q & Q(updated_at__lt=results.created_dt.datetime)
+            q = q & Q(created_at__lt=target)
         elif results.created_dt.op == ">":
-            q = q & Q(updated_at__gt=results.created_dt.datetime)
+            q = q & Q(created_at__gt=target)
         elif results.created_dt.op == "<=":
-            q = q & Q(updated_at__lte=results.created_dt.datetime)
+            q = q & Q(created_at__lte=target)
         elif results.created_dt.op == ">=":
-            q = q & Q(updated_at__gte=results.created_dt.datetime)
+            q = q & Q(created_at__gte=target)
         elif results.created_dt.op == "==":
-            q = q & Q(updated_at__exact=results.created_dt.datetime)
+            q = q & Q(created_at__exact=target)
 
     if results.priority:
         if results.priority.op == "<":
@@ -200,15 +227,16 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
             q = q & Q(package_url=results.purl.purl)
 
     # Handle full text search a little differently
-    text_qq = Q()
-    if "project_version" in available_attributes:
-        text_qq |= Q(project_version__project__name__icontains=results.text_search)
-    if "title" in available_attributes:
-        text_qq |= Q(title__icontains=results.text_search)
-    if "description" in available_attributes:
-        text_qq |= Q(description__icontains=results.text_search)
+    if results.text_search:
+        text_qq = Q()
+        if "project_version" in available_attributes:
+            text_qq |= Q(project_version__project__name__icontains=results.text_search)
+        if "title" in available_attributes:
+            text_qq |= Q(title__icontains=results.text_search)
+        if "description" in available_attributes:
+            text_qq |= Q(description__icontains=results.text_search)
+        q = q & text_qq
 
-    q = q & text_qq
-
+    print(q)
     logger.debug("Query: %s", q)
     return q

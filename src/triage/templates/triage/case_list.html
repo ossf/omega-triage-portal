@@ -15,6 +15,8 @@
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Queries</button>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><h6 class="dropdown-header">Shared Queries</h6></li>
+                    <li><a class="dropdown-item" href="/cases?q=">All Cases</a></li>
+                    <li><a class="dropdown-item" href="/cases?q=closed,resolved+updated_dt:>=@today-30">Recently Closed</a></li>
                     <li><a class="dropdown-item" href="/cases?q=state:active">Active Cases</a></li>
                     <li><a class="dropdown-item" href="/cases?q=assigned_to:@me">Assigned to Me</a></li>
                     <li><hr class="dropdown-divider"></li>
@@ -39,8 +41,10 @@
                         <th>Title</th>
                         <th class="text-nowrap">Assigned To</th>
                         <th class="text-nowrap">State</th>
+                        <th class="text-nowrap">Reporting Partner</th>
                         <th class="text-nowrap">Reported</th>
                         <th class="text-nowrap">Resolution Estimate</th>
+
                     </tr>
                 </thead>
                 <tbody style="word-break: break-word;white-space:normal;word-wrap:break-word">
@@ -49,6 +53,7 @@
                             <td>{{ case.title }}</td>
                             <td>{{ case.assigned_to.get_full_name|default:'<i>Unassigned</i>' }}</td>
                             <td>{{ case.get_state_display }}</td>
+                            <td>{{ case.get_reporting_partner_display }}</td>
                             <td>{{ case.reported_dt|date:"SHORT_DATE_FORMAT" }}</td>
                             <td>{{ case.resolved_target_dt|date:"SHORT_DATE_FORMAT" }}</td>
                         </tr>
