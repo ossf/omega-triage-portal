@@ -18,6 +18,7 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
+from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
@@ -46,6 +47,24 @@ def home(request: HttpRequest) -> HttpResponse:
 
 @login_required
 @require_http_methods(["GET"])
+@never_cache
+def show_wiki_article_list(request: HttpRequest) -> HttpResponse:
+    """Shows all wiki articles."""
+    wiki_articles = WikiArticle.active_wiki_articles.all()
+
+    query = request.GET.get("q", "").strip()
+    wiki_articles = WikiArticle.objects.all()  # Default
+    if query:
+        query_object = parse_query_to_Q(WikiArticle, query)
+        if query_object:
+            wiki_articles = wiki_articles.filter(query_object)
+
+    context = {"query": query, "wiki_articles": wiki_articles}
+    return render(request, "triage/wiki_list.html", context)
+
+
+@login_required
+@require_http_methods(["GET"])
 def show_wiki_article(
     request: HttpRequest, slug: str, template: str = "triage/wiki_show.html"
 ) -> HttpResponse:
@@ -55,12 +74,18 @@ def show_wiki_article(
         context = {
             "wiki_article": article,
             "wiki_article_revision": article.current,
+            "wiki_article_states": WorkItemState.choices,
         }
         return render(request, template, context)
     else:
         if slug == "new":
             slug = ""
-        context = {"wiki_article": {"slug": slug}}
+        context = {
+            "wiki_article": {
+                "slug": slug,
+                "wiki_article_states": WorkItemState.choices,
+            }
+        }
         return render(request, "triage/wiki_edit.html", context)
 
 
@@ -83,6 +108,7 @@ def show_wiki_article_revision(
     context = {
         "wiki_article": article_revision.article,
         "wiki_article_revision": article_revision,
+        "wiki_article_states": WorkItemState.choices,
     }
     return render(request, template, context)
 
@@ -101,18 +127,19 @@ def save_wiki_article(request: HttpRequest) -> HttpResponse:
     wiki_article_uuid = request.POST.get("wiki_article_uuid")
     if not wiki_article_uuid:
         wiki_article = WikiArticle()
-        slug = request.POST.get("title")
-        if not slug:
-            slug = slugify(request.POST.get("title"))
-        wiki_article.slug = slug
-        wiki_article.save()
     else:
         wiki_article = get_object_or_404(WikiArticle, uuid=wiki_article_uuid)
+
+    slug = request.POST.get("slug")
+    if not slug:
+        slug = slugify(request.POST.get("title"))
+    wiki_article.state = request.POST.get("state")
+    wiki_article.slug = slug
+    wiki_article.save()
 
     wiki_article_revision = WikiArticleRevision(
         title=request.POST.get("title"),
         content=request.POST.get("content"),
-        state=WorkItemState.ACTIVE,
         article=wiki_article,
         change_comment=request.POST.get("change_comment"),
         created_by=request.user,

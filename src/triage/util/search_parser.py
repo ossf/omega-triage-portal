@@ -6,7 +6,7 @@ import pyparsing as pp
 from django.db.models import Model, Q
 from django.utils import timezone
 
-from triage.models import Finding, WorkItemState
+from triage.models import Finding, WikiArticle, WorkItemState
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +95,7 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
         + pp.Word(pp.alphanums + ":@/?=-.").setResultsName("purl")
     ).setResultsName("purl")
 
-    other_clause = pp.Word(pp.alphanums).setResultsName("text_search")
+    other_clause = pp.Word(pp.printables).setResultsName("text_search")
 
     available_attributes = [
         getattr(model, key).field.name
@@ -122,7 +122,7 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
         parser_elements.append(purl_clause)
 
     parser_elements.append(other_clause)
-    parser_elements = list(set(parser_elements))  # Unique only
+    parser_elements = list(dict.fromkeys(parser_elements))  # Unique only
 
     clause = parser_elements[0]
 
@@ -235,8 +235,11 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
             text_qq |= Q(title__icontains=results.text_search)
         if "description" in available_attributes:
             text_qq |= Q(description__icontains=results.text_search)
+
+        if model == WikiArticle:  # @HACK: Special case for foreign key
+            text_qq |= Q(current__content__icontains=results.text_search)
+
         q = q & text_qq
 
-    print(q)
     logger.debug("Query: %s", q)
     return q

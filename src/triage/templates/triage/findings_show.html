@@ -29,6 +29,9 @@
 .file_tree_context_menu_item {
     font-size: 75%;
 }
+.highlighted_line {
+    background-color: #f5f5f5;
+}
 </style>
 <div class="row">
     <div class="col-12 mt-4 mb-2">
@@ -46,7 +49,10 @@
                         <a class="dropdown-item" href="#"><i class="fas fa-download"></i>&nbsp;&nbsp;Download files</a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="#"><i class="fab fa-github"></i>&nbsp;&nbsp;View Source (GitHub)</a>
+                        <a class="dropdown-item" href="/util/finding-redirect?finding_uuid={{ finding.uuid }}&type=github"><i class="fab fa-github"></i>&nbsp;&nbsp;View Source (GitHub)</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#"><img src="/static/triage/images/icon-vscode.png" width="16" height="16" style="filter: grayscale(100%);"></i>&nbsp;&nbsp;View Source (VS Code)</a>
                     </li>
                     <li>
                         <a class="dropdown-item" href="#"><img src="https://sourcegraph.com/.assets/img/favicon.png?v=2" width="16" height="16" style="filter: grayscale(100%);"></i>&nbsp;&nbsp;View Source (SourceGraph)</a>
@@ -241,8 +247,10 @@
         'project_version_uuid': '{{ finding.project_version.uuid }}',
         'file_line': '{{ finding.file_line }}',
         'file_path': '{{ finding.file.path }}',
-        'file_uuid': '{{ finding.file.uuid }}'
+        'file_uuid': '{{ finding.file.uuid }}',
+        'finding_title': '{{ finding.title }}'
     });
+
     /* Handle clicks of the "New Tool Finding" button */
     $('#action_new_tooling_bug').on('click', (e) => {
         let finding_uuid = $('#finding_list').data('finding_uuid');
@@ -333,6 +341,7 @@
         $('#data').on({
             "loaded.jstree": function (event, data) {
                 $('#data').jstree('select_node', '{{ finding.file.path }}', false);
+
             }
         });
         

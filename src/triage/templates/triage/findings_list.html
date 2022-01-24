@@ -36,7 +36,7 @@
         </form>
     </div>
 </div>
-<div id="resize_wrapper" class="row mt-4">
+<div id="resize_wrapperx" class="row mt-4">
     <div class="col-lg-12 ps-4 pe-4">
         <table id="finding_list" class="table table-sm table-hover">
             <thead>
@@ -64,9 +64,37 @@
                 {% endfor %}
             </tbody>
         </table>
+
+    </div>
+    <div class="col-12 pagination">
+        <ul class="pagination">
+            {% if findings.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{{ params }}&page=1" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">begin</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% for i in findings.paginator.page_range %}
+                {% if findings.number == i %}
+                    <li class="page-item active"><a class="page-link">{{ i }}</a><span class="sr-only">(current)</span></li>
+                {% elif i > findings.number|add:'-7' and i < findings.number|add:'7' %}
+                    <li class="page-item"><a class="page-link" href="?{{ params }}&page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+    
+            {% if findings.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{{ params }}&page={{ findings.paginator.num_pages }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">end</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
     </div>
 </div>
-
     {% endblock main %}
 {% endblock body %}
 

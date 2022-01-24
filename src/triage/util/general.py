@@ -57,3 +57,7 @@ def parse_date(date_str: str) -> datetime:
         except Exception as msg:
             logger.warning(f"Failed to parse date: {msg}")
     return None
+
+def clamp(value, min_value, max_value):
+    """Clamp a value between a minimum and maximum value."""
+    return max(min_value, min(float(value), max_value))

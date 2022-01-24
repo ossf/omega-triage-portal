@@ -5,6 +5,7 @@ from base64 import b64encode
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -30,6 +31,7 @@ from triage.models import (
 )
 from triage.util.azure_blob_storage import ToolshedBlobStorageAccessor
 from triage.util.finding_importers.sarif_importer import SARIFImporter
+from triage.util.general import clamp
 from triage.util.search_parser import parse_query_to_Q
 from triage.util.source_viewer import path_to_graph
 from triage.util.source_viewer.viewer import SourceViewer
@@ -45,11 +47,8 @@ def show_findings(request: HttpRequest) -> HttpResponse:
         q: query to search for, or all findings if not provided
     """
     query = request.GET.get("q", "").strip()
-    limit = request.GET.get("limit", 500)
-    if limit > 500:
-        limit = 500
-    if limit <= 0:
-        limit = 100
+    page_size = clamp(request.GET.get("page_size", 20), 10, 500)
+    page = clamp(request.GET.get("page", 1), 1, 1000)
 
     findings = Finding.active_findings.all()
 
@@ -60,9 +59,15 @@ def show_findings(request: HttpRequest) -> HttpResponse:
             findings = findings.filter(query_object)
 
     findings = findings.select_related("project_version", "tool", "file")
-    findings = findings[0:limit]
+    findings = findings.order_by('-project_version__package_url', 'title', 'created_at')
+    paginator = Paginator(findings, page_size)
+    page_object = paginator.get_page(page)
 
-    context = {"query": query, "findings": findings}
+    query_string = request.GET.copy()
+    if 'page' in query_string:
+        query_string.pop("page", None)
+
+    context = {"query": query, "findings": page_object, "params": query_string.urlencode() }
 
     return render(request, "triage/findings_list.html", context)
 

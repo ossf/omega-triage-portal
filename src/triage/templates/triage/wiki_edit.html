@@ -30,13 +30,22 @@
                 <div class="col-12">
             {% endif %}
                 <div class="row">
-                    <div class="col-md-8 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="wiki_article_title" class="form-label">Title</label>
                         <input type="text" class="form-control" id="wiki_article_title" name="title" value="{{ wiki_article_revision.title }}" placeholder="Article title" required="required"/>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="wiki_article_slug" class="form-label">Slug</label>
                         <input type="text" class="form-control" id="wiki_article_slug" name="slug" pattern="^[-\w]+\Z" value="{{ wiki_article.slug }}" placeholder="Article slug" required="required"/>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="wiki_article_state" class="form-label">State</label>
+                        <select id="wiki_article_state" class="form-select" name="state">
+                            {{ wiki_article_states }}
+                            {% for state in wiki_article_states|dictsort:1 %}
+                                <option value="{{ state.0 }}" {% if wiki_article.state == state.0 %}selected{% endif %}>{{ state.1 }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="col-12 mb-3">
                         <label for="wiki_article_content" class="form-label">Content</label>

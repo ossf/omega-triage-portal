@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -7,6 +8,7 @@ from django.utils import timezone
 from triage.models import Case, Finding, ToolDefect
 
 
+@login_required
 def home(request: HttpRequest) -> HttpResponse:
     finding_last_updated = Finding.objects.all().order_by("-updated_at").first().created_at
     case_last_updated = Case.objects.all().order_by("-updated_at").first().created_at

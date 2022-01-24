@@ -38,6 +38,7 @@ urlpatterns = [
     path("filter/delete", filters.delete_filter),
     path("filter/", filters.show_filters),
     # Wiki
+    path("wiki/special:list", wiki.show_wiki_article_list),
     path("wiki/save", wiki.save_wiki_article),
     path("wiki/<str:slug>", wiki.show_wiki_article),
     path("wiki/<str:slug>/<uuid:wiki_article_revision_uuid>", wiki.show_wiki_article_revision),

@@ -41,7 +41,6 @@ $(document).ready(function () {
                     let row = $('#finding_list').DataTable().rows(indexes).nodes().to$();
                     let finding_uuid = row.data('finding-uuid');
                     document.location.href = `/findings/${finding_uuid}`;
-                    //window.open(`/findings/${finding_uuid}`, 'omega_findings');
                 }
             });
         }
@@ -79,7 +78,7 @@ let getCookie = function (name) {
     return cookieValue;
 }
 
-const load_source_code = function (options) {
+const load_source_code = function(options) {
     $('#finding_center').css('opacity', '0.20');
     $.ajax({
         'url': '/api/findings/get_source_code',
@@ -105,7 +104,7 @@ const load_source_code = function (options) {
 
             // Set the editor title
             const file_line = $(document.body).data('current_finding').file_line;
-            if (file_line !== undefined && options['first']) {
+            if (file_line !== undefined && options['first'] === true) {
                 $('#file_path').text(file_name + ":" + file_line);
             } else {
                 $('#file_path').text(file_name);
@@ -116,14 +115,15 @@ const load_source_code = function (options) {
             //    path_abbrev = '...' + path_abbrev.substring(path_abbrev.length - 150, path_abbrev.length);
             //}
             //$('#editor-title .text').text(path_abbrev).attr('title', path);
-
-            if (options['file-location'] != undefined) {
+            const file_path = $(document.body).data('current_finding').file_path;
+            var finding_title = ($(document.body).data('current_finding').finding_title || '').substring(0, 40);
+            if (file_path !== undefined && file_line !== undefined && options['first'] === true) {
                 let session = ace.edit('editor').getSession();
                 session.clearAnnotations();
                 session.setAnnotations([{
-                    row: options['file-location'] - 1,
+                    row: file_line - 1,
                     column: 0,
-                    text: options['finding-title'],
+                    text: finding_title,
                     type: 'error'
                 }]);
             } else {
@@ -137,10 +137,11 @@ const load_source_code = function (options) {
             $(window).trigger('resize');
             $('#editor').css('height', $(window).height() - $('#editor').offset().top - 10);
 
-            //window.setTimeout(function() {
-            //    ace.edit('editor').scrollToLine($row.data('line-number'), true, false);
-            //    $('.bottom-row').css('opacity', 1.0);
-            //}, 50);
+            if (options['first'] === true) {
+                window.setTimeout(function() {
+                    ace.edit('editor').scrollToLine(file_line, true, false);
+                }, 50);
+            }
         },
         'error': function (jqXHR, textStatus, errorThrown) {
             ace.edit('editor').getSession().clearAnnotations();
@@ -251,7 +252,8 @@ const load_file_listing = function (options, callback) {
                             $('#finding_right').remove();
                         }
                         load_source_code({
-                            'file_uuid': data.node.original.file_uuid
+                            'file_uuid': data.node.original.file_uuid,
+                            'first': data.event === undefined    // Event is undefined when changed is called manually upon paage load (@magic)
                         });
                     }
                 }
