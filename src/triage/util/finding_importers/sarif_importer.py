@@ -5,13 +5,15 @@ import hashlib
 import json
 import logging
 import os
+import re
 import uuid
-from typing import Optional, Union
+from typing import Optional, Type
 
-import django.contrib.auth
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from packageurl import PackageURL
 
-from triage.models.models import Finding, ProjectVersion, Scan, Tool
+from triage.models import Finding, ProjectVersion, Scan, Tool, WorkItemState
 from triage.util.general import get_complex
 
 logger = logging.getLogger(__name__)
@@ -23,22 +25,8 @@ class SARIFImporter:
     """
 
     @classmethod
-    def save_file_archive(cls, file_archive: bytes) -> Optional[uuid.UUID]:
-        """Save a file archive (bits) somewhere."""
-        # REMOV
-        if file_archive is None:
-            return None
-        # TODO Remove SARIFImporter.safe_file_archive
-
-        filename = uuid.uuid4()
-        os.makedirs("temp-data", exist_ok=True)
-        with open(os.path.join("temp-data", str(filename)), "wb") as output_file:
-            output_file.write(file_archive)
-        return filename
-
-    @classmethod
     def import_sarif_file(
-        cls, package_url: Union[PackageURL, str], sarif: dict, file_archive: bytes = None
+        cls, package_url: PackageURL | str, sarif: dict, user: Optional[Type[AbstractUser]]
     ) -> bool:
         """
         Imports a SARIF file containing tool findings into the database.
@@ -69,43 +57,25 @@ class SARIFImporter:
         if sarif.get("version") != "2.1.0":
             raise ValueError("Only SARIF version 2.1.0 is supported.")
 
-        if file_archive is None:
-            raise ValueError("Missing 'file_archive'.")
-
-        file_archive_name = SARIFImporter.save_file_archive(file_archive)
-        user_model = django.contrib.auth.get_user_model()
-        admin_user = user_model.objects.get(id=1)
-        project_version = ProjectVersion.get_or_create_from_package_url(package_url, admin_user)
+        user = get_user_model().objects.get(id=1)  # TODO: Fix this hardcoding
+        project_version = ProjectVersion.get_or_create_from_package_url(package_url, user)
 
         num_imported = 0
         processed = set()  # Reduce duplicates
-
-        # Remove everything that hasn't been triaged yet
-        # issues = Issue.objects.filter(file__source_location__package_url=self.package_url)
-        # issues.exclude(disposition="N").delete()
 
         # First load all of the rules
         for run in sarif.get("runs"):
             tool_name = get_complex(run, "tool.driver.name")
             tool_version = get_complex(run, "tool.driver.version")
-            tool, _ = Tool.objects.get_or_create(
+            tool = Tool.objects.get_or_create(
                 name=tool_name,
                 version=tool_version,
                 defaults={
-                    "created_by": admin_user,
-                    "updated_by": admin_user,
+                    "created_by": user,
+                    "updated_by": user,
                     "type": Tool.ToolType.STATIC_ANALYSIS,
                 },
-            )
-
-            scan = Scan(
-                project_version=project_version,
-                tool=tool,
-                artifact_uuid=file_archive_name,
-                created_by=admin_user,
-                updated_by=admin_user,
-            )
-            scan.save()
+            )[0]
 
             logger.debug("Processing run for tool: %s", tool)
 
@@ -137,36 +107,48 @@ class SARIFImporter:
                         "path": uri,
                         "line_number": get_complex(location, "physicalLocation.region.startLine"),
                     }
-                    key = hashlib.sha256(json.dumps(key).encode("utf-8")).hexdigest()
+                    key = hashlib.sha256(json.dumps(key).encode("utf-8")).digest()
 
                     if key not in processed:
                         logger.debug("New key for issue %s, adding.", message)
                         processed.add(key)
 
-                        # Create the issue
-                        finding = Finding(scan=scan)
-                        finding.title = message
-                        finding.state = Finding.State.NOT_SPECIFIED
-                        # finding.issue_type = rule_description_map.get(rule_id, rule_id)
+                        file_path = get_complex(artifact_location, "uri")
+                        file_path = cls.normalize_file_path(file_path)
 
-                        # issue.file = file
-                        finding.file_path = get_complex(artifact_location, "uri")
+                        file = project_version.files.filter(path=file_path).first()
+                        if not file:
+                            logger.debug("File %s not found, skipping.", file_path)
+                            continue
+
+                        # Create the issue
+                        finding = Finding()
+                        finding.title = message
+                        finding.normalized_title = cls.normalize_title(message)
+                        finding.state = WorkItemState.NEW
+                        finding.file = file
+                        finding.tool = tool
+                        finding.project_version = project_version
+
                         finding.file_line = get_complex(
-                            location, "physicalLocation.region.startLine", 0
+                            location, "physicalLocation.region.startLine", None
                         )
                         finding.severity_level = Finding.SeverityLevel.parse(level)
                         finding.analyst_severity_level = Finding.SeverityLevel.NOT_SPECIFIED
                         finding.confidence = Finding.ConfidenceLevel.NOT_SPECIFIED
 
-                        finding.created_by = admin_user
-                        finding.updated_by = admin_user
+                        finding.created_by = user
+                        finding.updated_by = user
 
-                        # try:
-                        #    result_copy = json.dumps(result).replace("\\u0000", "")
-                        #    result_copy = json.loads(result_copy)
-                        #    issue.property_bag = result_copy
-                        # except Exception as msg:
-                        #    logging.warning("Unable to insert results into property bag: %s", msg)
+                        if Finding.objects.filter(
+                            title=finding.title,
+                            file=finding.file,
+                            file_line=finding.file_line,
+                            project_version=finding.project_version,
+                        ).exists():
+                            logger.debug("Duplicate finding, skipping.")
+                            continue
+
                         finding.save()
 
                     num_imported += 1
@@ -177,3 +159,28 @@ class SARIFImporter:
         else:
             logger.debug("SARIF file processed, but no issues were found.")
             return False
+
+    @classmethod
+    def normalize_file_path(self, path):
+        """Normalizes a file path to be relative to the root."""
+        logger.debug("normalize_file_path(%s)", path)
+        try:
+            result = path
+            if path.split("/")[2] == "package":
+                result = "/".join(path.split("/")[2:])
+            logger.debug("Normalizing file path [%s] -> [%s]", path, result)
+            return result
+        except:
+            return path
+
+    @classmethod
+    def normalize_title(self, title):
+        norm = {
+            r"^Bracket object notation with user input is present.*": "Bracket object notation",
+            r"^Object injection via bracket notation.*": "Object injection",
+            r"^`ref` usage found.*": "Use of `ref`",
+        }
+        for regex, replacement in norm.items():
+            if re.match(regex, title, re.IGNORECASE):
+                return replacement
+        return title

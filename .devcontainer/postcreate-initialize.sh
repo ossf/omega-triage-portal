@@ -39,4 +39,10 @@ python manage.py migrate
 python manage.py makemigrations
 python manage.py migrate triage
 
+# Create superuser
+DJANGO_SUPERUSER_USERNAME="admin" \
+DJANGO_SUPERUSER_PASSWORD="admin" \
+DJANGO_SUPERUSER_EMAIL="nobody@localhost" \
+python manage.py createsuperuser --noinput
+
 echo "Initialization completed."

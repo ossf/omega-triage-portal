@@ -36,5 +36,7 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports": true
         }
-    }
+    },
+    "editor.bracketPairColorization.enabled": true,
+    "html.format.templating": true
 }

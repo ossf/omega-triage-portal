@@ -19,6 +19,10 @@ except Exception:
 SECRET_KEY = get_env_variable("SECRET_KEY")
 DEBUG = to_bool(get_env_variable("DEBUG"))
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -30,10 +34,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "triage"
+    "taggit",
+    "triage",
+    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -68,14 +75,14 @@ WSGI_APPLICATION = "core.wsgi.application"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': get_env_variable("DATABASE_ENGINE"),
-        'NAME': get_env_variable('DATABASE_NAME'),
-        'USER': get_env_variable('DATABASE_USER'),
-        'PASSWORD': get_env_variable('DATABASE_PASSWORD'),
-        'HOST': get_env_variable('DATABASE_HOST'),
-        'PORT': get_env_variable('DATABASE_PORT'),
-        'OPTIONS': {},
+    "default": {
+        "ENGINE": get_env_variable("DATABASE_ENGINE"),
+        "NAME": get_env_variable("DATABASE_NAME"),
+        "USER": get_env_variable("DATABASE_USER"),
+        "PASSWORD": get_env_variable("DATABASE_PASSWORD"),
+        "HOST": get_env_variable("DATABASE_HOST"),
+        "PORT": get_env_variable("DATABASE_PORT"),
+        "OPTIONS": {"options": "-c statement_timeout=5000"},
     }
 }
 
@@ -102,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Los_Angeles"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -116,66 +123,94 @@ STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# @TODO Move this to an external, shared Redis cache
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-        'TIMEOUT': 60 * 30
-    }
-}
+# Set up caching
+DEFAULT_CACHE_TIMEOUT = 60 * 30  # 30 minutes
+CACHES = {}
+if to_bool(get_env_variable("ENABLE_CACHE")):
+    if to_bool(get_env_variable("CACHE_USE_REDIS")):
+        CACHES = {
+            "default": {
+                "BACKEND": "django_redis.cache.RedisCache",
+                "LOCATION": get_env_variable("CACHE_REDIS_CONNECTION"),
+                "OPTIONS": {
+                    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                    "TIMEOUT": DEFAULT_CACHE_TIMEOUT,
+                    "PASSWORD": get_env_variable("CACHE_REDIS_PASSWORD"),
+                },
+            }
+        }
+    else:
+        CACHES = {
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "unique-snowflake",
+                "TIMEOUT": DEFAULT_CACHE_TIMEOUT,
+            },
+        }
 
 # Configure application logging
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format' : u"[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)s] %(message)s",
-            'datefmt' : "%d/%b/%Y %H:%M:%S"
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": u"[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)s] %(message)s",
+            "datefmt": "%d/%b/%Y %H:%M:%S",
         },
-        'simple': {
-            'format': u'%(levelname)s %(message)s'
-        },
+        "simple": {"format": u"%(levelname)s %(message)s"},
     },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-            'level': 'WARNING'
-        },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "verbose", "level": "WARNING"},
         #'appinsights': {
         #    'class': 'applicationinsights.django.LoggingHandler',
         #    'level': 'INFO',
-        #},
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, '..', 'logs', 'omega-triage.log'),
-            'maxBytes': 1024 * 1024 * 50,  # 50 MB
-            'backupCount': 5,
-            'formatter': 'verbose',
-            'encoding': 'utf-8'
+        # },
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "..", "logs", "omega-triage.log"),
+            "maxBytes": 1024 * 1024 * 50,  # 50 MB
+            "backupCount": 5,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+        "database-log": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "..", "logs", "database.log"),
+            "maxBytes": 1024 * 1024 * 50,  # 50 MB
+            "backupCount": 1,
+            "formatter": "verbose",
+            "encoding": "utf-8",
         },
     },
-    'loggers': {
-        '': {
-            'handlers': ['file', 'console'],
-            'level': 'WARNING',
-            'propagate': True,
+    "loggers": {
+        "": {
+            "handlers": ["file", "console"],
+            "level": "WARNING",
+            "propagate": True,
         },
-        'django': {
-            'level': 'WARNING',
-            'handlers': ['console', 'file'],
-            'propagate': False,
+        "django": {
+            "level": "WARNING",
+            "handlers": ["console", "file"],
+            "propagate": False,
         },
-        'triage': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': False,
+        "django.db": {
+            "level": "DEBUG",
+            "handlers": ["database-log"],
+            "propagate": True,
+        },
+        "triage": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            "propagate": False,
         },
     },
 }
 
-TOOLSHED_BLOB_STORAGE_CONTAINER = get_env_variable("TOOLSHED_BLOB_STORAGE_CONTAINER")
-TOOLSHED_BLOB_STORAGE_URL = get_env_variable("TOOLSHED_BLOB_STORAGE_URL")
+TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET = get_env_variable("TOOLSHED_BLOB_STORAGE_CONTAINER")
+TOOLSHED_BLOB_STORAGE_URL_SECRET = get_env_variable("TOOLSHED_BLOB_STORAGE_URL")
+
+OSSGADGET_PATH = get_env_variable("OSSGADGET_PATH")
+
+AUTH_USER_MODEL = "auth.User"

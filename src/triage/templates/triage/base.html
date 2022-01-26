@@ -5,20 +5,28 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="icon" href="https://openssf.org/wp-content/uploads/sites/132/2021/09/cropped-favicon-192x192.png" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/bootstrap/dist/css/bootstrap.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/@fortawesome/fontawesome-free/css/all.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-bs4/css/dataTables.bootstrap4.min.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-fixedheader-bs4/css/fixedHeader.bootstrap4.min.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-keytable-bs4/css/keyTable.bootstrap4.min.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-fixedheader-bs5/css/fixedHeader.bootstrap5.min.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "triage/resources/datatables.net-keytable-bs5/css/keyTable.bootstrap5.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/jstree/dist/themes/default/style.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/jstree-bootstrap-theme/dist/themes/proton/style.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/select2/dist/css/select2.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "triage/resources/source-code-pro/source-code-pro.css" %}" />
     <style type="text/css">
+      @font-face {
+        font-family: 'Inconsolata';
+        src:  url('{% static "triage/resources/inconsolata/inconsolata.woff" %}') format('woff');
+      }
       body { background-color: #fcfefd!important;}
       a.navbar-brand { font-size: 50px; font-weight: bold; color: #222!important; text-shadow: 0 0 5px #ddd; margin-left: 12px; padding-top: 0 }
       button.navbar-toggler { margin-left: 8px }
       li.nav-item { margin-left: 12px }
+      a { color: #0f0f8a; text-decoration: none }
+      a:hover { color: #5C5CD7 }
+
       #editor-title, #note-title, #file-listing-title { color:#fff;font-size:0.85em;padding-top:4px;padding-bottom:4px;padding-left: 7px; margin-bottom:2px;}
       #issue_list tr { cursor: pointer; }
       #issue_list td { padding-top:0; padding-bottom:0; padding-left: 3px; padding-right: 3px; }
@@ -60,7 +68,7 @@
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Open Navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a class="navbar-brand" href="/" style="">&#x1D6C0;</a>
+      <a class="navbar-brand" href="/">&#x1D6C0;</a>
       <div class="collapse navbar-collapse" id="navbarCollapse">
           <ul class="navbar-nav mr-auto">
             {% block topbar %}
@@ -75,17 +83,38 @@
               {% endif %}
             </li>
             <li class="nav-item">
+              {% if '/filter/' in request.path %}
+                <a class="nav-link active" href="/filter/">Filters</a>
+              {% else %}
+                <a class="nav-link" href="/filter/">Filters</a>
+              {% endif %}
+            </li>            
+            <li class="nav-item">
               {% if '/cases/' in request.path %}
                 <a class="nav-link active" href="/cases/">Cases</a>
               {% else %}
                 <a class="nav-link" href="/cases/">Cases</a>
               {% endif %}
             </li>
+            <li class="nav-item">
+              {% if '/tool_defect' in request.path %}
+                <a class="nav-link active" href="/tool_defect">Tool Defects</a>
+              {% else %}
+                <a class="nav-link" href="/tool_defect">Tool Defects</a>
+              {% endif %}
+            </li>
+            <li class="nav-item">
+              {% if '/wiki/' in request.path %}
+                <a class="nav-link active" href="/wiki">Wiki</a>
+              {% else %}
+                <a class="nav-link" href="/wiki">Wiki</a>
+              {% endif %}
+            </li>                  
           </ul>
       </div>
     </nav>
 
-    <main role="main" class="container-fluid">
+    <main class="container-fluid">
       {% block body %}
       {% endblock body %}
     </main>
@@ -99,14 +128,15 @@
     <script type="text/javascript" src="{% static "triage/resources/@popperjs/core/dist/umd/popper.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/bootstrap/dist/js/bootstrap.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/datatables.net/js/jquery.dataTables.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "triage/resources/datatables.net-bs4/js/dataTables.bootstrap4.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "triage/resources/datatables.net-bs5/js/dataTables.bootstrap5.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "triage/resources/datatables.net-fixedheader-bs4/js/fixedHeader.bootstrap4.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "triage/resources/datatables.net-fixedheader-bs5/js/fixedHeader.bootstrap5.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/datatables.net-keytable/js/dataTables.keyTable.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "triage/resources/datatables.net-keytable-bs4/js/keyTable.bootstrap4.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "triage/resources/datatables.net-keytable-bs5/js/keyTable.bootstrap5.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/datatables.net-select/js/dataTables.select.min.js" %}"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.11.3/features/scrollResize/dataTables.scrollResize.min.js"></script>
     <script type="text/javascript" src="{% static "triage/resources/tablesorter/dist/js/jquery.tablesorter.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "triage/resources/tablesorter/dist/js/jquery.tablesorter.widgets.js" %}"></script>
+    <script type="text/javascript" src="{% static "triage/resources/tablesorter/dist/js/jquery.tablesorter.widgets.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/ace-builds/src-min-noconflict/ace.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/ace-builds/src-min-noconflict/ext-settings_menu.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/ace-builds/src-min-noconflict/ext-modelist.js" %}"></script>
@@ -114,68 +144,11 @@
     <script type="text/javascript" src="{% static "triage/resources/jstree/dist/jstree.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/select2/dist/js/select2.min.js" %}"></script>
     
-    <script type="text/javascript" src="{% static "triage/resources/omega.js" %}"></script>
-
-    <script type="text/javascript" charset="utf-8">
-      $(document).ready(function () {
-        // Initialize Bootstrap
-        $('[data-toggle="popover"]').popover();
-        $('[data-toggle="tooltip"]').tooltip();
-      });
-
-      function getCookie(name) {
-          var cookieValue = null;
-          if (document.cookie && document.cookie !== '') {
-              var cookies = document.cookie.split(';');
-              for (var i = 0; i < cookies.length; i++) {
-                  var cookie = jQuery.trim(cookies[i]);
-                  // Does this cookie string begin with the name we want?
-                  if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                      break;
-                  }
-              }
-          }
-          return cookieValue;
-      }
-      var faderHandle = null;
-      $.ajaxSetup({
-          'timeout': 15000,
-          'beforeSend': function(jqXHR, settings) {
-              if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type) && !this.crossDomain) {
-                jqXHR.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-              }
-              //faderHandle = window.setInterval(() => {
-              //  $('#brand-icon').attr('title', 'AJAX request in progress...');
-              //  var opacity = $('#brand-icon').css('opacity') == "1" ? 0.1 : 1.0;
-              //  $('#brand-icon').fadeTo(300, opacity);
-              //}, 300)
-          },
-          'complete': function() {
-            //$('#brand-icon').attr('title', '');
-            //window.clearInterval(faderHandle);
-            //$('#brand-icon').fadeTo(300, 1.0);
-            //faderHandle = null;
-          },
-          'error': function(jqXHR, textStatus, errorThrown) {
-              //show_toast(`Error: ${textStatus}`);
-              //$('#brand-icon').attr('title', '');
-              //window.clearInterval(faderHandle);
-              //$('#brand-icon').fadeTo(300, 1.0);
-              //faderHandle = null;
-          }
-      });
-    </script>
-
+    <script type="text/javascript" src="{% static "triage/omega.js" %}"></script>
     <script type="text/javascript">
-    function show_toast(message) {
-        $('#toast-body').text(message);
-        $('#toast').toast('show');
-    }
       {% block javascript %}
       {% endblock javascript %}
     </script>
-
     {% block javascript_include %}
     {% endblock javascript_include %}
   </body>

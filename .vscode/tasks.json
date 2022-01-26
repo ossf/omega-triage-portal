@@ -21,6 +21,7 @@
                 "pylint_django",
                 "--django-settings-module",
                 "core.settings",
+                "--exit-zero",
                 "${workspaceFolder}/src/triage"
             ],
             "presentation": {
@@ -41,6 +42,52 @@
                     "message": 5
                 }
             }
+        },
+        {
+            "label": "Django: Make Migrations (Triage)",
+            "type": "shell",
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "manage.py",
+                "makemigrations",
+                "triage"
+            ],
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/src"
+            },
+        },
+        {
+            "label": "Django: Migrate Database (Triage)",
+            "type": "shell",
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "manage.py",
+                "migrate"
+            ],
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/src"
+            },
+        },
+        {
+            "label": "Redis: Clear Local Cache",
+            "type": "shell",
+            "presentation": {
+                "reveal": "never",
+                "panel": "shared"
+            },
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "manage.py",
+                "shell",
+                "-c",
+                "from django.core.cache import cache; cache.clear()"
+            ],
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/src"
+            },
         },
     ]
 }

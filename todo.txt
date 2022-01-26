@@ -1,0 +1,21 @@
+Initial Milestone TODO List
+---------------------------
+
+Findings / Show
+[ ] Add Package URL on the page, hard to know what you're looking at.
+[ ] Fix labels UI
+[ ] Fix TP/FP UI
+[x] Complete Notes UI
+
+Findings / List
+[ ] Pagination?
+[ ] Add impact as the default sorting
+
+Findings / Backend
+[ ] Add impact measurement (download count, etc.)
+
+Wiki
+[x] Basic build out
+
+Cases
+[ ] Search broken for state:new,active - priotitizes as text search
