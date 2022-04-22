@@ -10,7 +10,7 @@ charset-normalizer==2.0.9
 click==8.0.3
 cryptography==36.0.0
 Deprecated==1.2.13
-Django==4.0.1
+Django==4.0.4
 django-dotenv==1.4.2
 django-redis==5.1.0
 django-taggit==2.0.0
