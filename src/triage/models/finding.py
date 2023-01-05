@@ -92,7 +92,7 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
                     return cls.NONE
             return cls.NOT_SPECIFIED
 
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True, unique=True)
     project_version = models.ForeignKey(
         "ProjectVersion", on_delete=models.CASCADE, null=True, blank=True
     )
@@ -144,10 +144,10 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
     objects = models.Manager()
 
     def __str__(self):
-        return f"{self.normalized_title} in {self.file.name}:{self.file_line}"
+        return f"{self.normalized_title} in {self.file}:{self.file_line}"
 
     def get_absolute_url(self):
-        return f"/finding/{self.uuid}"
+        return f"/findings/{self.uuid}"
 
     @property
     def get_filename_display(self):
