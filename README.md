@@ -17,7 +17,7 @@ button. A new widow will open. This is needed because VS Code launch settings ar
 within the omega/triage-portal folder.
 
 You can then run the Django launch task to start the application. Navigate to
-<http://localhost:8001/admin> and enter the default credentials (admin/admin), then
+<http://localhost:0/admin> and enter the default credentials (admin/admin), then
 navigate back to <http://localhost:8001>.
 
 
@@ -36,5 +36,5 @@ TBD
 
 ## Security
 
-See [SECURITY.md](https://github.com/ossf/alpha-omega/blob/main/SECURITY.md).
+See [SECURITY.md](https://github.com/ossf/omega-triage-portal/blob/main/SECURITY.md).
 
