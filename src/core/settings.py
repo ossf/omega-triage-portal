@@ -20,10 +20,9 @@ SECRET_KEY = get_env_variable("SECRET_KEY")
 DEBUG = to_bool(get_env_variable("DEBUG"))
 
 INTERNAL_IPS = [
-    "127.0.0.1",
 ]
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -213,4 +212,14 @@ TOOLSHED_BLOB_STORAGE_URL_SECRET = get_env_variable("TOOLSHED_BLOB_STORAGE_URL")
 
 OSSGADGET_PATH = get_env_variable("OSSGADGET_PATH")
 
-AUTH_USER_MODEL = "auth.User"
+AUTH_USER_MODEL = "auth.User"  # pylint: disable=hard-coded-auth-user
+
+# File Storage Providers for files, attachments, etc.
+FILE_STORAGE_PROVIDERS = {
+    "default": {
+        "provider": "triage.util.content_managers.file_manager.FileManager",
+        "args": {
+            "root_path": "/home/vscode/omega-fs"
+        }
+    }
+}
