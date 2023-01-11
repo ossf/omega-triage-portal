@@ -13,8 +13,8 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
-from triage.models import (Case, File, Finding,
-                           ProjectVersion, WorkItemState)
+
+from triage.models import Case, File, Finding, ProjectVersion, WorkItemState
 from triage.util.content_managers.file_manager import FileManager
 from triage.util.finding_importers.archive_importer import ArchiveImporter
 from triage.util.finding_importers.sarif_importer import SARIFImporter
@@ -78,8 +78,12 @@ def show_upload(request: HttpRequest) -> HttpResponse:
 
         for file in files:
             try:
+                package_version = ProjectVersion.get_or_create_from_package_url(
+                    package_url=PackageURL.from_string(package_url),
+                    created_by=request.user
+                )
                 importer = SARIFImporter.import_sarif_file(
-                    package_url, json.load(file), request.user
+                    json.load(file), package_version, request.user
                 )
             except:  # pylint: disable=bare-except
                 logger.warning("Failed to import SARIF file", exc_info=True)
