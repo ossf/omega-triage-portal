@@ -1,5 +1,5 @@
-import hashlib
 import base64
+import hashlib
 import logging
 import uuid
 
@@ -7,7 +7,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core import settings
-from triage.models import BaseTimestampedModel, BaseUserTrackedModel, WorkItemState
 
 logger = logging.getLogger(__name__)
 
