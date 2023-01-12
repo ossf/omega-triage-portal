@@ -70,25 +70,37 @@ def show_upload(request: HttpRequest) -> HttpResponse:
         return render(request, "triage/findings_upload.html")
 
     if request.method == "POST":
-        package_url = request.POST.get("package_url")
-        files = request.FILES.getlist("sarif_file[]")
+        package_url = PackageURL.from_string(request.POST.get("package_url"))
+        files = request.FILES.getlist("file[]")
 
         if not files:
             return HttpResponseBadRequest("No files provided")
 
+        if request.user.is_anonymous:
+            user = get_user_model().objects.get(id=1)
+        else:
+            user = request.user
+
+        project_version = ProjectVersion.get_or_create_from_package_url(package_url, user)
+
+        # Find the source code for this project version
+        # Get the source based on the package url
+        project_version.download_source_code()
+
+        errors = []
         for file in files:
             try:
-                package_version = ProjectVersion.get_or_create_from_package_url(
-                    package_url=PackageURL.from_string(package_url),
-                    created_by=request.user
-                )
-                importer = SARIFImporter.import_sarif_file(
-                    json.load(file), package_version, request.user
-                )
+                archive_importer = ArchiveImporter()
+                try:
+                    archive_importer.import_archive(file.name, file.read(), project_version, user)
+                except Exception as msg:  # pylint: disable=bare-except
+                    print(msg)
+                    errors.append("Failed to import archive: " + file.name)
+
             except:  # pylint: disable=bare-except
                 logger.warning("Failed to import SARIF file", exc_info=True)
 
-        return redirect("/findings/upload?status=success")
+        return render(request, "triage/findings_upload.html", {"errors": errors})
 
 
 @login_required
@@ -164,9 +176,8 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
                     }
                 )
     logger.info("Source code not found for %s", file_uuid)
-    return JsonResponse(
-        {"status": "error", "message": "File not found"}, status=404
-    )
+    return JsonResponse({"status": "error", "message": "File not found"}, status=404)
+
 
 @login_required
 @cache_page(60 * 5)
@@ -185,117 +196,13 @@ def api_get_files(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"data": source_graph, "status": "ok"})
 
 
-# @login_required
-# def api_get_file_list(request: HttpRequest) -> JsonResponse:
-#    """Returns a list of files in a project."""
-#    finding_uuid = request.GET.get("finding_uuid")
-#    finding = get_object_or_404(Finding, uuid=finding_uuid)
-#    source_code = finding.scan.get_file_list()
-#    source_graph = path_to_graph(source_code, finding.scan.project_version.package_url)#
-#
-#    return JsonResponse({"data": source_graph, "status": "ok"})
-
-
 @login_required
 def api_download_file(request: HttpRequest) -> HttpResponse:
-    """Returns a list of files in a project."""
+    """Downloads a particular file (raw).
+
+    Not currently implemented.
+    """
     return HttpResponse("Not implemented.")
-
-
-@login_required
-def api_get_blob_list(request: HttpRequest) -> JsonResponse:
-    """Returns a list of files in a project."""
-    finding_uuid = request.GET.get("finding_uuid")
-    finding = get_object_or_404(Finding, uuid=finding_uuid)
-    source_code = finding.scan.get_blob_list()
-    source_graph = path_to_graph(
-        map(lambda s: s.get("relative_path"), source_code),
-        finding.scan.project_version.package_url,
-    )
-
-    return JsonResponse({"data": source_graph, "status": "ok"})
-
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def api_add_scan_archive(request: HttpRequest) -> JsonResponse:
-    """Inserts data into the database.
-
-    Required:
-    - scan_artifact => an archive of the content analyzed
-    - package_url => the package URL (must include version)
-    - scan_type => the type of scan (e.g. "toolshed")
-    - replace => replace existing scan if it exists (default: false)
-    """
-    scan_artifact = request.FILES.get("scan_artifact")
-    if scan_artifact is None:
-        return JsonResponse({"error": "No scan_artifact provided"})
-
-    try:
-        package_url = PackageURL.from_string(request.POST.get("package_url"))
-        if package_url.version is None:
-            raise ValueError("Missing version")
-    except ValueError:
-        return JsonResponse({"error": "Invalid or missing package url"})
-
-    if request.user.is_anonymous:
-        user = get_user_model().objects.get(id=1)
-    else:
-        user = request.user
-
-    project_version = ProjectVersion.get_or_create_from_package_url(package_url, user)
-
-    archive_importer = ArchiveImporter()
-    archive_importer.import_archive(
-        scan_artifact.name, scan_artifact.read(), project_version, user
-    )
-
-    return JsonResponse({"success": True})
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def api_add_artifact(request: HttpRequest) -> JsonResponse:
-    """Inserts data into the database.
-
-    Required:
-    - artifact_type => "scan" or "package"
-    - action => "add" or "replace" (only used for package)
-    - package_url => the package URL (must include version)
-    - artifact => file contents to import
-    """
-    action = request.FILES.get("action")
-    if action not in ["add", "update"]:
-        return JsonResponse({"error": "Invalid action"})
-
-    artifact_type = request.FILES.get("artifact_type")
-    if artifact_type is None:
-        return JsonResponse({"error": "No artifact type provided"})
-
-    try:
-        package_url = PackageURL.from_string(request.POST.get("package_url"))
-        if package_url.version is None:
-            raise ValueError("Missing version")
-    except ValueError:
-        return JsonResponse({"error": "Invalid or missing package url"})
-
-    # TODO: Make this better
-    user = get_user_model().objects.get(pk=1)
-
-    if artifact_type == "sarif":
-        sarif = request.FILES.get("sarif")
-        sarif_content = json.load(sarif)
-        SARIFImporter.import_sarif_file(package_url, sarif_content, user)
-
-    # Source code files are usually archives that contain source code or other
-    # artifacts. They'll be automatically extracted during the import process. They
-    # are associated with a ProjectVersion.
-    if "source_code" in request.FILES:
-        source_code = request.FILES.get("source_code")
-        source_code_content = source_code.read()
-        FileImporter.import_artifact(package_url, source_code_content, user)
-
-    return JsonResponse({"success": True})
-
 
 def api_upload_attachment(request: HttpRequest) -> JsonResponse:
     """Handles uploads (attachments)"""
@@ -317,8 +224,6 @@ def api_upload_attachment(request: HttpRequest) -> JsonResponse:
             content_type=attachment.content_type,
             content=attachment.read(),
         )
-        results.append(
-            {"filename": new_attachment.filename, "uuid": new_attachment.uuid}
-        )
+        results.append({"filename": new_attachment.filename, "uuid": new_attachment.uuid})
 
     return JsonResponse({"success": True, "attachments": results})
