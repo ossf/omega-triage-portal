@@ -213,9 +213,6 @@ LOGGING = {
     },
 }
 
-TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET = get_env_variable("TOOLSHED_BLOB_STORAGE_CONTAINER")
-TOOLSHED_BLOB_STORAGE_URL_SECRET = get_env_variable("TOOLSHED_BLOB_STORAGE_URL")
-
 OSSGADGET_PATH = get_env_variable("OSSGADGET_PATH")
 
 AUTH_USER_MODEL = "auth.User"  # pylint: disable=hard-coded-auth-user
