@@ -1,4 +1,6 @@
 {
+  "name": "triage-portal",
+  "version": "0.0.2",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.7.2",
     "@popperjs/core": "^2.10.1",
@@ -20,5 +22,13 @@
     "source-code-pro": "^2.30.2",
     "tablesorter": "^2.31.1",
     "yarn": "^1.13.0"
+  },
+  "scripts": {
+    "build": "docker build . -t triage-portal",
+    "start": "docker run -d -p 8001:8001 triage-portal"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ossf/omega-triage-portal.git"
   }
 }
