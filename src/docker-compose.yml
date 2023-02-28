@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres-latest
+    image: postgres:latest
     restart: unless-stopped
     volumes:
       - ./data/db:/var/lib/postgresql/data
@@ -8,6 +8,14 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    network_mode: service:db
+    volumes:
+      - redis-data:/data
+
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8001
@@ -21,3 +29,9 @@ services:
       - POSTGRES_PASSWORD=postgres
     depends_on:
       - db
+    env_file:
+      - .env-template
+
+volumes:
+  postgres-data:
+  redis-data:
