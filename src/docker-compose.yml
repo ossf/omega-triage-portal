@@ -1,13 +1,17 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:latest
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     volumes:
       - ./data/db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=triage
+      - POSTGRES_USER=triage_user
+      - POSTGRES_PASSWORD=triage_password
 
   redis:
     image: redis:latest
@@ -20,15 +24,18 @@ services:
     build: .
     command: python manage.py runserver 0.0.0.0:8001
     volumes:
-      - .:/code
+      - .:/app
     ports:
       - "8001:8001"
+#    image: app:portal
+#    container_name: Triage_Container
     environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_NAME=triage
+      - POSTGRES_USER=triage_user
+      - POSTGRES_PASSWORD=triage_password
     depends_on:
       - db
+      - redis
     env_file:
       - .env-template
 

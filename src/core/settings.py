@@ -12,9 +12,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 try:
     import dotenv
 
-    dotenv.read_dotenv(os.path.join(BASE_DIR, ".env"))
+    dotenv.load_dotenv(os.path.join(BASE_DIR, ".env-template"))
 except Exception:
-    raise ImproperlyConfigured("A .env file was not found. Environment variables are not set.")
+    raise ImproperlyConfigured("A .env-template file was not found. Environment variables are not set.")
 
 SECRET_KEY = get_env_variable("SECRET_KEY")
 DEBUG = to_bool(get_env_variable("DEBUG"))
@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     "taggit",
     "triage",
     "debug_toolbar",
+    "core",
+    "data"
 ]
 
 MIDDLEWARE = [
@@ -81,10 +83,15 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": get_env_variable("DATABASE_ENGINE"),
-        "NAME": get_env_variable("DATABASE_NAME"),
-        "USER": get_env_variable("DATABASE_USER"),
-        "PASSWORD": get_env_variable("DATABASE_PASSWORD"),
+        # Comment out for Local dev values
+        # "ENGINE": get_env_variable("DATABASE_ENGINE"),
+        # "NAME": get_env_variable("DATABASE_NAME"),
+        # "USER": get_env_variable("DATABASE_USER"),
+        # "PASSWORD": get_env_variable("DATABASE_PASSWORD"),
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "triage",
+        "USER": "triage_user",
+        "PASSWORD": "triage_password",
         "HOST": get_env_variable("DATABASE_HOST"),
         "PORT": get_env_variable("DATABASE_PORT"),
         "OPTIONS": {"options": "-c statement_timeout=5000"},

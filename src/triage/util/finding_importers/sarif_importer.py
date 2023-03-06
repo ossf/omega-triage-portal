@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module provides support for import SARIF files into the Triage Portal's data model."""
+from __future__ import annotations
 
 import hashlib
 import json
