@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser
 from packageurl import PackageURL
 
-from triage.models import Finding, ProjectVersion, Scan, Tool, WorkItemState, File
+from triage.models import File, Finding, ProjectVersion, Tool, WorkItemState
 from triage.util.general import get_complex
 
 logger = logging.getLogger(__name__)
@@ -25,16 +25,16 @@ class SARIFImporter:
     This class handles importing SARIF files into the database.
     """
 
-    @classmethod
+    def __init__(self):
+        pass
+
     def import_sarif_file(
-        cls, sarif: dict, project_version: ProjectVersion, user: AbstractBaseUser | None
+        self, sarif: dict, project_version: ProjectVersion, user: AbstractBaseUser | None
     ) -> bool:
         """
         Imports a SARIF file containing tool findings into the database.
 
         Args:
-            package_url: The PackageURL to attach all findings to. This PackageURL must
-                         contain a version.
             sarif: The SARIF content (as a dict) to import.
             file_archive: The file archive containing the SARIF file.
 
@@ -43,6 +43,9 @@ class SARIFImporter:
         """
         if sarif is None:
             raise ValueError("The sarif content must not be None.")
+
+        if not isinstance(sarif, dict):
+            raise ValueError("The sarif content must be a dict.")
 
         if sarif.get("version") != "2.1.0":
             raise ValueError("Only SARIF version 2.1.0 is supported.")
@@ -111,9 +114,9 @@ class SARIFImporter:
                         processed.add(key)
 
                         file_path = get_complex(artifact_location, "uri")
-                        file_path = cls.normalize_file_path(file_path)
+                        file_path = self.normalize_file_path(file_path)
 
-                        file = cls.get_most_likely_source(project_version, file_path)
+                        file = self.get_most_likely_source(project_version, file_path)
                         if not file:
                             logger.debug("File not found, skipping.")
                             continue
@@ -121,7 +124,7 @@ class SARIFImporter:
                         # Create the issue
                         finding = Finding()
                         finding.title = message
-                        finding.normalized_title = cls.normalize_title(message)
+                        finding.normalized_title = self.normalize_title(message)
                         finding.state = WorkItemState.NEW
                         finding.file = file
                         finding.tool = tool
@@ -159,8 +162,7 @@ class SARIFImporter:
             logger.debug("SARIF file processed, but no issues were found.")
             return False
 
-    @classmethod
-    def normalize_file_path(cls, path):
+    def normalize_file_path(self, path: str) -> str:
         """Normalizes a file path to be relative to the root."""
         logger.debug("normalize_file_path(%s)", path)
         try:
@@ -172,8 +174,7 @@ class SARIFImporter:
         except:
             return path
 
-    @classmethod
-    def normalize_title(cls, title):
+    def normalize_title(self, title: str) -> str:
         norm = {
             r"^Bracket object notation with user input is present.*": "Bracket object notation",
             r"^Object injection via bracket notation.*": "Object injection",
@@ -184,9 +185,8 @@ class SARIFImporter:
                 return replacement
         return title
 
-    @classmethod
     def get_most_likely_source(
-        cls, project_version: ProjectVersion, file_path: str
+        self, project_version: ProjectVersion, file_path: str
     ) -> File | None:
         """Returns the most likely source file for a given issue."""
 

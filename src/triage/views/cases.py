@@ -7,23 +7,12 @@ from uuid import UUID
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.http import (
-    HttpRequest,
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseForbidden,
-    HttpResponseNotFound,
-    HttpResponseRedirect,
-    JsonResponse,
-)
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from packageurl import PackageURL
 
-from triage.models import Case, Project, ProjectVersion, WorkItemState
-from triage.util.azure_blob_storage import ToolshedBlobStorageAccessor
-from triage.util.finding_importers.sarif_importer import SARIFImporter
+from triage.models import Case, WorkItemState
 from triage.util.general import parse_date
 from triage.util.search_parser import parse_query_to_Q
 from triage.util.source_viewer import path_to_graph
@@ -53,6 +42,7 @@ def show_cases(request: HttpRequest) -> HttpResponse:
     }
 
     return render(request, "triage/case_list.html", context)
+
 
 @login_required
 @require_http_methods(["GET"])

@@ -1,18 +1,21 @@
 from __future__ import annotations
 
 import json
+
 import io
+import json
 import logging
 import os
 import tarfile
 import zipfile
 
 import magic
-from triage.models import File, FileContent, ProjectVersion
-from triage.util.finding_importers.sarif_importer import SARIFImporter
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
-from triage.util.content_managers.file_manager import FileManager
+
 from core import settings
+from triage.models import File, FileContent, ProjectVersion
+from triage.util.content_managers.file_manager import FileManager
+from triage.util.finding_importers.sarif_importer import SARIFImporter
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +73,11 @@ class ArchiveImporter:
                 )
 
                 logger.debug("File was a SARIF file, saving as scan.")
+
+                # Additionally, parse and save the content as individual findings
                 sarif_content = json.loads(file_info.get("content"))
-                SARIFImporter.import_sarif_file(sarif_content, project_version, user)
+                importer = SARIFImporter()
+                importer.import_sarif_file(sarif_content, project_version, user)
 
             else:
                 logger.debug("File was generic file, saving as a scan result.")
@@ -139,7 +145,7 @@ class ArchiveImporter:
                         }
         else:
             logger.debug("File %s is not an archive", file_path)
-            return {
+            yield {
                 "name": file_path,
                 "path": file_path,
                 "size": len(file_content),
