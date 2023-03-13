@@ -39,6 +39,7 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 #RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
+#COPY world.sql /docker-entrypoint-initdb.d/
 
 EXPOSE 8001
 

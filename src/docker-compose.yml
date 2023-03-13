@@ -6,8 +6,11 @@ services:
     restart: unless-stopped
     ports:
       - "5432:5432"
+    env_file:
+      - .env-template
     volumes:
       - ./data/db:/var/lib/postgresql/data
+      - ./data/db/:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_DB=triage
       - POSTGRES_USER=triage_user
