@@ -3,7 +3,7 @@ from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
 
-from core import get_env_variable, to_bool
+from core import to_bool
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,12 +12,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 try:
     import dotenv
 
-    dotenv.read_dotenv(os.path.join(BASE_DIR, ".env"))
+    dotenv.load_dotenv(os.path.join(BASE_DIR, ".env-template"))
 except Exception:
-    raise ImproperlyConfigured("A .env file was not found. Environment variables are not set.")
+    raise ImproperlyConfigured("A .env-template file was not found. Environment variables are not set.")
 
-SECRET_KEY = get_env_variable("SECRET_KEY")
-DEBUG = to_bool(get_env_variable("DEBUG"))
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = to_bool(os.getenv("DEBUG"))
 
 INTERNAL_IPS = [
 ]
@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     "taggit",
     "triage",
     "debug_toolbar",
+    "core",
+    "data"
 ]
 
 MIDDLEWARE = [
@@ -81,12 +83,13 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": get_env_variable("DATABASE_ENGINE"),
-        "NAME": get_env_variable("DATABASE_NAME"),
-        "USER": get_env_variable("DATABASE_USER"),
-        "PASSWORD": get_env_variable("DATABASE_PASSWORD"),
-        "HOST": get_env_variable("DATABASE_HOST"),
-        "PORT": get_env_variable("DATABASE_PORT"),
+        # Comment out for Local dev values
+        "ENGINE": os.getenv("DATABASE_ENGINE"),
+        "NAME": os.getenv("DATABASE_NAME"),
+        "USER": os.getenv("DATABASE_USER"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD"),
+        "HOST": os.getenv("DATABASE_HOST"),
+        "PORT": os.getenv("DATABASE_PORT"),
         "OPTIONS": {"options": "-c statement_timeout=5000"},
     }
 }
@@ -131,16 +134,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Set up caching
 DEFAULT_CACHE_TIMEOUT = 60 * 30  # 30 minutes
 CACHES = {}
-if to_bool(get_env_variable("ENABLE_CACHE")):
-    if to_bool(get_env_variable("CACHE_USE_REDIS")):
+if to_bool(os.getenv("ENABLE_CACHE")):
+    if to_bool(os.getenv("CACHE_USE_REDIS")):
         CACHES = {
             "default": {
                 "BACKEND": "django_redis.cache.RedisCache",
-                "LOCATION": get_env_variable("CACHE_REDIS_CONNECTION"),
+                "LOCATION": os.getenv("CACHE_REDIS_CONNECTION"),
                 "OPTIONS": {
                     "CLIENT_CLASS": "django_redis.client.DefaultClient",
                     "TIMEOUT": DEFAULT_CACHE_TIMEOUT,
-                    "PASSWORD": get_env_variable("CACHE_REDIS_PASSWORD"),
+                    "PASSWORD": os.getenv("CACHE_REDIS_PASSWORD"),
                 },
             }
         }
@@ -213,7 +216,10 @@ LOGGING = {
     },
 }
 
-OSSGADGET_PATH = get_env_variable("OSSGADGET_PATH")
+TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET = os.getenv("TOOLSHED_BLOB_STORAGE_CONTAINER")
+TOOLSHED_BLOB_STORAGE_URL_SECRET = os.getenv("TOOLSHED_BLOB_STORAGE_URL")
+
+OSSGADGET_PATH = os.getenv("OSSGADGET_PATH")
 
 AUTH_USER_MODEL = "auth.User"  # pylint: disable=hard-coded-auth-user
 

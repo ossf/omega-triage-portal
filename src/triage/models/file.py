@@ -1,3 +1,9 @@
+<<<<<<< HEAD:src/triage/models/File.py
+from __future__ import annotations
+
+import hashlib
+=======
+>>>>>>> main:src/triage/models/file.py
 import base64
 import hashlib
 import logging
