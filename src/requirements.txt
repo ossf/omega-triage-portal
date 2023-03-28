@@ -30,7 +30,7 @@ lazy-object-proxy==1.6.0
 Markdown==3.4.1
 mccabe==0.7.0
 msrest==0.7.1
-mypy-extensions==0.4.3
+mypy-extensions==1.0.0
 oauthlib==3.2.2
 packageurl-python==0.10.4
 packaging==21.3
