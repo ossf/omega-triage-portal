@@ -2,7 +2,7 @@ asgiref==3.5.2
 astroid==2.12.13
 azure-core==1.26.1
 azure-storage-blob==12.14.1
-bandit==1.7.4
+bandit==1.7.5
 black==22.10.0
 cryptography==39.0.1
 certifi==2022.12.7
