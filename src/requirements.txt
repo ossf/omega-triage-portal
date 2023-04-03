@@ -1,4 +1,4 @@
-asgiref==3.5.2
+asgiref==3.6.0
 astroid==2.12.13
 azure-core==1.26.1
 azure-storage-blob==12.14.1
