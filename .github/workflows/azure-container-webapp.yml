@@ -48,8 +48,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
         with:
-          context: ../../src/.
-          file: ./Dockerfile
+#          context: ../../src/
+          file: ../../src/Dockerfile
           version: v0.10.4
 
       - name: Log in to GitHub container registry
@@ -67,7 +67,7 @@ jobs:
         with:
           push: true
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
-          context: ../../src/.
+          context: ../../src/
           file: ./Dockerfile
 
   deploy-dev:
