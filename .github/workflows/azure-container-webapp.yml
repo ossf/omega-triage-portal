@@ -67,8 +67,8 @@ jobs:
         with:
           push: true
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
-          context: ../../src/
-          file: ./Dockerfile
+#          context: ../../src/
+          file: ../../src/Dockerfile
 
   deploy-dev:
     permissions:
