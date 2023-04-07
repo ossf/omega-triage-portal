@@ -81,7 +81,7 @@ jobs:
 
     steps:
       - name: Deploy Dev to Azure Web App
-#        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
       - name: Deploy to Azure Web App
 #        id: deploy-to-webapp
