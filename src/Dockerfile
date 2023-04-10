@@ -39,7 +39,7 @@ RUN mkdir .env
 RUN mkdir /data
 RUN mkdir /logs
 # Uncomment below for local dev - during GH workflow this dir already exist
-RUN mkdir /tmp
+# RUN mkdir /tmp
 RUN touch /logs/database.log
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
