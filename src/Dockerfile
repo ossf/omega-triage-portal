@@ -2,14 +2,14 @@
 #COPY .. /usr/share/nginx/html
 #COPY ./site/ /usr/share/nginx/html/
 
+FROM docker
+COPY --from=docker/buildx-bin /buildx /usr/libexec/docker/cli-plugins/docker-buildx
+RUN docker buildx version
+
 # syntax=docker/dockerfile:1
 FROM python:3.8-alpine3.17
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-
-FROM docker
-COPY --from=docker/buildx-bin /buildx /usr/libexec/docker/cli-plugins/docker-buildx
-RUN docker buildx version
 
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="none"
@@ -38,10 +38,11 @@ COPY src/requirements.txt .
 RUN mkdir .env
 RUN mkdir /data
 RUN mkdir /logs
-# RUN mkdir /tmp - errors already exist
+# Uncomment below for local dev - during GH workflow this dir already exist
+RUN mkdir /tmp
 RUN touch /logs/database.log
-RUN PYTHONPATH=/usr/bin/python pip install --upgrade pip
-RUN PYTHONPATH=/usr/bin/python pip install -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 COPY . /app/
 
 EXPOSE 8001
