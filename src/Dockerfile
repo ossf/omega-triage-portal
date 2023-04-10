@@ -40,8 +40,8 @@ RUN mkdir /data
 RUN mkdir /logs
 # RUN mkdir /tmp - errors already exist
 RUN touch /logs/database.log
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN PYTHONPATH=/usr/bin/python pip install --upgrade pip
+RUN PYTHONPATH=/usr/bin/python pip install -r requirements.txt
 COPY . /app/
 
 EXPOSE 8001
