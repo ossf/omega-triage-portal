@@ -12,7 +12,7 @@ COPY --from=docker/buildx-bin /buildx /usr/libexec/docker/cli-plugins/docker-bui
 RUN docker buildx version
 
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
-ARG NODE_VERSION=16
+ARG NODE_VERSION="none"
 RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
 
 # Install OSS Gadget
@@ -34,7 +34,7 @@ RUN apk update && apk add python3-dev \
                         libmagic
 
 WORKDIR /app
-COPY requirements.txt .
+COPY src/requirements.txt .
 RUN mkdir .env
 RUN mkdir /data
 RUN mkdir /logs
