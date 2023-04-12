@@ -63,13 +63,13 @@ jobs:
       - name: Log in to GitHub container registry
         run: |
           echo $PAT | docker login ghcr.io -u $USER --password-stdin
-#          docker tag $REGISTRY/$IMAGE_NAME
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: $REGISTRY/$IMAGE_NAME
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 #          context: ../../src/
           file: ../../src/Dockerfile
 
