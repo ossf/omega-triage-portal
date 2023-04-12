@@ -82,7 +82,9 @@ jobs:
       - name: Deploy Dev to Azure Web App
         run: |
           echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-          cd ./src
+          pwd
+          ls
+          cd ./app
           docker-compose build
           docker-compose up
           docker-compose exec web /bin/sh
