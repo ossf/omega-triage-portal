@@ -80,16 +80,16 @@ jobs:
 
     steps:
       - name: Deploy Dev to Azure Web App
-        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
         run: |
+          echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
           docker-compose build
           docker-compose up
           docker-compose exec web /bin/sh
           python3 manage.py migrate
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
 #          startup-command: 'docker-compose build && docker-compose up && docker-compose exec web /bin/sh && python3 manage.py migrate'
