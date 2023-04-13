@@ -37,7 +37,7 @@ env:
 
 on:
   push:
-    branches: [ "main", "azure_docker_workflow" ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
@@ -82,17 +82,11 @@ jobs:
       - name: Deploy Dev to Azure Web App
         run: |
           echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-#          cd app
-#          docker-compose build
-#          docker-compose up
-#          docker-compose exec web /bin/sh
-#          python3 manage.py migrate
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-#          startup-command: 'docker-compose build && docker-compose up && docker-compose exec web /bin/sh && python3 manage.py migrate'
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           images: 'ghcr.io/${{ env.REPO }}:${{ github.sha }}'
