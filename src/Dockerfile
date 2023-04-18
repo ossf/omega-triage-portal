@@ -34,7 +34,7 @@ RUN apk update && apk add python3-dev \
                         libmagic
 
 WORKDIR /app
-COPY src/requirements.txt .
+COPY requirements.txt .
 RUN mkdir .env
 RUN mkdir /data
 RUN mkdir /logs
