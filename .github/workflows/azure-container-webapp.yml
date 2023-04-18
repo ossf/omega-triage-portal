@@ -52,6 +52,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up QEMU
+        id: docker-qemu
         uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
@@ -71,6 +72,7 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           file: ../../src/Dockerfile
+          platforms: ${{ steps.docker-qemu.outputs.platforms }}
 
   deploy-dev:
     permissions:
