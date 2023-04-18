@@ -20,6 +20,30 @@ You can then run the Django launch task to start the application. Navigate to
 <http://localhost:0/admin> and enter the default credentials (admin/admin), then
 navigate back to <http://localhost:8001>.
 
+## Local Development
+
+### Docker Compose
+
+To build the application, run the following command:
+```bash
+docker-compose build
+```
+
+To run the application, run the following command:
+```bash
+docker-compose up
+```
+
+**NOTE:** The first time you run the application, you will need to run the following commands to
+create the database. This command MUST be run after the application is running with the above commands.
+
+```bash
+docker-compose run web python3 manage.py migrate
+```
+
+```bash
+docker-compose run web python manage.py createsuperuser
+```
 
 ### Local Windows Development
 

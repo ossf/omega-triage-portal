@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   db:
@@ -7,7 +7,7 @@ services:
     ports:
       - "5432:5432"
     env_file:
-      - .env-template
+      - ./src/.env-template
     volumes:
       - ./data/db:/var/lib/postgresql/data
       - ./data/db/:/docker-entrypoint-initdb.d
@@ -15,6 +15,11 @@ services:
       - POSTGRES_DB=triage
       - POSTGRES_USER=triage_user
       - POSTGRES_PASSWORD=triage_password
+    healthcheck:
+        test: pg_isready -d $$DATABASE_NAME -U $$DATABASE_USER
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
   redis:
     image: redis:latest
@@ -24,10 +29,11 @@ services:
       - redis-data:/data
 
   web:
-    build: .
+    build:
+      context: ./src
     command: python3 manage.py runserver 0.0.0.0:8001
     volumes:
-      - .:/app
+      - ./src:/app
     ports:
       - "8001:8001"
     image: app:portal
@@ -37,10 +43,12 @@ services:
       - POSTGRES_USER=triage_user
       - POSTGRES_PASSWORD=triage_password
     depends_on:
-      - db
-      - redis
+      db:
+          condition: service_healthy
+      redis:
+          condition: service_started
     env_file:
-      - .env-template
+      - ./src/.env-template
 
 volumes:
   postgres-data:

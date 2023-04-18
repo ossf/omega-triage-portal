@@ -7,7 +7,7 @@ COPY --from=docker/buildx-bin /buildx /usr/libexec/docker/cli-plugins/docker-bui
 RUN docker buildx version
 
 # syntax=docker/dockerfile:1
-FROM python:3.11-alpine
+FROM python:3.8-alpine
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
