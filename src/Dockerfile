@@ -2,6 +2,10 @@
 #COPY .. /usr/share/nginx/html
 #COPY ./site/ /usr/share/nginx/html/
 
+FROM docker
+COPY --from=docker/buildx-bin /buildx /usr/libexec/docker/cli-plugins/docker-buildx
+RUN docker buildx version
+
 # syntax=docker/dockerfile:1
 FROM python:3.8-alpine3.17
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -30,10 +34,12 @@ RUN apk update && apk add python3-dev \
                         libmagic
 
 WORKDIR /app
-COPY requirements.txt .
+COPY src/requirements.txt .
 RUN mkdir .env
 RUN mkdir /data
 RUN mkdir /logs
+# Uncomment below for local dev - during GH workflow this dir already exist
+# RUN mkdir /tmp
 RUN touch /logs/database.log
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
