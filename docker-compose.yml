@@ -29,14 +29,12 @@ services:
       - redis-data:/data
 
   web:
+    image: app:portal
     build:
-      context: ./src
+      context: src
     command: python3 manage.py runserver 0.0.0.0:8001
-    volumes:
-      - ./src:/app
     ports:
       - "8001:8001"
-    image: app:portal
     container_name: Triage_Container
     environment:
       - POSTGRES_NAME=triage

@@ -38,7 +38,7 @@ docker-compose up
 create the database. This command MUST be run after the application is running with the above commands.
 
 ```bash
-docker-compose run web python3 manage.py migrate
+docker-compose run web python manage.py migrate
 ```
 
 ```bash
