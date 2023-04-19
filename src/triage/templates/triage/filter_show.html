@@ -21,7 +21,7 @@
                 {% for error_message in error_messages %}
                     <div>{{ error_message }}</div>
                 {% endfor %}
-                
+
             </div>
         {% endif %}
 
@@ -60,7 +60,7 @@
                     <label for="filterPriority" class="form-label">Priority</label>
                     <input type="number" class="form-control" id="filterPriority" name="priority" value="{{ filter.priority|default:"500" }}" required min="0" max="1000"/>
                     <small id="filterPriority" class="form-text text-muted">0=highest priority, 1000=lowest priority</small>
-                </div>            
+                </div>
                 <div class="col-12">
                     <label for="filter_condition" class="form-label">Condition
                         <a href="/wiki/How_To_Write_Filters" target="_blank">
@@ -110,7 +110,7 @@ $(function() {
             'fontSize': localStorage.getItem('last-used-editor-font-size') || '1.1rem',
             tabSize: 2,
             useSoftTabs: true
-        });    
+        });
         editor.setTheme("ace/theme/cobalt");
 
         // copy back to textarea on form submit...

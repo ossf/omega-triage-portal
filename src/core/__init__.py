@@ -17,7 +17,7 @@ def get_env_variable(var_name, optional=False):
         if optional:
             return False
         raise ImproperlyConfigured(
-            f"Error: You must set the {var_name} environment variable."
+            f"Error: You must set the {var_name} environment variable.",
         ) from ex
 
 

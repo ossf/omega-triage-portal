@@ -21,7 +21,7 @@ class ActiveFindingsManager(models.Manager):
                     WorkItemState.NEW,
                     WorkItemState.ACTIVE,
                     WorkItemState.NOT_SPECIFIED,
-                ]
+                ],
             )
         )
 
@@ -104,15 +104,24 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
             return cls.NOT_SPECIFIED
 
     uuid = models.UUIDField(
-        default=uuid.uuid4, editable=False, db_index=True, unique=True
+        default=uuid.uuid4,
+        editable=False,
+        db_index=True,
+        unique=True,
     )
     project_version = models.ForeignKey(
-        "ProjectVersion", on_delete=models.CASCADE, null=True, blank=True
+        "ProjectVersion",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     title = models.CharField(max_length=1024, db_index=True)
     normalized_title = models.CharField(
-        max_length=1024, null=True, blank=True, db_index=True
+        max_length=1024,
+        null=True,
+        blank=True,
+        db_index=True,
     )
 
     file = models.ForeignKey("File", null=True, blank=True, on_delete=models.SET_NULL)
@@ -151,12 +160,19 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
     )
 
     tool = models.ForeignKey(
-        "Tool", null=True, blank=True, on_delete=models.SET_NULL, db_index=True
+        "Tool",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        db_index=True,
     )
 
     # Who the finding is currently assigned to
     assigned_to = models.ForeignKey(
-        User, null=True, blank=True, on_delete=models.SET_NULL
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
     )
     assigned_dt = models.DateTimeField(auto_now_add=True)
 

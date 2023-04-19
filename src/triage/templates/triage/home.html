@@ -2,7 +2,7 @@
 {% load static %}
 {% block body %}
     {% block main %}
-    
+
 <div class="row" style="margin-top: 30px">
     <div class="col-md-2"></div>
     <div class="col-md-8">
@@ -71,7 +71,7 @@
           </div>
         </div>
       </div> <!-- /row -->
-      
+
       <!-- 2nd row -->
       <div class="row row-cols-1 row-cols-md-3 mt-2 g-4">
         <div class="col">
@@ -142,7 +142,7 @@
                   <li class="list-group-item">
                     <a href="/findings?q=created:>={{ last_week|date:"Y-m-d" }}">New This Week</a>
                     <span class="badge rounded-pill bg-primary float-end">{{ metrics.num_new_findings|floatformat:"g" }}</span>
-                  </li>                  
+                  </li>
                 </ul>
               </p>
             </div>
@@ -176,7 +176,7 @@
           break;
         case 'searchcode':
           window.open('https://searchcode.com/codesearch?q=' + encodeURIComponent(query), '_omega_cs', 'noopener,noreferrer');
-          break;      
+          break;
         case 'debian':
         window.open('https://codesearch.debian.net/search?literal=1&q=' + encodeURIComponent(query), '_omega_cs', 'noopener,noreferrer');
           break;
@@ -202,7 +202,7 @@
           break;
         case 'exploit-db.com':
         window.open('https://www.exploit-db.com/search?q=' + encodeURIComponent(query), '_omega_vs', 'noopener,noreferrer');
-          break;      
+          break;
         default:
       }
     });

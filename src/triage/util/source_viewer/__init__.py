@@ -46,7 +46,7 @@ def path_to_graph(files: QuerySet, package_url, separator="/", root=None):
                 "path": "/",
                 "file_id": None,
                 "icon": "fa fa-folder",
-            }
+            },
         )
     else:
         root = "#"
@@ -84,9 +84,10 @@ def path_to_graph(files: QuerySet, package_url, separator="/", root=None):
                         "li_attr": {"package_url": package_url},
                         "path": node_id,
                         "icon": get_icon_for_path(
-                            node_name, part_id == len(path_parts)
+                            node_name,
+                            part_id == len(path_parts),
                         ),
-                    }
+                    },
                 )
                 seen_nids.add(node_id)
     return result

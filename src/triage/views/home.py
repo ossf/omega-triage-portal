@@ -29,7 +29,7 @@ def home(request: HttpRequest) -> HttpResponse:
         "num_findings": Finding.objects.count(),
         "num_active_findings": Finding.active_findings.count(),
         "num_new_findings": Finding.active_findings.filter(
-            created_at__gt=timezone.now() - timedelta(days=7)
+            created_at__gt=timezone.now() - timedelta(days=7),
         ).count(),
     }
     context = {

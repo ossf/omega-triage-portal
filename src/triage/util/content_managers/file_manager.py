@@ -28,8 +28,8 @@ class FileManager(BaseManager):
         if not root_path:
             default_manager = FILE_STORAGE_PROVIDERS.get("default")
             if not default_manager:
-                raise EnvironmentError(
-                    "Missing configuration value for FILE_STORAGE_PROVIDERS.default"
+                raise OSError(
+                    "Missing configuration value for FILE_STORAGE_PROVIDERS.default",
                 )
             root_path = str(default_manager.get("args", {}).get("root_path", ""))
 
@@ -40,7 +40,7 @@ class FileManager(BaseManager):
         logger.debug("Initiizing a FileManager with root path: %s", root_path)
         self.root_path = root_path
 
-    def compress(self, filename: str, content: bytes) -> Tuple[str, bytes]:
+    def compress(self, filename: str, content: bytes) -> tuple[str, bytes]:
         """Compresses content using the configured compressor."""
         if self.compressor == "zstd":
             return (

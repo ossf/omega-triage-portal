@@ -113,7 +113,9 @@ def save_tool_defect(request: HttpRequest) -> HttpResponse:
 
     if note_content and note_content.strip():
         note = Note(
-            content=note_content, created_by=request.user, updated_by=request.user
+            content=note_content,
+            created_by=request.user,
+            updated_by=request.user,
         )
         note.save()
         tool_defect.notes.add(note)

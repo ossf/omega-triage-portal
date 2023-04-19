@@ -28,7 +28,10 @@ class Migration(migrations.Migration):
                 (
                     "content_type",
                     models.CharField(
-                        blank=True, db_index=True, max_length=64, null=True
+                        blank=True,
+                        db_index=True,
+                        max_length=64,
+                        null=True,
                     ),
                 ),
                 ("data", models.BinaryField(blank=True, null=True)),

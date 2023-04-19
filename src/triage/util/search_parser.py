@@ -20,14 +20,14 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
     assigned_to_clause = pp.Group(
         pp.Keyword("assigned_to").suppress()
         + pp.Literal(":").suppress()
-        + pp.Word(pp.alphanums).setResultsName("username")
+        + pp.Word(pp.alphanums).setResultsName("username"),
     ).setResultsName("assigned_to")
 
     priority_clause = pp.Group(
         pp.Keyword("priority").suppress()
         + pp.Literal(":").suppress()
         + pp.one_of(["<", ">", "<=", ">=", "==", "!="]).setResultsName("op")
-        + pp.Word(pp.nums).setResultsName("value")
+        + pp.Word(pp.nums).setResultsName("value"),
     ).setResultsName("priority")
 
     severity_clause = pp.Group(
@@ -51,16 +51,16 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
                     "vl",
                     "informational",
                     "unknown",
-                ]
-            )
-        )
+                ],
+            ),
+        ),
     ).setResultsName("severity")
 
     updated_dt_clause = pp.Group(
         pp.Keyword("updated").suppress()
         + pp.Literal(":").suppress()
         + pp.one_of(["<", ">", "<=", ">=", "==", "!="]).setResultsName("op")
-        + pp.pyparsing_common.iso8601_date("datetime")
+        + pp.pyparsing_common.iso8601_date("datetime"),
     ).setResultsName("updated_dt")
 
     created_dt_clause = pp.Group(
@@ -74,7 +74,7 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
                 + pp.one_of(["+", "-"]).setResultsName("anchor_op")
                 + pp.Word(pp.nums).setResultsName("anchor_value")
             )
-        )
+        ),
     ).setResultsName("created_dt")
 
     state_clause = pp.Group(
@@ -85,14 +85,14 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
                 [str(c[0]) for c in WorkItemState.choices]
                 + [str(c[1]) for c in WorkItemState.choices],
                 caseless=True,
-            )
-        ).setResultsName("states")
+            ),
+        ).setResultsName("states"),
     ).setResultsName("state")
 
     purl_clause = pp.Group(
         pp.Keyword("purl").suppress()
         + pp.Literal(":").suppress()
-        + pp.Word(pp.alphanums + ":@/?=-.").setResultsName("purl")
+        + pp.Word(pp.alphanums + ":@/?=-.").setResultsName("purl"),
     ).setResultsName("purl")
 
     other_clause = pp.Word(pp.printables).setResultsName("text_search")
@@ -101,7 +101,8 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
         getattr(model, key).field.name
         for key in dir(model)
         if isinstance(
-            getattr(model, key), django.db.models.query_utils.DeferredAttribute
+            getattr(model, key),
+            django.db.models.query_utils.DeferredAttribute,
         )
     ]
 
@@ -163,11 +164,11 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
                 target = timezone.now()
                 if results.updated_dt.anchor_op == "-":
                     target -= datetime.timedelta(
-                        days=int(results.updated_dt.anchor_value)
+                        days=int(results.updated_dt.anchor_value),
                     )
                 elif results.updated_dt.anchor_op == "+":
                     target += datetime.timedelta(
-                        days=int(results.updated_dt.anchor_value)
+                        days=int(results.updated_dt.anchor_value),
                     )
             else:
                 raise ValueError("Unknown anchor: %s" % results.updated_dt.anchor)
@@ -197,11 +198,11 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
                 target = timezone.now()
                 if results.created_dt.anchor_op == "-":
                     target -= datetime.timedelta(
-                        days=int(results.created_dt.anchor_value)
+                        days=int(results.created_dt.anchor_value),
                     )
                 elif results.created_dt.anchor_op == "+":
                     target += datetime.timedelta(
-                        days=int(results.created_dt.anchor_value)
+                        days=int(results.created_dt.anchor_value),
                     )
             else:
                 raise ValueError("Unknown anchor: %s" % results.created_dt.anchor)

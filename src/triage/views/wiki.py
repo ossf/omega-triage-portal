@@ -65,7 +65,9 @@ def show_wiki_article_list(request: HttpRequest) -> HttpResponse:
 @login_required
 @require_http_methods(["GET"])
 def show_wiki_article(
-    request: HttpRequest, slug: str, template: str = "triage/wiki_show.html"
+    request: HttpRequest,
+    slug: str,
+    template: str = "triage/wiki_show.html",
 ) -> HttpResponse:
     """Shows a wiki article (current revision)."""
     article = WikiArticle.objects.filter(slug=slug).first()
@@ -83,7 +85,7 @@ def show_wiki_article(
             "wiki_article": {
                 "slug": slug,
                 "wiki_article_states": WorkItemState.choices,
-            }
+            },
         }
         return render(request, "triage/wiki_edit.html", context)
 
@@ -102,7 +104,9 @@ def show_wiki_article_revision(
 ) -> HttpResponse:
     """Shows a wiki article (current revision)."""
     article_revision = get_object_or_404(
-        WikiArticleRevision, article__slug=slug, uuid=wiki_article_revision_uuid
+        WikiArticleRevision,
+        article__slug=slug,
+        uuid=wiki_article_revision_uuid,
     )
     context = {
         "wiki_article": article_revision.article,
@@ -113,10 +117,15 @@ def show_wiki_article_revision(
 
 
 def edit_wiki_article_revision(
-    request: HttpRequest, slug: str, wiki_article_revision_uuid: UUID
+    request: HttpRequest,
+    slug: str,
+    wiki_article_revision_uuid: UUID,
 ) -> HttpResponse:
     return show_wiki_article_revision(
-        request, slug, wiki_article_revision_uuid, "triage/wiki_edit.html"
+        request,
+        slug,
+        wiki_article_revision_uuid,
+        "triage/wiki_edit.html",
     )
 
 

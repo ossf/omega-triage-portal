@@ -31,12 +31,18 @@ class File(models.Model):
         UNKNOWN = "U", _("Unknown")
 
     uuid = models.UUIDField(
-        default=uuid.uuid4, editable=False, db_index=True, unique=True
+        default=uuid.uuid4,
+        editable=False,
+        db_index=True,
+        unique=True,
     )
     name = models.CharField(max_length=512, db_index=True)
     path = models.CharField(max_length=4096, db_index=True)
     file_type = models.CharField(
-        max_length=16, db_index=True, choices=FileType.choices, default=FileType.UNKNOWN
+        max_length=16,
+        db_index=True,
+        choices=FileType.choices,
+        default=FileType.UNKNOWN,
     )
     content_type = models.CharField(max_length=64, db_index=True, null=True, blank=True)
     file_key = models.CharField(max_length=64, db_index=True, null=True, blank=True)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """This module provides support for import SARIF files into the Triage Portal's data model."""
 from __future__ import annotations
 
@@ -93,7 +92,8 @@ class SARIFImporter:
                 level = get_complex(result, "level")
                 for location in get_complex(result, "locations"):
                     artifact_location = get_complex(
-                        location, "physicalLocation.artifactLocation"
+                        location,
+                        "physicalLocation.artifactLocation",
                     )
 
                     src_root = get_complex(artifact_location, "uriBaseId", "%SRCROOT%")
@@ -107,7 +107,8 @@ class SARIFImporter:
                         "title": message,
                         "path": uri,
                         "line_number": get_complex(
-                            location, "physicalLocation.region.startLine"
+                            location,
+                            "physicalLocation.region.startLine",
                         ),
                     }
                     key = hashlib.sha256(json.dumps(key).encode("utf-8")).digest()
@@ -134,7 +135,9 @@ class SARIFImporter:
                         finding.project_version = project_version
 
                         finding.file_line = get_complex(
-                            location, "physicalLocation.region.startLine", None
+                            location,
+                            "physicalLocation.region.startLine",
+                            None,
                         )
                         finding.severity_level = Finding.SeverityLevel.parse(level)
                         finding.analyst_severity_level = (
@@ -189,12 +192,14 @@ class SARIFImporter:
         return title
 
     def get_most_likely_source(
-        self, project_version: ProjectVersion, file_path: str
+        self,
+        project_version: ProjectVersion,
+        file_path: str,
     ) -> File | None:
         """Returns the most likely source file for a given issue."""
 
         possible_files = project_version.files.filter(
-            path__endswith=os.path.basename(file_path)
+            path__endswith=os.path.basename(file_path),
         )
         if not possible_files:
             logger.debug("No files found for path %s, skipping.", file_path)
@@ -202,7 +207,8 @@ class SARIFImporter:
 
         if len(possible_files) == 1:
             logger.debug(
-                "Only one possible file found for path %s, using that one.", file_path
+                "Only one possible file found for path %s, using that one.",
+                file_path,
             )
             return possible_files.first()
 

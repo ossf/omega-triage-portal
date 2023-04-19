@@ -23,7 +23,7 @@
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="#">Save Current Query As...</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="/wiki/Query_Syntax_Info">Query Syntax Info</a></li>                    
+                    <li><a class="dropdown-item" href="/wiki/Query_Syntax_Info">Query Syntax Info</a></li>
                 </ul>
             </div>
         </form>
@@ -67,7 +67,7 @@
 {% endblock body %}
 
 {% block javascript %}
-    /* Handle row clicks */ 
+    /* Handle row clicks */
     $('tr.data_row').on('click', (e) => {
         let tool_defect_uuid = $(e.target).closest('tr').data('tool_defect_uuid')
         if (tool_defect_uuid !== undefined) {

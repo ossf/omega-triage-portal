@@ -23,7 +23,9 @@ class TriageRule(models.Model):
         PYTHON_FUNCTION = "PY", _("Python Function")
 
     event = models.CharField(
-        max_length=2, choices=TriageEvent.choices, default=TriageEvent.ON_FINDING_NEW
+        max_length=2,
+        choices=TriageEvent.choices,
+        default=TriageEvent.ON_FINDING_NEW,
     )
     condition = models.TextField(max_length=2048, null=True, blank=True)
     action = models.TextField(max_length=2048, null=True, blank=True)
@@ -32,5 +34,7 @@ class TriageRule(models.Model):
     priority = models.PositiveSmallIntegerField(default=1000)
 
     type = models.CharField(
-        max_length=2, choices=RuleType.choices, default=RuleType.PYTHON_FUNCTION
+        max_length=2,
+        choices=RuleType.choices,
+        default=RuleType.PYTHON_FUNCTION,
     )

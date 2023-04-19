@@ -108,7 +108,9 @@ def save_case(request: HttpRequest) -> HttpResponse:
     note_text = request.POST.get("note_text")
     if note_text and note_text.strip():
         case.notes.create(
-            content=note_text, created_by=request.user, updated_by=request.user
+            content=note_text,
+            created_by=request.user,
+            updated_by=request.user,
         )
 
     return HttpResponseRedirect(f"/cases/{case.uuid}")

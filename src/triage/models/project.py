@@ -22,11 +22,17 @@ class Project(BaseTimestampedModel, BaseUserTrackedModel):
     """An abstract project undergoing analysis."""
 
     uuid = models.UUIDField(
-        default=uuid.uuid4, editable=False, db_index=True, unique=True
+        default=uuid.uuid4,
+        editable=False,
+        db_index=True,
+        unique=True,
     )
     name = models.CharField(max_length=1024, db_index=True)
     package_url = models.CharField(
-        max_length=1024, null=True, blank=True, db_index=True
+        max_length=1024,
+        null=True,
+        blank=True,
+        db_index=True,
     )
     metadata = models.JSONField(null=True)
 
@@ -41,11 +47,17 @@ class ProjectVersion(BaseTimestampedModel, BaseUserTrackedModel):
     """A version of a project."""
 
     uuid = models.UUIDField(
-        default=uuid.uuid4, editable=False, db_index=True, unique=True
+        default=uuid.uuid4,
+        editable=False,
+        db_index=True,
+        unique=True,
     )
     project = models.ForeignKey("Project", on_delete=models.CASCADE)
     package_url = models.CharField(
-        max_length=1024, null=True, blank=True, db_index=True
+        max_length=1024,
+        null=True,
+        blank=True,
+        db_index=True,
     )
     files = models.ManyToManyField("File", blank=True, editable=True)
     metadata = models.JSONField(null=True)
@@ -58,7 +70,9 @@ class ProjectVersion(BaseTimestampedModel, BaseUserTrackedModel):
 
     @classmethod
     def get_or_create_from_package_url(
-        cls, package_url: PackageURL, created_by: User
+        cls,
+        package_url: PackageURL,
+        created_by: User,
     ) -> "ProjectVersion":
         """Retrieves or create a PackageVersion from the given package_url."""
         if package_url is None:
@@ -101,14 +115,15 @@ class ProjectVersion(BaseTimestampedModel, BaseUserTrackedModel):
             )
             if res.returncode != 0 or not os.listdir(temp_directory):
                 logger.debug("Failed to load source for package %s", self.package_url)
-                raise IOError("Failed to download package")
+                raise OSError("Failed to download package")
 
             num_added = 0
             for root, _, files in os.walk(temp_directory):
                 for file in files:
                     full_path = os.path.join(root, file)
                     relative_path = full_path[len(temp_directory) + 1 :].replace(
-                        "\\", "/"
+                        "\\",
+                        "/",
                     )
 
                     with open(full_path, "rb") as f:
@@ -117,7 +132,9 @@ class ProjectVersion(BaseTimestampedModel, BaseUserTrackedModel):
 
                     logger.debug("Adding [%s]", relative_path)
                     file_key = file_manager.add_file(
-                        content, relative_path, exist_ok=True
+                        content,
+                        relative_path,
+                        exist_ok=True,
                     )
 
                     # Files are unique by content, path, etc.

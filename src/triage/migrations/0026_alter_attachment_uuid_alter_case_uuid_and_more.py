@@ -15,84 +15,120 @@ class Migration(migrations.Migration):
             model_name="attachment",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="case",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="file",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="filter",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="finding",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="project",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="projectversion",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="scan",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="tool",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="tooldefect",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="wikiarticle",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
         migrations.AlterField(
             model_name="wikiarticlerevision",
             name="uuid",
             field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
+                db_index=True,
+                default=uuid.uuid4,
+                editable=False,
+                unique=True,
             ),
         ),
     ]

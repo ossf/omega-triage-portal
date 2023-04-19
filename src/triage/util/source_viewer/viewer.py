@@ -50,7 +50,8 @@ class SourceViewer:
                 for file in files:
                     full_path = os.path.join(root, file)
                     relative_path = full_path[len(temp_directory) + 1 :].replace(
-                        "\\", "/"
+                        "\\",
+                        "/",
                     )
                     cache_updates[f"sv_{self.package_url}_files"].add(relative_path)
                     with open(full_path, "rb") as f:
@@ -71,7 +72,8 @@ class SourceViewer:
         self.load_if_needed()
 
         target_path = PathSimilarity.find_most_similar_path(
-            self.get_file_list(), file_path
+            self.get_file_list(),
+            file_path,
         )
         if target_path:
             return {
