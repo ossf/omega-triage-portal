@@ -2,9 +2,7 @@ import logging
 import uuid
 
 from django.contrib.auth.models import User
-from django.core.cache import cache
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from taggit.managers import TaggableManager
 
 from triage.models import (
@@ -24,7 +22,11 @@ class ActiveToolDefectsManager(models.Manager):
             super()
             .get_queryset()
             .filter(
-                state__in=[WorkItemState.NEW, WorkItemState.ACTIVE, WorkItemState.NOT_SPECIFIED]
+                state__in=[
+                    WorkItemState.NEW,
+                    WorkItemState.ACTIVE,
+                    WorkItemState.NOT_SPECIFIED,
+                ]
             )
         )
 
@@ -35,12 +37,18 @@ class ToolDefect(BaseTimestampedModel, BaseUserTrackedModel):
     """
 
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True, unique=True)
+    uuid = models.UUIDField(
+        default=uuid.uuid4, editable=False, db_index=True, unique=True
+    )
     title = models.CharField(max_length=1024)
     description = models.TextField(null=True, blank=True)
     findings = models.ManyToManyField("Finding")
-    state = models.CharField(choices=WorkItemState.choices, max_length=2, default=WorkItemState.NEW)
-    assigned_to = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    state = models.CharField(
+        choices=WorkItemState.choices, max_length=2, default=WorkItemState.NEW
+    )
+    assigned_to = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL
+    )
     priority = models.PositiveSmallIntegerField(default=0)
     notes = models.ManyToManyField(Note)
     tags = TaggableManager()

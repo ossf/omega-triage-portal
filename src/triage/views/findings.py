@@ -6,8 +6,7 @@ from base64 import b64encode
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.http import (HttpRequest, HttpResponse, HttpResponseBadRequest,
-                         JsonResponse)
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
@@ -81,7 +80,9 @@ def show_upload(request: HttpRequest) -> HttpResponse:
         else:
             user = request.user
 
-        project_version = ProjectVersion.get_or_create_from_package_url(package_url, user)
+        project_version = ProjectVersion.get_or_create_from_package_url(
+            package_url, user
+        )
 
         # Find the source code for this project version
         # Get the source based on the package url
@@ -92,7 +93,9 @@ def show_upload(request: HttpRequest) -> HttpResponse:
             try:
                 archive_importer = ArchiveImporter()
                 try:
-                    archive_importer.import_archive(file.name, file.read(), project_version, user)
+                    archive_importer.import_archive(
+                        file.name, file.read(), project_version, user
+                    )
                 except Exception as msg:  # pylint: disable=bare-except
                     print(msg)
                     errors.append("Failed to import archive: " + file.name)
@@ -106,8 +109,9 @@ def show_upload(request: HttpRequest) -> HttpResponse:
 @login_required
 def show_finding_by_uuid(request: HttpRequest, finding_uuid) -> HttpResponse:
     finding = get_object_or_404(Finding, uuid=finding_uuid)
-    from django.contrib.auth.models import \
-        User  # pylint: disable=import-outside-toplevel
+    from django.contrib.auth.models import (  # pylint: disable=import-outside-toplevel
+        User,
+    )
 
     assignee_list = User.objects.all()
     context = {"finding": finding, "assignee_list": assignee_list}
@@ -204,6 +208,7 @@ def api_download_file(request: HttpRequest) -> HttpResponse:
     """
     return HttpResponse("Not implemented.")
 
+
 def api_upload_attachment(request: HttpRequest) -> JsonResponse:
     """Handles uploads (attachments)"""
     target_type = request.POST.get("target_type")
@@ -224,6 +229,8 @@ def api_upload_attachment(request: HttpRequest) -> JsonResponse:
             content_type=attachment.content_type,
             content=attachment.read(),
         )
-        results.append({"filename": new_attachment.filename, "uuid": new_attachment.uuid})
+        results.append(
+            {"filename": new_attachment.filename, "uuid": new_attachment.uuid}
+        )
 
     return JsonResponse({"success": True, "attachments": results})

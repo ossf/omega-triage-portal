@@ -3,8 +3,6 @@ import logging
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from triage.util.general import modify_purl
-
 logger = logging.getLogger(__name__)
 
 

@@ -9,8 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 class WikiArticleRevision(BaseTimestampedModel, BaseUserTrackedModel):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True, unique=True)
-    article = models.ForeignKey("WikiArticle", on_delete=models.CASCADE, related_name="revisions")
+    uuid = models.UUIDField(
+        default=uuid.uuid4, editable=False, db_index=True, unique=True
+    )
+    article = models.ForeignKey(
+        "WikiArticle", on_delete=models.CASCADE, related_name="revisions"
+    )
     title = models.CharField(max_length=1024)
     content = models.TextField(null=True, blank=True)
     change_comment = models.CharField(max_length=512, null=True, blank=True)
@@ -39,13 +43,19 @@ class ActiveWikiArticleManager(models.Manager):
             super()
             .get_queryset()
             .filter(
-                state__in=[WorkItemState.NEW, WorkItemState.ACTIVE, WorkItemState.NOT_SPECIFIED]
+                state__in=[
+                    WorkItemState.NEW,
+                    WorkItemState.ACTIVE,
+                    WorkItemState.NOT_SPECIFIED,
+                ]
             )
         )
 
 
 class WikiArticle(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True, unique=True)
+    uuid = models.UUIDField(
+        default=uuid.uuid4, editable=False, db_index=True, unique=True
+    )
     slug = models.SlugField(unique=True)
     state = models.CharField(
         max_length=2, choices=WorkItemState.choices, default=WorkItemState.ACTIVE
@@ -60,8 +70,7 @@ class WikiArticle(models.Model):
     def __str__(self):
         if self.current:
             return self.current.title
-        else:
-            return "(No article)"
+        return "(No article)"
 
     def get_absolute_url(self):
         return f"/wiki/{self.slug}"

@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("triage", "0028_remove_file_content_file_content_type_and_more"),
     ]

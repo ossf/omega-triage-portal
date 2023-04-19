@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import datetime
 import logging
 import uuid
 from typing import Any
 
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -35,7 +33,9 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
     class RuleType(models.TextChoices):
         PYTHON_FUNCTION = "PY", _("Python Function")
 
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True, unique=True)
+    uuid = models.UUIDField(
+        default=uuid.uuid4, editable=False, db_index=True, unique=True
+    )
     title = models.CharField(max_length=255, null=True, blank=True)
     condition = models.TextField(null=True, blank=True)
     action = models.TextField(null=True, blank=True)
@@ -63,7 +63,7 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
             raise ValidationError(_("Priority must be between 0 and 1000."))
 
     @classmethod
-    def get_filter_function(cls, function_body: str, type: str) -> Any | None:
+    def get_filter_function(cls, function_body: str, the_type: str) -> Any | None:
         """
         Creates a dynamic function with the body provided, of the type provided.
         In addition to sanity checking, this function also ensures that the function
@@ -71,17 +71,17 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
 
         Args:
             function_body: The body of the function to create.
-            type: The type of function to create, either "condition" or "action".
+            the_type: The type of function to create, either "condition" or "action".
 
         Returns:
             The function created, or None if the function body is invalid.
         """
-        if not function_body or not type:
+        if not function_body or not the_type:
             return None
 
         try:
             function_str = (
-                f"def {type}(finding):\n"
+                f"def {the_type}(finding):\n"
                 + "\n  return_value = None\n"
                 + "\n  from triage.models import Finding\n"
                 + "\n".join(["  " + line for line in function_body.splitlines()])
@@ -89,15 +89,14 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
             )
             logger.debug(function_str)
             if Filter.is_safe_function(function_str):
-                return compile(function_str, type, "exec")
-            else:
-                raise Exception("Function is not safe.")
-        except Exception as msg:
-            logger.warning("Invalid %s function: %s", type, msg)
+                return compile(function_str, the_type, "exec")
+            raise Exception("Function is not safe.")
+        except Exception as msg:  # pylint: disable=broad-except
+            logger.warning("Invalid %s function: %s", the_type, msg)
             return None
 
     @classmethod
-    def is_safe_function(self, code):
+    def is_safe_function(cls, code):
         """
         Helper method to check if a function is safe, meaning whether it uses unsafe
         functionality, like exec, eval, imports, or other potentially dangerous strings.
@@ -107,8 +106,10 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
 
         TODO: We need to actually implement this function.
         """
+        # pylint: disable=import-outside-toplevel
         import ast
 
+        # pylint: disable=unused-variable
         body = ast.parse(code)
         return True
 
@@ -117,8 +118,8 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
         """
         Execute all filters.
         """
-        for filter in Filter.objects.filter(active=True).order_by("priority"):
-            filter.execute()
+        for the_filter in Filter.objects.filter(active=True).order_by("priority"):
+            the_filter.execute()
 
     @synchronized
     def execute(self):
@@ -129,30 +130,37 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
             logger.info("Filter #%d is not active.", self.pk)
             return
 
+        # pylint: disable=import-outside-toplevel
         from triage.models import Finding
 
         try:
             condition_bytecode = Filter.get_filter_function(self.condition, "condition")
+            # pylint: disable=exec-used
             exec(condition_bytecode, globals())
 
             action_bytecode = Filter.get_filter_function(self.action, "action")
+            # pylint: disable=exec-used
             exec(action_bytecode, globals())
 
             for finding in Finding.active_findings.all():
                 try:
+                    # pylint: disable=undefined-variable
                     if condition(finding):  # type: ignore (dynamic variable)
                         logger.debug(
-                            "Executing filter action %s on finding %s", self.title, finding
+                            "Executing filter action %s on finding %s",
+                            self.title,
+                            finding,
                         )
+                        # pylint: disable=undefined-variable
                         action(finding)  # type: ignore (dynamic valiable)
-                except Exception as msg:
+                except Exception as msg:  # pylint: disable=broad-except
                     logger.error(
                         "Error executing filter action %s on finding %s: %s",
                         self.title,
                         finding,
                         msg,
                     )
-        except Exception as msg:
+        except Exception as msg:  # pylint: disable=broad-except
             logger.exception("Error executing filter %s: %s", self.title, msg)
 
         self.last_executed = timezone.now()

@@ -49,13 +49,16 @@ class SourceViewer:
             for root, dirs, files in os.walk(temp_directory):
                 for file in files:
                     full_path = os.path.join(root, file)
-                    relative_path = full_path[len(temp_directory) + 1 :].replace("\\", "/")
+                    relative_path = full_path[len(temp_directory) + 1 :].replace(
+                        "\\", "/"
+                    )
                     cache_updates[f"sv_{self.package_url}_files"].add(relative_path)
                     with open(full_path, "rb") as f:
                         file_cache_key = f"sv_{self.package_url}_{relative_path}"
                         cache_updates[file_cache_key] = f.read()
             logger.debug(
-                "Adding %d entries to cache", len(cache_updates[f"sv_{self.package_url}_files"])
+                "Adding %d entries to cache",
+                len(cache_updates[f"sv_{self.package_url}_files"]),
             )
             cache.set_many(cache_updates, timeout=60 * 60 * 8)
             self._is_loaded = True
@@ -67,7 +70,9 @@ class SourceViewer:
 
         self.load_if_needed()
 
-        target_path = PathSimilarity.find_most_similar_path(self.get_file_list(), file_path)
+        target_path = PathSimilarity.find_most_similar_path(
+            self.get_file_list(), file_path
+        )
         if target_path:
             return {
                 "path": target_path,

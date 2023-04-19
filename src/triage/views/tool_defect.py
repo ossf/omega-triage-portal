@@ -5,17 +5,31 @@ from base64 import b64encode
 from typing import Any, List
 
 from django.contrib.auth.decorators import login_required
-from django.http import (HttpRequest, HttpResponse, HttpResponseBadRequest,
-                         HttpResponseForbidden, HttpResponseNotFound,
-                         HttpResponseRedirect, JsonResponse)
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    HttpResponseNotFound,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
 
-from triage.models import (Case, Finding, Note, Project, ProjectVersion, Tool,
-                           ToolDefect, WorkItemState)
+from triage.models import (
+    Case,
+    Finding,
+    Note,
+    Project,
+    ProjectVersion,
+    Tool,
+    ToolDefect,
+    WorkItemState,
+)
 from triage.util.finding_importers.sarif_importer import SARIFImporter
 from triage.util.search_parser import parse_query_to_Q
 from triage.util.source_viewer import path_to_graph
@@ -91,14 +105,16 @@ def save_tool_defect(request: HttpRequest) -> HttpResponse:
     note_content = request.POST.get("note_content")
     tool_defect.save()
 
-    finding_uuid = request.POST.get("finding_uuid");
+    finding_uuid = request.POST.get("finding_uuid")
     if finding_uuid:
         finding = get_object_or_404(Finding, uuid=finding_uuid)
         tool_defect.findings.add(finding)
         tool_defect.save()
 
     if note_content and note_content.strip():
-        note = Note(content=note_content, created_by=request.user, updated_by=request.user)
+        note = Note(
+            content=note_content, created_by=request.user, updated_by=request.user
+        )
         note.save()
         tool_defect.notes.add(note)
         tool_defect.save()

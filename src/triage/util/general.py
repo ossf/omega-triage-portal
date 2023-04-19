@@ -22,7 +22,7 @@ def get_complex(obj, key, default_value: str | None = ""):
         for inner_key in parts:
             _data = _data[inner_key]
         return _data
-    except Exception:   # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         return default_value
 
 
@@ -59,6 +59,7 @@ def parse_date(date_str: str) -> datetime | None:
         except Exception as msg:  # pylint: disable=broad-except
             logger.warning("Failed to parse date: %s", msg)
     return None
+
 
 def clamp(value, min_value, max_value):
     """Clamp a value between a minimum and maximum value."""

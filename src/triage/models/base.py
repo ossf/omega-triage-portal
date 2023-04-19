@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -19,10 +18,18 @@ class BaseUserTrackedModel(models.Model):
     """A mixin that adds a created/updated by field to a model."""
 
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+", null=True, blank=True
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="+",
+        null=True,
+        blank=True,
     )
     updated_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+", null=True, blank=True
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="+",
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -57,6 +64,7 @@ class WorkItemState(models.TextChoices):
         If strict is False (default), then this method maps related strings to a close
         approximation, so "very high" and "critical" are both mapped to "VERY_HIGH", etc.
         """
+        # pylint: disable=too-many-branches,too-many-return-statements
         if state is None or not isinstance(state, str):
             return cls.NOT_SPECIFIED
         state = state.lower().strip()

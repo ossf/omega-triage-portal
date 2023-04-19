@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('triage', '0009_tooldefect_priority_tooldefect_tags'),
+        ("triage", "0009_tooldefect_priority_tooldefect_tags"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tooldefect',
-            name='description',
+            model_name="tooldefect",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
     ]

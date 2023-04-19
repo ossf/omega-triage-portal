@@ -5,10 +5,10 @@ this directory.
 """
 
 from triage.models.attachment import Attachment
+
 # import triage.models.project
 # import triage.models.tool_defect
-from triage.models.base import (BaseTimestampedModel, BaseUserTrackedModel,
-                                WorkItemState)
+from triage.models.base import BaseTimestampedModel, BaseUserTrackedModel, WorkItemState
 from triage.models.case import Case
 from triage.models.file import File, FileContent
 from triage.models.filter import Filter

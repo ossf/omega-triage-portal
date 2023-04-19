@@ -4,25 +4,35 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('triage', '0023_rename_parent_wikiarticlerevision_article_and_more'),
+        ("triage", "0023_rename_parent_wikiarticlerevision_article_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='wikiarticlerevision',
-            name='change_comment',
+            model_name="wikiarticlerevision",
+            name="change_comment",
             field=models.CharField(blank=True, max_length=512, null=True),
         ),
         migrations.AlterField(
-            model_name='wikiarticle',
-            name='slug',
+            model_name="wikiarticle",
+            name="slug",
             field=models.SlugField(unique=True),
         ),
         migrations.AlterField(
-            model_name='wikiarticlerevision',
-            name='state',
-            field=models.CharField(choices=[('N', 'New'), ('A', 'Active'), ('R', 'Resolved'), ('D', 'Deleted'), ('CL', 'Closed'), ('NS', 'Not Specified')], default='A', max_length=2),
+            model_name="wikiarticlerevision",
+            name="state",
+            field=models.CharField(
+                choices=[
+                    ("N", "New"),
+                    ("A", "Active"),
+                    ("R", "Resolved"),
+                    ("D", "Deleted"),
+                    ("CL", "Closed"),
+                    ("NS", "Not Specified"),
+                ],
+                default="A",
+                max_length=2,
+            ),
         ),
     ]
