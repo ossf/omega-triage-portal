@@ -29,7 +29,10 @@ class SARIFImporter:
         pass
 
     def import_sarif_file(
-        self, sarif: dict, project_version: ProjectVersion, user: AbstractBaseUser | None
+        self,
+        sarif: dict,
+        project_version: ProjectVersion,
+        user: AbstractBaseUser | None,
     ) -> bool:
         """
         Imports a SARIF file containing tool findings into the database.

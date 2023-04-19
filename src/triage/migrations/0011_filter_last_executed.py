@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('triage', '0010_tooldefect_description'),
+        ("triage", "0010_tooldefect_description"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='filter',
-            name='last_executed',
+            model_name="filter",
+            name="last_executed",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

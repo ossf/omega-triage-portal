@@ -1,4 +1,3 @@
-import hashlib
 import logging
 
 import markdown
@@ -17,6 +16,6 @@ def wiki_markdown(context):
         extensions = [WikiLinkExtension(base_url="/wiki/", end_url="")]
         result = markdown.markdown(context, extensions=extensions)
         return result
-    except Exception as msg:
-        logger.warn("Error in wiki_markdown: %s" % msg)
+    except Exception as msg:  # pylint: disable=broad-except
+        logger.warning("Error in wiki_markdown: %s", msg)
         return context

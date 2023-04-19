@@ -3,7 +3,7 @@ from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
 
-from core import to_bool
+from . import to_bool
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,21 +13,22 @@ try:
     import dotenv
 
     dotenv.load_dotenv(os.path.join(BASE_DIR, ".env-template"))
-except Exception:
-    raise ImproperlyConfigured("A .env-template file was not found. Environment variables are not set.")
+except Exception as ex:
+    raise ImproperlyConfigured(
+        "A .env-template file was not found. Environment variables are not set."
+    ) from ex
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = to_bool(os.getenv("DEBUG"))
 
-INTERNAL_IPS = [
-]
+INTERNAL_IPS = []
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
-if 'CODESPACE_NAME' in os.environ:
+if "CODESPACE_NAME" in os.environ:
     codespace_name = os.getenv("CODESPACE_NAME")
     codespace_domain = os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")
-    CSRF_TRUSTED_ORIGINS = [f'https://{codespace_name}-8001.{codespace_domain}']
+    CSRF_TRUSTED_ORIGINS = [f"https://{codespace_name}-8001.{codespace_domain}"]
     X_FRAME_OPTIONS = "ALLOW-FROM preview.app.github.dev"
 
 # Application definition
@@ -43,7 +44,7 @@ INSTALLED_APPS = [
     "triage",
     "debug_toolbar",
     "core",
-    "data"
+    "data",
 ]
 
 MIDDLEWARE = [
@@ -157,64 +158,72 @@ if to_bool(os.getenv("ENABLE_CACHE")):
         }
 
 # Configure application logging
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": u"[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)s] %(message)s",
-            "datefmt": "%d/%b/%Y %H:%M:%S",
+# Disable logging if pylint is running
+if "PYLINT" not in os.environ:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)s] %(message)s",
+                "datefmt": "%d/%b/%Y %H:%M:%S",
+            },
+            "simple": {"format": "%(levelname)s %(message)s"},
         },
-        "simple": {"format": u"%(levelname)s %(message)s"},
-    },
-    "handlers": {
-        "console": {"class": "logging.StreamHandler", "formatter": "verbose", "level": "WARNING"},
-        #'appinsights': {
-        #    'class': 'applicationinsights.django.LoggingHandler',
-        #    'level': 'INFO',
-        # },
-        "file": {
-            "level": "DEBUG",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "..", "logs", "omega-triage.log"),
-            "maxBytes": 1024 * 1024 * 50,  # 50 MB
-            "backupCount": 5,
-            "formatter": "verbose",
-            "encoding": "utf-8",
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "verbose",
+                "level": "WARNING",
+            },
+            #'appinsights': {
+            #    'class': 'applicationinsights.django.LoggingHandler',
+            #    'level': 'INFO',
+            # },
+            "file": {
+                "level": "DEBUG",
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": os.path.join(BASE_DIR, "..", "logs", "omega-triage.log"),
+                "maxBytes": 1024 * 1024 * 50,  # 50 MB
+                "backupCount": 5,
+                "formatter": "verbose",
+                "encoding": "utf-8",
+            },
+            "database-log": {
+                "level": "DEBUG",
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": os.path.join(BASE_DIR, "..", "logs", "database.log"),
+                "maxBytes": 1024 * 1024 * 50,  # 50 MB
+                "backupCount": 1,
+                "formatter": "verbose",
+                "encoding": "utf-8",
+            },
         },
-        "database-log": {
-            "level": "DEBUG",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "..", "logs", "database.log"),
-            "maxBytes": 1024 * 1024 * 50,  # 50 MB
-            "backupCount": 1,
-            "formatter": "verbose",
-            "encoding": "utf-8",
+        "loggers": {
+            "": {
+                "handlers": ["file", "console"],
+                "level": "WARNING",
+                "propagate": True,
+            },
+            "django": {
+                "level": "WARNING",
+                "handlers": ["console", "file"],
+                "propagate": False,
+            },
+            "django.db": {
+                "level": "DEBUG",
+                "handlers": ["database-log"],
+                "propagate": True,
+            },
+            "triage": {
+                "handlers": ["console", "file"],
+                "level": "DEBUG",
+                "propagate": False,
+            },
         },
-    },
-    "loggers": {
-        "": {
-            "handlers": ["file", "console"],
-            "level": "WARNING",
-            "propagate": True,
-        },
-        "django": {
-            "level": "WARNING",
-            "handlers": ["console", "file"],
-            "propagate": False,
-        },
-        "django.db": {
-            "level": "DEBUG",
-            "handlers": ["database-log"],
-            "propagate": True,
-        },
-        "triage": {
-            "handlers": ["console", "file"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-    },
-}
+    }
+else:
+    LOGGING = {}
 
 TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET = os.getenv("TOOLSHED_BLOB_STORAGE_CONTAINER")
 TOOLSHED_BLOB_STORAGE_URL_SECRET = os.getenv("TOOLSHED_BLOB_STORAGE_URL")
@@ -227,8 +236,6 @@ AUTH_USER_MODEL = "auth.User"  # pylint: disable=hard-coded-auth-user
 FILE_STORAGE_PROVIDERS = {
     "default": {
         "provider": "triage.util.content_managers.file_manager.FileManager",
-        "args": {
-            "root_path": "/home/vscode/omega-fs"
-        }
+        "args": {"root_path": "/home/vscode/omega-fs"},
     }
 }

@@ -1,5 +1,4 @@
 import logging
-import os
 import uuid
 
 from django.contrib.auth.models import User
@@ -18,7 +17,11 @@ class ActiveFindingsManager(models.Manager):
             super()
             .get_queryset()
             .filter(
-                state__in=[WorkItemState.NEW, WorkItemState.ACTIVE, WorkItemState.NOT_SPECIFIED]
+                state__in=[
+                    WorkItemState.NEW,
+                    WorkItemState.ACTIVE,
+                    WorkItemState.NOT_SPECIFIED,
+                ]
             )
         )
 
@@ -57,6 +60,7 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
             If strict is False (default), then this method maps related strings to a close
             approximation, so "very high" and "critical" are both mapped to "VERY_HIGH", etc.
             """
+            # pylint: disable=too-many-branches,too-many-return-statements
             if severity is None or not isinstance(severity, str):
                 return cls.NOT_SPECIFIED
             severity = severity.lower().strip()
@@ -76,7 +80,14 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
                 if severity == "none":
                     return cls.NONE
             else:
-                if severity in ["critical", "fatal", "very high", "very_high", "veryhigh", "vh"]:
+                if severity in [
+                    "critical",
+                    "fatal",
+                    "very high",
+                    "very_high",
+                    "veryhigh",
+                    "vh",
+                ]:
                     return cls.VERY_HIGH
                 if severity in ["important", "error", "high", "h"]:
                     return cls.HIGH
@@ -92,13 +103,17 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
                     return cls.NONE
             return cls.NOT_SPECIFIED
 
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True, unique=True)
+    uuid = models.UUIDField(
+        default=uuid.uuid4, editable=False, db_index=True, unique=True
+    )
     project_version = models.ForeignKey(
         "ProjectVersion", on_delete=models.CASCADE, null=True, blank=True
     )
 
     title = models.CharField(max_length=1024, db_index=True)
-    normalized_title = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
+    normalized_title = models.CharField(
+        max_length=1024, null=True, blank=True, db_index=True
+    )
 
     file = models.ForeignKey("File", null=True, blank=True, on_delete=models.SET_NULL)
     file_line = models.PositiveIntegerField(null=True, blank=True)
@@ -109,7 +124,9 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
 
     # Confidence showing how certain a finding is.
     confidence = models.CharField(
-        max_length=2, choices=ConfidenceLevel.choices, default=ConfidenceLevel.NOT_SPECIFIED
+        max_length=2,
+        choices=ConfidenceLevel.choices,
+        default=ConfidenceLevel.NOT_SPECIFIED,
     )
 
     # Severity showing how important a finding is to the security quality of a project.
@@ -127,7 +144,10 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
     )
 
     state = models.CharField(
-        max_length=2, choices=WorkItemState.choices, default=WorkItemState.NEW, db_index=True
+        max_length=2,
+        choices=WorkItemState.choices,
+        default=WorkItemState.NEW,
+        db_index=True,
     )
 
     tool = models.ForeignKey(
@@ -135,7 +155,9 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
     )
 
     # Who the finding is currently assigned to
-    assigned_to = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    assigned_to = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL
+    )
     assigned_dt = models.DateTimeField(auto_now_add=True)
 
     tags = TaggableManager()
@@ -154,8 +176,7 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
         """Render the filename or a placeholder where one does not exist."""
         if self.file:
             return self.file.name or "-"
-        else:
-            return "-"
+        return "-"
 
     @property
     def get_calculated_severity(self):
@@ -176,13 +197,4 @@ class Finding(BaseTimestampedModel, BaseUserTrackedModel):
         """Gets the best impact level (analyst estimate taking precedence)"""
         if self.estimated_impact is not None:
             return self.estimated_impact
-        else:
-            return None
-
-    def get_source_code(self):
-        """Retrieve source code pertaining to this finding."""
-        if self.file:
-            return self.file.content
-
-        logger.debug("No source code available (file is empty)")
         return None

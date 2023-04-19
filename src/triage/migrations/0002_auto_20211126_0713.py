@@ -4,19 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('triage', '0001_initial'),
+        ("triage", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='scan',
-            name='artifact_uuid',
+            model_name="scan",
+            name="artifact_uuid",
         ),
         migrations.AddField(
-            model_name='scan',
-            name='artifact_url_base',
+            model_name="scan",
+            name="artifact_url_base",
             field=models.CharField(blank=True, max_length=1024, null=True),
         ),
     ]

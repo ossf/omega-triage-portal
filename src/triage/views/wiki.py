@@ -7,9 +7,15 @@ from uuid import UUID
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.http import (HttpRequest, HttpResponse, HttpResponseBadRequest,
-                         HttpResponseForbidden, HttpResponseNotFound,
-                         HttpResponseRedirect, JsonResponse)
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    HttpResponseNotFound,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.views.decorators.cache import never_cache
@@ -17,8 +23,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from packageurl import PackageURL
 
-from triage.models import (Case, Project, ProjectVersion, WikiArticle,
-                           WikiArticleRevision, WorkItemState)
+from triage.models import (
+    Case,
+    Project,
+    ProjectVersion,
+    WikiArticle,
+    WikiArticleRevision,
+    WorkItemState,
+)
 from triage.util.finding_importers.sarif_importer import SARIFImporter
 from triage.util.general import parse_date
 from triage.util.search_parser import parse_query_to_Q

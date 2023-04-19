@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('triage', '0012_filecontent_remove_finding_file_path_file_and_more'),
+        ("triage", "0012_filecontent_remove_finding_file_path_file_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='projectversion',
-            name='files',
-            field=models.ManyToManyField(blank=True, to='triage.File'),
+            model_name="projectversion",
+            name="files",
+            field=models.ManyToManyField(blank=True, to="triage.File"),
         ),
     ]

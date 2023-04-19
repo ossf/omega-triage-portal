@@ -99,7 +99,9 @@ def save_filter(request: HttpRequest) -> HttpResponse:
         filter.full_clean()
     except ValidationError as e:
         return render(
-            request, "triage/filter_edit.html", {"filter": filter, "error_messages": e.messages}
+            request,
+            "triage/filter_edit.html",
+            {"filter": filter, "error_messages": e.messages},
         )
     filter.save()
 

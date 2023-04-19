@@ -63,7 +63,7 @@ def path_to_graph(files: QuerySet, package_url, separator="/", root=None):
         path_parts = path.split(separator)[1:]
 
         logging.debug(f"Analyzing: %s", path_parts)
-        for (part_id, part) in enumerate(path_parts):
+        for part_id, part in enumerate(path_parts):
             if part_id == 0:
                 parent_id = root
                 node_id = part
@@ -83,7 +83,9 @@ def path_to_graph(files: QuerySet, package_url, separator="/", root=None):
                         "file_uuid": file.uuid,
                         "li_attr": {"package_url": package_url},
                         "path": node_id,
-                        "icon": get_icon_for_path(node_name, part_id == len(path_parts)),
+                        "icon": get_icon_for_path(
+                            node_name, part_id == len(path_parts)
+                        ),
                     }
                 )
                 seen_nids.add(node_id)

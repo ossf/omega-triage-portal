@@ -100,7 +100,9 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
     available_attributes = [
         getattr(model, key).field.name
         for key in dir(model)
-        if isinstance(getattr(model, key), django.db.models.query_utils.DeferredAttribute)
+        if isinstance(
+            getattr(model, key), django.db.models.query_utils.DeferredAttribute
+        )
     ]
 
     parser_elements = []
@@ -160,9 +162,13 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
             if results.updated_dt.anchor == "@today":
                 target = timezone.now()
                 if results.updated_dt.anchor_op == "-":
-                    target -= datetime.timedelta(days=int(results.updated_dt.anchor_value))
+                    target -= datetime.timedelta(
+                        days=int(results.updated_dt.anchor_value)
+                    )
                 elif results.updated_dt.anchor_op == "+":
-                    target += datetime.timedelta(days=int(results.updated_dt.anchor_value))
+                    target += datetime.timedelta(
+                        days=int(results.updated_dt.anchor_value)
+                    )
             else:
                 raise ValueError("Unknown anchor: %s" % results.updated_dt.anchor)
         else:
@@ -190,9 +196,13 @@ def parse_query_to_Q(model: Model, query: str) -> Q:
             if results.created_dt.anchor == "@today":
                 target = timezone.now()
                 if results.created_dt.anchor_op == "-":
-                    target -= datetime.timedelta(days=int(results.created_dt.anchor_value))
+                    target -= datetime.timedelta(
+                        days=int(results.created_dt.anchor_value)
+                    )
                 elif results.created_dt.anchor_op == "+":
-                    target += datetime.timedelta(days=int(results.created_dt.anchor_value))
+                    target += datetime.timedelta(
+                        days=int(results.created_dt.anchor_value)
+                    )
             else:
                 raise ValueError("Unknown anchor: %s" % results.created_dt.anchor)
         else:

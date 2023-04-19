@@ -1,9 +1,10 @@
+import logging
 import math
 import os
-import logging
-from typing import Optional, List
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
+
 
 class PathSimilarity:
     def __init__(self):
@@ -21,13 +22,12 @@ class PathSimilarity:
 
         if not path.startswith("/"):
             path = "/" + path
-        
+
         if path.endswith("/"):
             path = path[:-1]
 
         path = path.strip().lower()
         return path
-
 
     @classmethod
     def get_path_similarity(cls, path1: str, path2: str) -> float:
@@ -38,9 +38,9 @@ class PathSimilarity:
             path2: The second path to compare.
 
         Returns:
-            A float between 0 and 1 indicating how similar the two paths are.       
+            A float between 0 and 1 indicating how similar the two paths are.
         """
-        logger.debug('get_path_similarity(%s, %s)', path1, path2)
+        logger.debug("get_path_similarity(%s, %s)", path1, path2)
         if path1 == path2:
             return 1.0
 
@@ -48,10 +48,10 @@ class PathSimilarity:
         path2 = cls._normalize_path(path2)
 
         if (
-            not path1                          # Invalid
-            or not path2                       # Invalid   
-            or path1.startswith("pkg:")        # Not a path
-            or path2.startswith("pkg:")        # Not a path
+            not path1  # Invalid
+            or not path2  # Invalid
+            or path1.startswith("pkg:")  # Not a path
+            or path2.startswith("pkg:")  # Not a path
         ):
             return 0.0
 
@@ -65,15 +65,15 @@ class PathSimilarity:
 
         longest_suffix = cls.get_longest_common_suffix(path1, path2)
         if longest_suffix:
-            suffix_dirs = longest_suffix.count('/') + 1
-            min_common_dirs = min(path1.count('/'), path2.count('/')) + 1
+            suffix_dirs = longest_suffix.count("/") + 1
+            min_common_dirs = min(path1.count("/"), path2.count("/")) + 1
             if suffix_dirs == min_common_dirs:
                 return 0.90
             else:
                 return min(math.sqrt(suffix_dirs / min_common_dirs), 0.90)
         else:
             return 0.0
-    
+
     @classmethod
     def get_longest_common_suffix(cls, path1: str, path2: str) -> str:
         """
@@ -89,9 +89,9 @@ class PathSimilarity:
         Args:
             path1: The first path to compare.
             path2: The second path to compare.
-        
+
         Returns:
-            The longest common suffix of the two paths, or None if there 
+            The longest common suffix of the two paths, or None if there
             is no common suffix.
         """
         # Simplify the algorithm to reduce copy/paste.
@@ -100,11 +100,13 @@ class PathSimilarity:
 
         for case in cases:
             for index in range(len(case[0]), 0, -1):
-                subpath = case[0][index:]   # Progressively longer suffixes
+                subpath = case[0][index:]  # Progressively longer suffixes
 
                 is_suffix = case[1].endswith(subpath)
-                is_dir = subpath.startswith('/') or (index > 0 and case[0][index-1] == '/')
-                is_longest = index > 0 and case[0][index-1] == '/'
+                is_dir = subpath.startswith("/") or (
+                    index > 0 and case[0][index - 1] == "/"
+                )
+                is_longest = index > 0 and case[0][index - 1] == "/"
 
                 if is_suffix and is_dir and is_longest:
                     longest_common_suffix = subpath
@@ -112,7 +114,9 @@ class PathSimilarity:
         return longest_common_suffix
 
     @classmethod
-    def find_most_similar_path(cls, target_paths: List[str], path: str) -> Optional[str]:
+    def find_most_similar_path(
+        cls, target_paths: List[str], path: str
+    ) -> Optional[str]:
         """
         Finds the path in the list that is most similar to the given path.
         The similarity is calculated using the get_path_similarity function.

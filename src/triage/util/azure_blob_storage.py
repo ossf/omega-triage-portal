@@ -43,8 +43,13 @@ class AzureBlobStorageAccessor:
         if not name_prefix or not name_prefix.strip():
             raise ValueError("name_prefix cannot be empty")
 
-        if not TOOLSHED_BLOB_STORAGE_URL_SECRET or not TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET:
-            raise ValueError("TOOLSHED_BLOB_STORAGE_URL and TOOLSHED_BLOB_CONTAINER must be set")
+        if (
+            not TOOLSHED_BLOB_STORAGE_URL_SECRET
+            or not TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET
+        ):
+            raise ValueError(
+                "TOOLSHED_BLOB_STORAGE_URL and TOOLSHED_BLOB_CONTAINER must be set"
+            )
 
         self.blob_service = BlobServiceClient(TOOLSHED_BLOB_STORAGE_URL_SECRET)
         self.container = self.blob_service.get_container_client(
@@ -55,7 +60,9 @@ class AzureBlobStorageAccessor:
     def get_blob_list(self) -> List[dict]:
         """Get list of blobs in the Toolshed container."""
         try:
-            cache_key = f"AzureBlobStorageAccessor[name_prefix={self.name_prefix}].blob_list"
+            cache_key = (
+                f"AzureBlobStorageAccessor[name_prefix={self.name_prefix}].blob_list"
+            )
             if cache.has_key(cache_key):
                 return cache.get(cache_key)
             else:
@@ -106,7 +113,12 @@ class ToolshedBlobStorageAccessor:
             return None
 
         if package_url.namespace:
-            parts = [package_url.type, package_url.namespace, package_url.name, package_url.version]
+            parts = [
+                package_url.type,
+                package_url.namespace,
+                package_url.name,
+                package_url.version,
+            ]
         else:
             parts = [package_url.type, package_url.name, package_url.version]
 
@@ -129,7 +141,9 @@ class ToolshedBlobStorageAccessor:
         for blob in self.blob_accessor.get_blob_list():
             if blob.get("relative_path").startswith("reference-binaries"):
                 if blob.get("relative_path").endswith(".tgz"):
-                    contents = self.blob_accessor.get_blob_contents(blob.get("full_path"))
+                    contents = self.blob_accessor.get_blob_contents(
+                        blob.get("full_path")
+                    )
                     tar = tarfile.open(fileobj=io.BytesIO(contents), mode="r")
                     for member in tar.getmembers():
                         results.append(os.path.join(path_prefix, member.name))
@@ -154,9 +168,9 @@ class ToolshedBlobStorageAccessor:
             clean_filename = self.clean_filename(filename)
 
             for blob in self.blob_accessor.get_blob_list():
-                if not blob.get("relative_path").startswith("reference-binaries") or not blob.get(
-                    "relative_path"
-                ).endswith(".tgz"):
+                if not blob.get("relative_path").startswith(
+                    "reference-binaries"
+                ) or not blob.get("relative_path").endswith(".tgz"):
                     continue
                 contents = self.blob_accessor.get_blob_contents(blob.get("full_path"))
                 tar = tarfile.open(fileobj=io.BytesIO(contents), mode="r")
@@ -169,7 +183,9 @@ class ToolshedBlobStorageAccessor:
 
                 # No exact match, try for fuzzy ones
                 member_names = [t.name for t in tar.getmembers()]
-                most_similar = PathSimilarity.find_most_similar_path(member_names, clean_filename)
+                most_similar = PathSimilarity.find_most_similar_path(
+                    member_names, clean_filename
+                )
                 if most_similar:
                     logger.info("Most similar path: %s", most_similar)
                     contents = tar.extractfile(most_similar).read()
@@ -195,7 +211,9 @@ class ToolshedBlobStorageAccessor:
             if filename.startswith("tools/"):
                 filename = filename[len("tools/") :]
             clean_filename = self.clean_filename(filename)
-            full_path = os.path.join(self.get_toolshed_prefix(self.package_url), filename)
+            full_path = os.path.join(
+                self.get_toolshed_prefix(self.package_url), filename
+            )
             contents = self.blob_accessor.get_blob_contents(full_path)
             logger.info("Content length: %d bytes", len(contents))
             cache.set(cache_key, contents, timeout=DEFAULT_CACHE_TIMEOUT)
@@ -207,7 +225,11 @@ class ToolshedBlobStorageAccessor:
 
     def get_all_files(self):
         """Retrieve all files about the scan."""
-        return self.get_tool_files() + self.get_package_files() + self.get_intermediate_files()
+        return (
+            self.get_tool_files()
+            + self.get_package_files()
+            + self.get_intermediate_files()
+        )
 
     def get_intermediate_files(self):
         return []

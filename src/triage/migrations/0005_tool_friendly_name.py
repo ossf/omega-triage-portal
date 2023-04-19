@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('triage', '0004_tooldefect_assigned_to'),
+        ("triage", "0004_tooldefect_assigned_to"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tool',
-            name='friendly_name',
+            model_name="tool",
+            name="friendly_name",
             field=models.CharField(blank=True, max_length=128, null=True),
         ),
     ]

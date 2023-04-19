@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("triage", "0026_alter_attachment_uuid_alter_case_uuid_and_more"),
     ]

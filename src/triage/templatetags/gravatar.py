@@ -16,6 +16,5 @@ def gravatar(user, size=128):
         # MD5 is mandated by the Gravatar spec - gravatar.com
         hash_value = hashlib.md5(email).hexdigest()  # noqa # nosec
         return root.format(hash_value, str(size), "")
-    else:
-        # Mystery Person
-        return root.format("", str(size), "f=y")
+    # Mystery Person
+    return root.format("", str(size), "f=y")
