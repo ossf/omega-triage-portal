@@ -3,7 +3,7 @@ data/
 # Derived from https://github.com/github/gitignore/blob/218a941be92679ce67d0484547e3e142b2f5f6f0/Python.gitignore
 
 # Static Files (brought in via Yarn)
-#src/triage/static/triage/resources
+src/triage/static/triage/resources
 logs/
 
 # Byte-compiled / optimized / DLL files
