@@ -81,7 +81,8 @@ def show_upload(request: HttpRequest) -> HttpResponse:
             user = request.user
 
         project_version = ProjectVersion.get_or_create_from_package_url(
-            package_url, user
+            package_url,
+            user,
         )
 
         # Find the source code for this project version
@@ -94,7 +95,10 @@ def show_upload(request: HttpRequest) -> HttpResponse:
                 archive_importer = ArchiveImporter()
                 try:
                     archive_importer.import_archive(
-                        file.name, file.read(), project_version, user
+                        file.name,
+                        file.read(),
+                        project_version,
+                        user,
                     )
                 except Exception as msg:  # pylint: disable=bare-except
                     print(msg)
@@ -177,7 +181,7 @@ def api_get_source_code(request: HttpRequest) -> JsonResponse:
                         "file_contents": b64encode(content).decode("utf-8"),
                         "file_name": file.path,
                         "status": "ok",
-                    }
+                    },
                 )
     logger.info("Source code not found for %s", file_uuid)
     return JsonResponse({"status": "error", "message": "File not found"}, status=404)
@@ -230,7 +234,7 @@ def api_upload_attachment(request: HttpRequest) -> JsonResponse:
             content=attachment.read(),
         )
         results.append(
-            {"filename": new_attachment.filename, "uuid": new_attachment.uuid}
+            {"filename": new_attachment.filename, "uuid": new_attachment.uuid},
         )
 
     return JsonResponse({"success": True, "attachments": results})

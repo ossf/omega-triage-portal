@@ -61,4 +61,3 @@ TBD
 ## Security
 
 See [SECURITY.md](https://github.com/ossf/omega-triage-portal/blob/main/SECURITY.md).
-

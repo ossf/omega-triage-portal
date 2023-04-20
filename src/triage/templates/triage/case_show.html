@@ -2,7 +2,7 @@
 {% load gravatar %}
 {% block body %}
     <div class="mb-3"></div>
-    <form class="row" method="post" action="/cases/save">    
+    <form class="row" method="post" action="/cases/save">
         {% csrf_token %}
         <input type="hidden" name="case_uuid" value="{{ case.uuid }}"/>
 
@@ -44,7 +44,7 @@
                         <div class="col-12 mt-2">
                             <label for="case_description" class="form-label">Description</label>
                             <textarea id="case_description" class="form-control" name="description" rows="7">{{ case.description|default:"" }}</textarea>
-                        </div>            
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -115,7 +115,7 @@
             <div class="col-md-3">
                 <label for="case_resolved_actual_dt" class="form-label">Resolution Actual</label>
                 <input type="date" class="form-control" id="case_resolved_actual_dt" name="resolved_actual_dt" value="{{ case.resolved_actual_dt|date:"Y-m-d" }}">
-            </div>            
+            </div>
             <div class="col-md-3">
                 <label for="case_reporting_partner" class="form-label">Reporting Partner</label>
                 <select id="case_reporting_partner" class="form-select" name="reporting_partner">
@@ -132,7 +132,7 @@
             <div class="col-md-3">
                 <label for="case_reported_dt" class="form-label">Reported Date</label>
                 <input type="date" class="form-control" id="case_reported_dt" name="reported_dt" value="{{ case.reported_dt|date:"Y-m-d" }}">
-            </div>                        
+            </div>
             <div class="col-md-3">
                 <label for="caseReportingReference" class="form-label">Reporting Reference</label>
                 <input type="text" class="form-control" id="caseReportingReference" name="reporting_reference" value="{{ case.reporting_reference|default:"" }}">

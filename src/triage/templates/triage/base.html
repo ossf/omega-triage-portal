@@ -88,7 +88,7 @@
               {% else %}
                 <a class="nav-link" href="/filter/">Filters</a>
               {% endif %}
-            </li>            
+            </li>
             <li class="nav-item">
               {% if '/cases/' in request.path %}
                 <a class="nav-link active" href="/cases/">Cases</a>
@@ -109,7 +109,7 @@
               {% else %}
                 <a class="nav-link" href="/wiki">Wiki</a>
               {% endif %}
-            </li>                  
+            </li>
           </ul>
       </div>
     </nav>
@@ -143,7 +143,7 @@
     <script type="text/javascript" src="{% static "triage/resources/ace-builds/src-min-noconflict/ext-beautify.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/jstree/dist/jstree.min.js" %}"></script>
     <script type="text/javascript" src="{% static "triage/resources/select2/dist/js/select2.min.js" %}"></script>
-    
+
     <script type="text/javascript" src="{% static "triage/omega.js" %}"></script>
     <script type="text/javascript">
       {% block javascript %}

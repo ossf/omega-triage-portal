@@ -48,16 +48,16 @@ class AzureBlobStorageAccessor:
             or not TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET
         ):
             raise ValueError(
-                "TOOLSHED_BLOB_STORAGE_URL and TOOLSHED_BLOB_CONTAINER must be set"
+                "TOOLSHED_BLOB_STORAGE_URL and TOOLSHED_BLOB_CONTAINER must be set",
             )
 
         self.blob_service = BlobServiceClient(TOOLSHED_BLOB_STORAGE_URL_SECRET)
         self.container = self.blob_service.get_container_client(
-            TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET
+            TOOLSHED_BLOB_STORAGE_CONTAINER_SECRET,
         )
         self.name_prefix = name_prefix
 
-    def get_blob_list(self) -> List[dict]:
+    def get_blob_list(self) -> list[dict]:
         """Get list of blobs in the Toolshed container."""
         try:
             cache_key = (
@@ -73,7 +73,7 @@ class AzureBlobStorageAccessor:
                             "relative_path": b.name[len(self.name_prefix) + 1 :],
                         },
                         self.container.list_blobs(name_starts_with=self.name_prefix),
-                    )
+                    ),
                 )
                 cache.set(cache_key, data, timeout=DEFAULT_CACHE_TIMEOUT)
                 return data
@@ -97,7 +97,7 @@ class AzureBlobStorageAccessor:
 
 
 class ToolshedBlobStorageAccessor:
-    def __init__(self, scan: "triage.models.Scan"):
+    def __init__(self, scan: triage.models.Scan):
         if not scan:
             raise ValueError("scan cannot be empty")
         self.scan = scan
@@ -142,7 +142,7 @@ class ToolshedBlobStorageAccessor:
             if blob.get("relative_path").startswith("reference-binaries"):
                 if blob.get("relative_path").endswith(".tgz"):
                     contents = self.blob_accessor.get_blob_contents(
-                        blob.get("full_path")
+                        blob.get("full_path"),
                     )
                     tar = tarfile.open(fileobj=io.BytesIO(contents), mode="r")
                     for member in tar.getmembers():
@@ -169,7 +169,7 @@ class ToolshedBlobStorageAccessor:
 
             for blob in self.blob_accessor.get_blob_list():
                 if not blob.get("relative_path").startswith(
-                    "reference-binaries"
+                    "reference-binaries",
                 ) or not blob.get("relative_path").endswith(".tgz"):
                     continue
                 contents = self.blob_accessor.get_blob_contents(blob.get("full_path"))
@@ -184,7 +184,8 @@ class ToolshedBlobStorageAccessor:
                 # No exact match, try for fuzzy ones
                 member_names = [t.name for t in tar.getmembers()]
                 most_similar = PathSimilarity.find_most_similar_path(
-                    member_names, clean_filename
+                    member_names,
+                    clean_filename,
                 )
                 if most_similar:
                     logger.info("Most similar path: %s", most_similar)
@@ -212,7 +213,8 @@ class ToolshedBlobStorageAccessor:
                 filename = filename[len("tools/") :]
             clean_filename = self.clean_filename(filename)
             full_path = os.path.join(
-                self.get_toolshed_prefix(self.package_url), filename
+                self.get_toolshed_prefix(self.package_url),
+                filename,
             )
             contents = self.blob_accessor.get_blob_contents(full_path)
             logger.info("Content length: %d bytes", len(contents))
@@ -234,7 +236,7 @@ class ToolshedBlobStorageAccessor:
     def get_intermediate_files(self):
         return []
 
-    def clean_filename(self, filename: str) -> Optional[str]:
+    def clean_filename(self, filename: str) -> str | None:
         if not filename:
             return None
 

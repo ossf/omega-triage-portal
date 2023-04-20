@@ -115,7 +115,9 @@ class PathSimilarity:
 
     @classmethod
     def find_most_similar_path(
-        cls, target_paths: List[str], path: str
+        cls,
+        target_paths: List[str],
+        path: str,
     ) -> Optional[str]:
         """
         Finds the path in the list that is most similar to the given path.

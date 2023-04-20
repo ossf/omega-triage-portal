@@ -12,7 +12,8 @@ from triage.models import Attachment
 @login_required
 @require_http_methods(["GET"])
 def download_attachment(
-    request: HttpRequest, attachment_uuid: uuid.UUID
+    request: HttpRequest,
+    attachment_uuid: uuid.UUID,
 ) -> HttpResponse:
     """Downloads an attachment
 

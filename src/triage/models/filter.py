@@ -34,7 +34,10 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
         PYTHON_FUNCTION = "PY", _("Python Function")
 
     uuid = models.UUIDField(
-        default=uuid.uuid4, editable=False, db_index=True, unique=True
+        default=uuid.uuid4,
+        editable=False,
+        db_index=True,
+        unique=True,
     )
     title = models.CharField(max_length=255, null=True, blank=True)
     condition = models.TextField(null=True, blank=True)

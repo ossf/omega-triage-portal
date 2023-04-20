@@ -37,7 +37,10 @@ class Migration(migrations.Migration):
                 (
                     "package_url",
                     models.CharField(
-                        blank=True, db_index=True, max_length=1024, null=True
+                        blank=True,
+                        db_index=True,
+                        max_length=1024,
+                        null=True,
                     ),
                 ),
                 ("metadata", models.JSONField(null=True)),
@@ -83,7 +86,10 @@ class Migration(migrations.Migration):
                 (
                     "package_url",
                     models.CharField(
-                        blank=True, db_index=True, max_length=1024, null=True
+                        blank=True,
+                        db_index=True,
+                        max_length=1024,
+                        null=True,
                     ),
                 ),
                 ("metadata", models.JSONField(null=True)),
@@ -98,7 +104,8 @@ class Migration(migrations.Migration):
                 (
                     "project",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="triage.project"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="triage.project",
                     ),
                 ),
                 (
@@ -144,7 +151,9 @@ class Migration(migrations.Migration):
                 (
                     "type",
                     models.CharField(
-                        choices=[("PY", "Python Function")], default="PY", max_length=2
+                        choices=[("PY", "Python Function")],
+                        default="PY",
+                        max_length=2,
                     ),
                 ),
             ],
@@ -246,7 +255,8 @@ class Migration(migrations.Migration):
                 (
                     "tool",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="triage.tool"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="triage.tool",
                     ),
                 ),
                 (
@@ -413,7 +423,8 @@ class Migration(migrations.Migration):
                 (
                     "scan",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="triage.scan"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="triage.scan",
                     ),
                 ),
                 (

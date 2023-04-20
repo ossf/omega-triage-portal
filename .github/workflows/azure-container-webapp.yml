@@ -35,7 +35,7 @@ env:
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
   workflow_dispatch:
 

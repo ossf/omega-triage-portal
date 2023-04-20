@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """This module URL patterns specific to the Triage Portal."""
 
 from django.urls import path

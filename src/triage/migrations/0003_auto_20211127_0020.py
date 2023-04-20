@@ -65,7 +65,8 @@ class Migration(migrations.Migration):
                 (
                     "tool",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="triage.tool"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="triage.tool",
                     ),
                 ),
             ],

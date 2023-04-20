@@ -15,7 +15,7 @@ try:
     dotenv.load_dotenv(os.path.join(BASE_DIR, ".env-template"))
 except Exception as ex:
     raise ImproperlyConfigured(
-        "A .env-template file was not found. Environment variables are not set."
+        "A .env-template file was not found. Environment variables are not set.",
     ) from ex
 
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -92,7 +92,7 @@ DATABASES = {
         "HOST": os.getenv("DATABASE_HOST"),
         "PORT": os.getenv("DATABASE_PORT"),
         "OPTIONS": {"options": "-c statement_timeout=5000"},
-    }
+    },
 }
 
 
@@ -146,7 +146,7 @@ if to_bool(os.getenv("ENABLE_CACHE")):
                     "TIMEOUT": DEFAULT_CACHE_TIMEOUT,
                     "PASSWORD": os.getenv("CACHE_REDIS_PASSWORD"),
                 },
-            }
+            },
         }
     else:
         CACHES = {
@@ -237,5 +237,5 @@ FILE_STORAGE_PROVIDERS = {
     "default": {
         "provider": "triage.util.content_managers.file_manager.FileManager",
         "args": {"root_path": "/home/vscode/omega-fs"},
-    }
+    },
 }

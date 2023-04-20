@@ -44,12 +44,13 @@ class ArchiveImporter:
 
             if "/reference-binaries/" in file_info.get("name"):
                 logger.debug(
-                    "File was in reference source directory, saving as source code."
+                    "File was in reference source directory, saving as source code.",
                 )
 
                 # Extract each file, save it to the database
                 for source_file_info in self.extract_archive(
-                    file_info.get("name"), file_info.get("content")
+                    file_info.get("name"),
+                    file_info.get("content"),
                 ):
                     logger.debug("Saving source code: %s", source_file_info.get("name"))
                     self.add_file(

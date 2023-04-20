@@ -23,7 +23,7 @@ RUN cd /opt && \
     mv OSSGadget_linux_${OSSGADGET_VERSION} OSSGadget
 
 
-RUN apk update && apk add gcc \
+RUN apk update && apk add --no-cache gcc \
                         libc-dev \
                         postgresql-dev \
                         musl-dev  \

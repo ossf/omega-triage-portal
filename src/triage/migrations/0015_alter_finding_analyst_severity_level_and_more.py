@@ -32,7 +32,10 @@ class Migration(migrations.Migration):
             model_name="finding",
             name="normalized_title",
             field=models.CharField(
-                blank=True, db_index=True, max_length=1024, null=True
+                blank=True,
+                db_index=True,
+                max_length=1024,
+                null=True,
             ),
         ),
         migrations.AlterField(
