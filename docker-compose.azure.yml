@@ -1,0 +1,11 @@
+volumes:
+  postgres-data:
+    driver: azure_file
+    driver_opts: &default-driver-opts
+      share_name: triage-postgres-data
+      storage_account_name: ${AZURE_STORAGE_ACCOUNT_NAME:-jlltriageportalstorage}
+  redis-data:
+    driver: azure_file
+    driver_opts:
+      <<: *default-driver-opts
+      share_name: triage-redis-data

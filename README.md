@@ -38,11 +38,11 @@ docker-compose up
 create the database. This command MUST be run after the application is running with the above commands.
 
 ```bash
-docker-compose run web python manage.py migrate
+docker-compose run triage-portal python manage.py migrate
 ```
 
 ```bash
-docker-compose run web python manage.py createsuperuser
+docker-compose run triage-portal python manage.py createsuperuser
 ```
 
 ### Local Windows Development
