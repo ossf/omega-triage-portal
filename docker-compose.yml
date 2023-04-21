@@ -2,15 +2,17 @@ version: '3.9'
 
 services:
   db:
-    image: postgres:latest
+    image: registrytriageportal.azurecr.io/triage-postgres
+    build:
+      context: postgres
     restart: unless-stopped
+    container_name: triage-postgres
     ports:
       - "5432:5432"
     env_file:
       - ./src/.env-template
     volumes:
-      - ./data/db:/var/lib/postgresql/data
-      - ./data/db/:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=triage
       - POSTGRES_USER=triage_user
@@ -28,14 +30,14 @@ services:
     volumes:
       - redis-data:/data
 
-  web:
-    image: app:portal
+  triage-portal:
+    image: registrytriageportal.azurecr.io/triage-portal
     build:
       context: src
     command: python3 manage.py runserver 0.0.0.0:8001
     ports:
       - "8001:8001"
-    container_name: Triage_Container
+    container_name: triage-portal
     environment:
       - POSTGRES_NAME=triage
       - POSTGRES_USER=triage_user
