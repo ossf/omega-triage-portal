@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   db:
-    image: registrytriageportal.azurecr.io/triage-postgres
+    image: omegatriagecontainerreg.azurecr.io/triage-postgres
     build:
       context: postgres
     restart: unless-stopped
@@ -31,7 +31,7 @@ services:
       - redis-data:/data
 
   triage-portal:
-    image: registrytriageportal.azurecr.io/triage-portal
+    image: omegatriagecontainerreg.azurecr.io/triage-portal
     build:
       context: src
     command: python3 manage.py runserver 0.0.0.0:8001
