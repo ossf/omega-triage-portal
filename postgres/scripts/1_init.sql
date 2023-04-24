@@ -1,3 +1,2 @@
-CREATE USER triage_user;
-CREATE DATABASE triage;
-GRANT ALL PRIVILEGES ON DATABASE triage_user TO triage_user;
+-- Any initialization sql commands go here.
+-- The Postgres Docker image will have already created the user and the database at this point.
