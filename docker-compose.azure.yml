@@ -3,7 +3,7 @@ volumes:
     driver: azure_file
     driver_opts: &default-driver-opts
       share_name: triage-postgres-data
-      storage_account_name: ${AZURE_STORAGE_ACCOUNT_NAME:-jlltriageportalstorage}
+      storage_account_name: ${AZURE_STORAGE_ACCOUNT_NAME:-alphaomegaoafdev1}
   redis-data:
     driver: azure_file
     driver_opts:
