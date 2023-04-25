@@ -9,21 +9,10 @@ services:
 
   triage-portal:
     image: omegatriagecontainerreg.azurecr.io/triage-portal
-    build:
-      context: src
-    command: python3 manage.py runserver 0.0.0.0:8001
-    ports:
-      - "8001:8001"
-    container_name: triage-portal
-    depends_on:
-      redis:
-          condition: service_started
-    env_file:
-      - ./src/.env-template
 
 volumes:
   redis-data:
     driver: azure_file
-    driver_opts: &default-driver-opts
+    driver_opts:
       share_name: triage-redis-data
-      storage_account_name: alphaomegaoafdev1
+      storage_account_name: ${AZURE_STORAGE_ACCOUNT_NAME:-alphaomegaoafdev2}

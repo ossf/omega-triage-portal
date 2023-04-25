@@ -1,0 +1,31 @@
+services:
+  db:
+    image: triage-postgres
+    build:
+      context: postgres
+    restart: unless-stopped
+    container_name: triage-postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./src/.env-template
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=triage
+      - POSTGRES_USER=triage_user
+      - POSTGRES_PASSWORD=triage_password
+    healthcheck:
+      test: pg_isready -d $$DATABASE_NAME -U $$DATABASE_USER
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  triage-portal:
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      TRIAGE_PORTAL_DEVELOPMENT_MODE: True
+
+volumes:
+  postgres-data:
