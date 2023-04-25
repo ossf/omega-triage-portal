@@ -23,7 +23,7 @@ DEBUG = to_bool(os.getenv("DEBUG"))
 
 INTERNAL_IPS = []
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["omega-triageportal-dev1.azurewebsites.net"]
 
 if "CODESPACE_NAME" in os.environ:
     codespace_name = os.getenv("CODESPACE_NAME")
@@ -91,7 +91,10 @@ DATABASES = {
         "PASSWORD": os.getenv("DATABASE_PASSWORD"),
         "HOST": os.getenv("DATABASE_HOST"),
         "PORT": os.getenv("DATABASE_PORT"),
-        "OPTIONS": {"options": "-c statement_timeout=5000"},
+        "OPTIONS": {
+            "sslmode": "require",
+            "options": "-c statement_timeout=5000"
+        },
     },
 }
 

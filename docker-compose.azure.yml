@@ -1,11 +1,29 @@
+version: '3.9'
+
+services:
+  redis:
+    image: omegatriagecontainerreg.azurecr.io/redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  triage-portal:
+    image: omegatriagecontainerreg.azurecr.io/triage-portal
+    build:
+      context: src
+    command: python3 manage.py runserver 0.0.0.0:8001
+    ports:
+      - "8001:8001"
+    container_name: triage-portal
+    depends_on:
+      redis:
+          condition: service_started
+    env_file:
+      - ./src/.env-template
+
 volumes:
-  postgres-data:
-    driver: azure_file
-    driver_opts: &default-driver-opts
-      share_name: triage-postgres-data
-      storage_account_name: ${AZURE_STORAGE_ACCOUNT_NAME:-alphaomegaoafdev1}
   redis-data:
     driver: azure_file
-    driver_opts:
-      <<: *default-driver-opts
+    driver_opts: &default-driver-opts
       share_name: triage-redis-data
+      storage_account_name: alphaomegaoafdev1
