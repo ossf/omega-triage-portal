@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -158,8 +159,8 @@ if to_bool(os.getenv("ENABLE_CACHE")):
         }
 
 # Configure application logging
-# Disable logging if pylint is running
-if "PYLINT" not in os.environ:
+# Disable logging if pylint or pytest is running
+if "PYLINT" not in os.environ and "pytest" not in sys.modules:
     LOGGING = {
         "version": 1,
         "disable_existing_loggers": False,

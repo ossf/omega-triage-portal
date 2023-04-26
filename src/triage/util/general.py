@@ -35,7 +35,16 @@ def strtobool(value: str, default: bool) -> bool:
     """Convert a string representation of truth to True or False.
     True values are 'y', 'yes', 't', 'true', 'on', and '1';
     False values are 'n', 'no', 'f', 'false', 'off', and '0'.
-    Raises ValueError if the string is anything else.
+    >>> strtobool("yes", False)
+    True
+    >>> strtobool("no", True)
+    False
+    >>> strtobool("1", False)
+    True
+    >>> strtobool("0", True)
+    False
+    >>> strtobool("potato", False)
+    False
     """
     if isinstance(value, bool):
         return value

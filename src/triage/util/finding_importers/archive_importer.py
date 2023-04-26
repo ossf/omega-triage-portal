@@ -10,8 +10,7 @@ import zipfile
 import magic
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 
-from core import settings
-from triage.models import File, FileContent, ProjectVersion
+from triage.models import File, ProjectVersion
 from triage.util.content_managers.file_manager import FileManager
 from triage.util.finding_importers.sarif_importer import SARIFImporter
 

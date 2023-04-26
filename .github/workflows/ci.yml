@@ -35,9 +35,8 @@ jobs:
       - name: Run tests
         working-directory: ./src
         run: tox
-#      - name: Upload coverage to Codecov
-#        uses: codecov/codecov-action@v3
-#        working-directory: ./src
-#        with:
-#          token: ${{ secrets.CODECOV_TOKEN }}
-#          fail_ci_if_error: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
