@@ -5,10 +5,9 @@ import logging
 import os
 import tarfile
 import urllib.parse
-import uuid
-from typing import List, Optional
+from typing import List
 
-from azure.storage.blob import BlobClient, BlobServiceClient
+from azure.storage.blob import BlobServiceClient
 from django.core.cache import cache
 from packageurl import PackageURL
 
@@ -31,11 +30,9 @@ class AzureBlobStorageAccessor:
     {type}/{namespace}/{name}/{version}.
 
     Example:
-    >>> blob_storage = AzureBlobStorageAccessor('npm/left-pad/1.3.0')
-    >>> blob_storage.get_blob_list()
-    >>> blob_storage.get_tool_contents('tool-codeql-results.json')
-    >>> blob_storage.get_package_contents(')
-    >>> blob_storage.get_blob_contents('tool-codeql-results.json')
+    >>> blob_storage = AzureBlobStorageAccessor('npm/left-pad/1.3.0') # doctest: +SKIP
+    >>> blob_storage.get_blob_list() # doctest: +SKIP
+    >>> blob_storage.get_blob_contents('tool-codeql-results.json') # doctest: +SKIP
     """
 
     def __init__(self, name_prefix: str):
@@ -97,6 +94,12 @@ class AzureBlobStorageAccessor:
 
 
 class ToolshedBlobStorageAccessor:
+    """
+    Example:
+    >>> toolshed_storage_accessor = ToolshedBlobStorageAccessor(scan) # doctest: +SKIP
+    >>> toolshed_storage_accessor.get_package_contents('') # doctest: +SKIP
+    """
+
     def __init__(self, scan: triage.models.Scan):
         if not scan:
             raise ValueError("scan cannot be empty")
