@@ -8,7 +8,7 @@ services:
       - redis-data:/data
 
   triage-portal:
-    image: omegatriagecontainerreg.azurecr.io/triage-portal
+    image: omegatriagecontainerreg.azurecr.io/omega-triage-portal
 
 volumes:
   redis-data:

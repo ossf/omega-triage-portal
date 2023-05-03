@@ -1,0 +1,60 @@
+name: Publish Docker Containers to Registries
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    name: Build & Push (${{ matrix.platform }})
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        platform: [ "linux/amd64", "linux/arm64" ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up QEMU
+        if: matrix.platform == 'linux/arm64'
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        id: buildx
+        with:
+          version: latest
+          platforms: ${{ matrix.platform }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push to GitHub Container Registry
+        uses: docker/bake-action@v1.1.3
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          files: docker-compose.yml, docker-compose.ghcr.yml
+
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: omegatriagecontainerreg.azurecr.io
+          username: ${{ secrets.AZURE_CLIENT_ID }}
+          password: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Build and Push to Azure Container Registry
+        uses: docker/bake-action@v1.1.3
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          files: docker-compose.yml, docker-compose.azure.yml
