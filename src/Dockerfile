@@ -23,12 +23,13 @@ RUN    tar zxvf OSSGadget.tar.gz && \
     mv OSSGadget_linux_${OSSGADGET_VERSION} OSSGadget
 
 
-RUN apt-get update && apt-get install -y build-essential \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+                        build-essential \
                         libmagic-dev \
-                        postgresql  \
+                        postgresql \
                         postgresql-contrib \
-                        musl-dev  \
-                        libffi-dev
+                        musl-dev \
+                        && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 RUN mkdir .env && mkdir /data && mkdir /logs
