@@ -21,10 +21,13 @@ except Exception as ex:
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = to_bool(os.getenv("DEBUG"))
+TRIAGE_PORTAL_DEVELOPMENT_MODE = to_bool(os.getenv("TRIAGE_PORTAL_DEVELOPMENT_MODE"))
 
 INTERNAL_IPS = []
-
-ALLOWED_HOSTS = ["*"]
+if TRIAGE_PORTAL_DEVELOPMENT_MODE:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = ["omega-triageportal-dev1.azurewebsites.net"]
 
 if "CODESPACE_NAME" in os.environ:
     codespace_name = os.getenv("CODESPACE_NAME")
@@ -92,9 +95,13 @@ DATABASES = {
         "PASSWORD": os.getenv("DATABASE_PASSWORD"),
         "HOST": os.getenv("DATABASE_HOST"),
         "PORT": os.getenv("DATABASE_PORT"),
-        "OPTIONS": {"options": "-c statement_timeout=5000"},
     },
 }
+if not TRIAGE_PORTAL_DEVELOPMENT_MODE:
+    DATABASES["default"]["OPTIONS"] = {
+        "sslmode": "require",
+        "options": "-c statement_timeout=5000",
+    }
 
 
 # Password validation

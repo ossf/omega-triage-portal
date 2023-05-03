@@ -9,26 +9,27 @@ COPY package.json .
 RUN yarn
 
 # This is the final image that will be used in production
-FROM python:3.8-alpine
+FROM python:3.10-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # Install OSS Gadget
 # License: MIT
 ARG OSSGADGET_VERSION="0.1.307"
-RUN cd /opt && \
-    wget -q https://github.com/microsoft/OSSGadget/releases/download/v${OSSGADGET_VERSION}/OSSGadget_linux_${OSSGADGET_VERSION}.tar.gz -O OSSGadget.tar.gz && \
-    tar zxvf OSSGadget.tar.gz && \
+RUN cd /opt
+ADD https://github.com/microsoft/OSSGadget/releases/download/v${OSSGADGET_VERSION}/OSSGadget_linux_${OSSGADGET_VERSION}.tar.gz OSSGadget.tar.gz
+RUN    tar zxvf OSSGadget.tar.gz && \
     rm OSSGadget.tar.gz && \
     mv OSSGadget_linux_${OSSGADGET_VERSION} OSSGadget
 
 
-RUN apk update && apk add --no-cache gcc \
-                        libc-dev \
-                        postgresql-dev \
-                        musl-dev  \
-                        libffi-dev \
-                        libmagic
+RUN apt-get update && apt-get install -y --no-install-recommends \
+                        build-essential \
+                        libmagic-dev \
+                        postgresql \
+                        postgresql-contrib \
+                        musl-dev \
+                        && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 RUN mkdir .env && mkdir /data && mkdir /logs
