@@ -1,0 +1,3 @@
+services:
+  triage-portal:
+    image: ghcr.io/ossf/omega-triage-portal
