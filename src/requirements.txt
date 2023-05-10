@@ -1,7 +1,7 @@
 asgiref==3.6.0
 astroid==2.12.13
 azure-core==1.26.1
-azure-storage-blob==12.14.1
+azure-storage-blob==12.16.0
 bandit==1.7.5
 black==22.10.0
 celery==5.2.7
