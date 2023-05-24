@@ -39,6 +39,8 @@ RUN touch /logs/database.log
 
 # Run this last to prevent cache invalidation when dependencies change
 COPY requirements.txt .
+# Run pip install upgrade to support any updates not caught by the requirements.txt
+RUN pip install --upgrade pip
 # Run pip install before copying the rest of the code to prevent cache invalidation
 RUN pip install -r requirements.txt
 # Copy the frontend build from the node-install stage.
