@@ -51,6 +51,8 @@ COPY --from=node-install /node-build/triage/static/triage/resources /app/triage/
 # This will invalidate the cache if any of the code changes, so we want to do this last
 COPY . /app/
 
-EXPOSE 8001
+EXPOSE 443
 
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8001"]
+CMD ["python", "manage.py", "makemigrations"]
+CMD ["python", "manage.py", "migrate"]
