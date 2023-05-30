@@ -45,13 +45,13 @@ psycopg2-binary==2.9.5
 pycodestyle==2.9.1
 pycparser==2.21
 pydocstyle==6.1.1
-pyflakes==3.0.1
+pyflakes<2.6,>=2.5
 pylint==2.15.7
 pylint-celery==0.3
 pylint-common==0.2.5
 pylint-django==2.5.3
 pylint-flask==0.6
-pylint-plugin-utils==0.8.2
+pylint-plugin-utils<0.8,>=0.7
 pyparsing==3.0.9
 python-dotenv==1.0.0
 python-magic==0.4.27

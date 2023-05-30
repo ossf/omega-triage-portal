@@ -27,7 +27,7 @@
 name: Build, Test, and Deploy to Azure
 
 env:
-  AZURE_WEBAPP_NAME: omega-triageportal  # set this to the name of your Azure Web App
+  AZURE_WEBAPP_NAME: omega-triageportal-dev1  # set this to the name of your Azure Web App
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   TAG: python
