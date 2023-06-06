@@ -23,6 +23,7 @@ navigate back to <http://localhost:8001>.
 ## Local Development
 
 ### Docker Compose
+Make sure to have Docker installed and set up before running the following commands.
 
 To build the application, run the following command:
 ```bash
