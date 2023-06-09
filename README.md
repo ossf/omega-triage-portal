@@ -7,6 +7,7 @@ but may also be useful at lower scale.
 **The Portal is in early development, and is not ready for general use.**
 
 ## Getting Started
+Deployment of the Triage Portal in GitHub's development environment
 
 This extension can be used from GitHub Codespaces:
 
@@ -23,6 +24,7 @@ navigate back to <http://localhost:8001>.
 ## Local Development
 
 ### Docker Compose
+Make sure to have Docker installed and set up before running the following commands.
 
 To build the application, run the following command:
 ```bash
@@ -46,7 +48,6 @@ docker-compose run triage-portal python manage.py createsuperuser
 ```
 
 ### Local Windows Development
-
 Issues enabling python virtualenv
 
     1. Open PowerShell
