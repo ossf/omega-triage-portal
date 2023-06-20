@@ -38,7 +38,7 @@ packaging==23.1
 pathspec==0.11.1
 pbr==5.11.1
 pep8-naming==0.10.0
-platformdirs==3.2.0
+platformdirs==3.6.0
 poetry-semver==0.1.0
 prospector==1.8.2
 psycopg2-binary==2.9.6
