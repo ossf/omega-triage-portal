@@ -43,8 +43,8 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 # Run pip install before copying the rest of the code to prevent cache invalidation
 RUN pip install -r requirements.txt
-# Run pip install to update psycopg2-binary to solve postgresql SCRAM authentication problem on arm
-RUN pip install --upgrade psycopg2-binary
+# # Run pip install to update psycopg2-binary to solve postgresql SCRAM authentication problem on arm
+# RUN pip install --upgrade psycopg2-binary
 # Copy the frontend build from the node-install stage.
 # We don't need to have npm installed within the final image
 COPY --from=node-install /node-build/triage/static/triage/resources /app/triage/static/triage/resources/
