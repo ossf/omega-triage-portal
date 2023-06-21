@@ -15,7 +15,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Install OSS Gadget
 # License: MIT
-ARG OSSGADGET_VERSION="0.1.307"
+ARG OSSGADGET_VERSION="0.1.406"
 RUN cd /opt
 ADD https://github.com/microsoft/OSSGadget/releases/download/v${OSSGADGET_VERSION}/OSSGadget_linux_${OSSGADGET_VERSION}.tar.gz OSSGadget.tar.gz
 RUN    tar zxvf OSSGadget.tar.gz && \
