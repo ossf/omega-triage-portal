@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.11
       - uses: pre-commit/action@v3.0.0
 
   test:
@@ -21,7 +21,7 @@ jobs:
     name: test (Python ${{ matrix.python-version }})
     strategy:
       matrix:
-        python-version: ["3.9", "3.11"]
+        python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
