@@ -154,7 +154,8 @@ def save_wiki_article(request: HttpRequest) -> HttpResponse:
         wiki_article = WikiArticle()
     else:
         wiki_article = get_object_or_404(
-            WikiArticle.objects.all(), uuid=wiki_article_uuid,
+            WikiArticle.objects.all(),
+            uuid=wiki_article_uuid,
         )
 
     slug = request.POST.get("slug")
