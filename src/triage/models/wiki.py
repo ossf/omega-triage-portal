@@ -57,6 +57,20 @@ class ActiveWikiArticleManager(models.Manager):
         )
 
 
+class InactiveWikiArticleManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                state__in=[
+                    WorkItemState.CLOSED,
+                    WorkItemState.RESOLVED,
+                ],
+            )
+        )
+
+
 class WikiArticle(models.Model):
     uuid = models.UUIDField(
         default=uuid.uuid4,
@@ -78,6 +92,7 @@ class WikiArticle(models.Model):
     )
 
     active_wiki_articles = ActiveWikiArticleManager()
+    inactive_wiki_articles = InactiveWikiArticleManager()
     objects = models.Manager()
 
     def __str__(self):

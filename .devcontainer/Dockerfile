@@ -10,7 +10,7 @@ RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/
 
 # Install OSS Gadget
 # License: MIT
-ARG OSSGADGET_VERSION="0.1.307"
+ARG OSSGADGET_VERSION="0.1.406"
 RUN cd /opt && \
     wget -q https://github.com/microsoft/OSSGadget/releases/download/v${OSSGADGET_VERSION}/OSSGadget_linux_${OSSGADGET_VERSION}.tar.gz -O OSSGadget.tar.gz && \
     tar zxvf OSSGadget.tar.gz && \

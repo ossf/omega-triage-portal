@@ -48,17 +48,26 @@ def home(request: HttpRequest) -> HttpResponse:
 @require_http_methods(["GET"])
 @never_cache
 def show_wiki_article_list(request: HttpRequest) -> HttpResponse:
-    """Shows all wiki articles."""
-    wiki_articles = WikiArticle.active_wiki_articles.all()
+    """Shows all wiki articles: unresolved and resolved (except the deleted ones)."""
+
+    # Show only unresolved articles
+    unresolved_wiki_articles = WikiArticle.active_wiki_articles.all()
+    # Show only resolved articles
+    resolved_wiki_articles = WikiArticle.inactive_wiki_articles.all()
 
     query = request.GET.get("q", "").strip()
-    wiki_articles = WikiArticle.objects.all()  # Default
+
     if query:
         query_object = parse_query_to_Q(WikiArticle, query)
         if query_object:
-            wiki_articles = wiki_articles.filter(query_object)
+            unresolved_wiki_articles = unresolved_wiki_articles.filter(query_object)
+            resolved_wiki_articles = resolved_wiki_articles.filter(query_object)
 
-    context = {"query": query, "wiki_articles": wiki_articles}
+    context = {
+        "query": query,
+        "unresolved_wiki_articles": unresolved_wiki_articles,
+        "resolved_wiki_articles": resolved_wiki_articles,
+    }
     return render(request, "triage/wiki_list.html", context)
 
 
@@ -82,10 +91,8 @@ def show_wiki_article(
         if slug == "new":
             slug = ""
         context = {
-            "wiki_article": {
-                "slug": slug,
-                "wiki_article_states": WorkItemState.choices,
-            },
+            "slug": slug,
+            "wiki_article_states": WorkItemState.choices,
         }
         return render(request, "triage/wiki_edit.html", context)
 
@@ -146,7 +153,10 @@ def save_wiki_article(request: HttpRequest) -> HttpResponse:
     if not wiki_article_uuid:
         wiki_article = WikiArticle()
     else:
-        wiki_article = get_object_or_404(WikiArticle, uuid=wiki_article_uuid)
+        wiki_article = get_object_or_404(
+            WikiArticle.objects.all(),
+            uuid=wiki_article_uuid,
+        )
 
     slug = request.POST.get("slug")
     if not slug:
