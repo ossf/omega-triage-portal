@@ -63,7 +63,11 @@ def show_wiki_article_list(request: HttpRequest) -> HttpResponse:
             unresolved_wiki_articles = unresolved_wiki_articles.filter(query_object)
             resolved_wiki_articles = resolved_wiki_articles.filter(query_object)
 
-    context = {"query": query, "unresolved_wiki_articles": unresolved_wiki_articles, "resolved_wiki_articles": resolved_wiki_articles}
+    context = {
+        "query": query,
+        "unresolved_wiki_articles": unresolved_wiki_articles,
+        "resolved_wiki_articles": resolved_wiki_articles,
+    }
     return render(request, "triage/wiki_list.html", context)
 
 
@@ -149,7 +153,9 @@ def save_wiki_article(request: HttpRequest) -> HttpResponse:
     if not wiki_article_uuid:
         wiki_article = WikiArticle()
     else:
-        wiki_article = get_object_or_404(WikiArticle.objects.all(), uuid=wiki_article_uuid)
+        wiki_article = get_object_or_404(
+            WikiArticle.objects.all(), uuid=wiki_article_uuid
+        )
 
     slug = request.POST.get("slug")
     if not slug:
