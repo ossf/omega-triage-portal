@@ -135,6 +135,9 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
+# Nginx Conf files
+nginx.conf
+
 # Environments
 .env
 .venv
