@@ -82,6 +82,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
+STATIC_ROOT = "/opt/omega/static"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases

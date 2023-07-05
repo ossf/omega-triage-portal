@@ -55,6 +55,26 @@ Issues enabling python virtualenv
 
 https://stackoverflow.com/questions/69605313/vs-code-terminal-activate-ps1-cannot-be-loaded-because-running-scripts-is-disa
 
+### Azure Development Environment
+
+The Proof of concept webapp is available at https://otpdev1.eastus.cloudapp.azure.com/admin
+
+In the event of a virtual machine having to be destroy and a new one taken it's place, here are important details when deploying a new proof of concept using Azure VM
+
+* In the Networking settings for the Azure VM, ensure that HTTP, HTTPS, and SSH are configured in the firewall.
+* In the VM,
+  * Perform a git pull via HTTP git clone URI in the `/app` directory
+  * Install the following and any of their dependencies
+    * [nginx](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-22-04)
+    * [docker](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-22-04)
+    * [docker compose](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-22-04)
+    * [gunicorn](https://docs.gunicorn.org/en/stable/install.html)
+  * Update `/etc/nginx/nginx.conf` and `/etc/nginx/sites-available/default` file with the respected settings
+  * Collecting the static files for UI
+    * Ensure that the `/opt/omega/static` directory is available, if not, create it.
+    * Enter the triage-portal container ( `docker exec -it omega-triage-portal /bin/bash` ) and run `python manage.py collectstatic`
+    * Move the static files to the `/opt/omega/static` directory
+
 ## Contributing
 
 TBD
