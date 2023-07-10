@@ -73,7 +73,7 @@ In the event of a virtual machine having to be destroy and a new one taken it's 
   * Collecting the static files for UI
     * Ensure that the `/opt/omega/static` directory is available, if not, create it.
     * Enter the triage-portal container ( `docker exec -it omega-triage-portal /bin/bash` ) and run `python manage.py collectstatic`
-    * Move the static files to the `/opt/omega/static` directory
+    * Move the static files from container to the VM's `/opt/omega/static` directory ( `cp core/settings.py /opt/omega/static`)
 
 ## Contributing
 
