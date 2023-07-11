@@ -26,8 +26,10 @@ TRIAGE_PORTAL_DEVELOPMENT_MODE = to_bool(os.getenv("TRIAGE_PORTAL_DEVELOPMENT_MO
 INTERNAL_IPS = []
 if TRIAGE_PORTAL_DEVELOPMENT_MODE:
     ALLOWED_HOSTS = ["*"]
+    CSRF_TRUSTED_ORIGINS = [os.getenv("AZURE_VM_CSRF_URL_DEV")]
 else:
-    ALLOWED_HOSTS = ["omega-triageportal-dev1.azurewebsites.net"]
+    ALLOWED_HOSTS = [os.getenv("AZURE_VM_CSRF_URL_PROD")]
+    CSRF_TRUSTED_ORIGINS = [os.getenv("AZURE_VM_CSRF_URL_PROD")]
 
 if "CODESPACE_NAME" in os.environ:
     codespace_name = os.getenv("CODESPACE_NAME")
