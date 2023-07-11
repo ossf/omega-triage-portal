@@ -109,6 +109,7 @@ def save_tool_defect(request: HttpRequest) -> HttpResponse:
     if finding_uuid:
         finding = get_object_or_404(Finding, uuid=finding_uuid)
         tool_defect.findings.add(finding)
+        tool_defect.assigned_to = finding.assigned_to
         tool_defect.save()
 
     if note_content and note_content.strip():
