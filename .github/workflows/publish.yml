@@ -45,16 +45,16 @@ jobs:
           push: true
           files: docker-compose.yml, docker-compose.ghcr.yml
 
-      - name: Login to Azure Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: omegatriagecontainerreg.azurecr.io
-          username: ${{ secrets.AZURE_CLIENT_ID }}
-          password: ${{ secrets.AZURE_CLIENT_SECRET }}
-
-      - name: Build and Push to Azure Container Registry
-        uses: docker/bake-action@v1.1.3
-        with:
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          files: docker-compose.yml, docker-compose.azure.yml
+#      - name: Login to Azure Container Registry
+#        uses: docker/login-action@v2
+#        with:
+#          registry: omegatriagecontainerreg.azurecr.io
+#          username: ${{ secrets.AZURE_CLIENT_ID }}
+#          password: ${{ secrets.AZURE_CLIENT_SECRET }}
+#
+#      - name: Build and Push to Azure Container Registry
+#        uses: docker/bake-action@v1.1.3
+#        with:
+#          builder: ${{ steps.buildx.outputs.name }}
+#          push: true
+#          files: docker-compose.yml, docker-compose.azure.yml
