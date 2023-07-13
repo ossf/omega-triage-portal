@@ -1,18 +1,21 @@
-version: '3.9'
-
-services:
-  redis:
-    image: omegatriagecontainerreg.azurecr.io/redis
-    restart: unless-stopped
-    volumes:
-      - redis-data:/data
-
-  triage-portal:
-    image: omegatriagecontainerreg.azurecr.io/omega-triage-portal
-
-volumes:
-  redis-data:
-    driver: azure_file
-    driver_opts:
-      share_name: triage-redis-data
-      storage_account_name: ${AZURE_STORAGE_ACCOUNT_NAME:-alphaomegaoafdev2}
+# NOTE:Azure CICD deploy no longer in use.
+# Commenting out section in the event we return to Azure deployment
+#
+#version: '3.9'
+#
+#services:
+#  redis:
+#    image: omegatriagecontainerreg.azurecr.io/redis
+#    restart: unless-stopped
+#    volumes:
+#      - redis-data:/data
+#
+#  triage-portal:
+#    image: omegatriagecontainerreg.azurecr.io/omega-triage-portal
+#
+#volumes:
+#  redis-data:
+#    driver: azure_file
+#    driver_opts:
+#      share_name: triage-redis-data
+#      storage_account_name: ${AZURE_STORAGE_ACCOUNT_NAME:-alphaomegaoafdev2}
