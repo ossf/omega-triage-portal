@@ -24,10 +24,10 @@
 # For more information on the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # For more samples to get started with GitHub Action workflows to deploy to Azure: https://github.com/Azure/actions-workflow-samples
 
-name: Build, Test, and Deploy to Azure
+name: Build, Test, and Deploy to GHCR
 
 env:
-  AZURE_WEBAPP_NAME: omega-triageportal-dev1  # set this to the name of your Azure Web App
+#  AZURE_WEBAPP_NAME: omega-triageportal-dev1  # set this to the name of your Azure Web App
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   TAG: python
