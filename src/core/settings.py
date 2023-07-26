@@ -51,6 +51,10 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "core",
     "data",
+    "triage.api",
+    "graphene_django",
+    "graphene_file_upload",
+    "graphql_jwt",
 ]
 
 MIDDLEWARE = [
@@ -62,6 +66,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -242,6 +247,20 @@ TOOLSHED_BLOB_STORAGE_URL_SECRET = os.getenv("TOOLSHED_BLOB_STORAGE_URL")
 OSSGADGET_PATH = os.getenv("OSSGADGET_PATH")
 
 AUTH_USER_MODEL = "auth.User"  # pylint: disable=hard-coded-auth-user
+
+# Add JSONWebTokenMiddleware middleware to the GRAPHENE settings
+GRAPHENE = {
+    "SCHEMA": "triage.api.schema.schema",
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+    ],
+}
+
+# Add JSONWebTokenBackend backend to AUTHENTICATION_BACKENDS
+AUTHENTICATION_BACKENDS = [
+    "graphql_jwt.backends.JSONWebTokenBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 # File Storage Providers for files, attachments, etc.
 FILE_STORAGE_PROVIDERS = {
