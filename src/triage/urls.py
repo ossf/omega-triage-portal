@@ -1,8 +1,6 @@
 """This module URL patterns specific to the Triage Portal."""
 
 from django.urls import path
-from graphene_file_upload.django import FileUploadGraphQLView
-from triage.api.schema import schema
 from triage.views import attachments, cases, filters, findings, home, tool_defect, wiki
 
 urlpatterns = [
@@ -51,6 +49,4 @@ urlpatterns = [
     path("wiki/", wiki.home),
     # Default (Home)
     path("", home.home),
-    # GraphQl Url
-    path("graphql", FileUploadGraphQLView.as_view(graphiql=True, schema=schema)),
 ]
