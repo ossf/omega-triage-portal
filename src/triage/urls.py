@@ -1,6 +1,7 @@
 """This module URL patterns specific to the Triage Portal."""
 
 from django.urls import path
+
 from triage.views import attachments, cases, filters, findings, home, tool_defect, wiki
 
 urlpatterns = [

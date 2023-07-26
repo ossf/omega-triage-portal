@@ -107,17 +107,7 @@ def show_upload(request: HttpRequest) -> HttpResponse:
             except:  # pylint: disable=bare-except
                 logger.warning("Failed to import SARIF file", exc_info=True)
 
-        # Check if there are any errors and change status based on it
-        if not errors:
-            status = "ok"
-        else:
-            status = "error"
-
-        return render(
-            request,
-            "triage/findings_upload.html",
-            {"errors": errors, "status": status},
-        )
+        return render(request, "triage/findings_upload.html", {"errors": errors})
 
 
 @login_required
