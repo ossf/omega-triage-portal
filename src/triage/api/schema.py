@@ -34,14 +34,16 @@ class UploadFileMutation(graphene.Mutation):
         file = Upload(required=True, description="The file to upload.")
         package_url = graphene.String(required=True, description="The package URL.")
         checksum = graphene.String(
-            required=True, description="The checksum of the file.",
+            required=True,
+            description="The checksum of the file.",
         )
 
     success = graphene.Boolean(
         description="Indicates if the file upload was successful.",
     )
     errors = graphene.List(
-        graphene.String, description="List of errors that occurred during file upload.",
+        graphene.String,
+        description="List of errors that occurred during file upload.",
     )
     success_message = graphene.String(
         description="Success message if file upload is successful.",
@@ -160,7 +162,9 @@ def validate_checksum(file, checksum):
     file.seek(0)  # Reset the file pointer to the beginning
     if checksum != calculated_checksum:
         logger.error(
-            "Checksum Calculated: %s, Given Checksum: %s", calculated_checksum, checksum,
+            "Checksum Calculated: %s, Given Checksum: %s",
+            calculated_checksum,
+            checksum,
         )
         raise ValidationError("Checksum Validation Failed")
     return True

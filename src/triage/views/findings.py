@@ -114,7 +114,9 @@ def show_upload(request: HttpRequest) -> HttpResponse:
             status = "error"
 
         return render(
-            request, "triage/findings_upload.html", {"errors": errors, "status": status},
+            request,
+            "triage/findings_upload.html",
+            {"errors": errors, "status": status},
         )
 
 
