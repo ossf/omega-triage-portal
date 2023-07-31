@@ -1,0 +1,3 @@
+upstream triage_portal {
+    server ${TRIAGE_PORTAL_HOST}:8001;
+}
