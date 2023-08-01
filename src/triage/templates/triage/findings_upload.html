@@ -6,11 +6,18 @@
 </style>
 
 {% if status == "ok" %}
-    <div class="alert alert-success" role="alert">
-        Upload successful!
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> <strong>Upload successful!</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 {% endif %}
 
+{% if status == "error" %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> Upload was <strong> NOT </strong> successful!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endif %}
 
 <div class="row">
 
