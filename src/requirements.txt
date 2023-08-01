@@ -79,4 +79,4 @@ tomlkit==0.11.7
 typing_extensions==4.4.0
 urllib3==2.0.3
 wrapt==1.14.1
-zstd==1.5.2.6
+zstd==1.5.4.0
