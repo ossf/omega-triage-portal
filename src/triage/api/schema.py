@@ -85,7 +85,6 @@ class UploadFileMutation(graphene.Mutation):
 
         # Success is set based on whether there are any errors
         if errors:
-            print("Array is not empty")
             return UploadFileMutation(success=False, errors=errors)
 
         # Array is empty, so file upload is successful
@@ -226,7 +225,9 @@ class Mutation(graphene.ObjectType):
     )
     # jwt mutations
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()
-    verify_token = graphql_jwt.Verify.Field()
+    verify_token = graphql_jwt.Verify.Field(
+        description="Validates the token and obtain the token payload",
+    )
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
