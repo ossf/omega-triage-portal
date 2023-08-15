@@ -759,3 +759,6 @@ $RECYCLE.BIN/
 # .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/node,yarn,intellij,pycharm,webstorm,python,django,macos,windows,linux
+
+# Emacs backups
+*~
