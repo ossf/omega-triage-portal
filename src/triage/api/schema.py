@@ -45,9 +45,6 @@ class UploadFileMutation(graphene.Mutation):
         graphene.String,
         description="List of errors that occurred during file upload.",
     )
-    success_message = graphene.String(
-        description="Success message if file upload is successful.",
-    )
 
     @classmethod
     @login_required
@@ -64,7 +61,7 @@ class UploadFileMutation(graphene.Mutation):
             info: The GraphQL Resolve Info.
             file: The uploaded file.
             package_url (str): The package URL specifying the project version.
-            checksum (str): The checksum of the file.
+            checksum (str): The checksum of the file (md5 hashing algorithm).
 
         Returns:
             UploadFileMutation: An instance of the UploadFileMutation.
@@ -221,7 +218,7 @@ class Mutation(graphene.ObjectType):
     """Root Mutation for the application."""
 
     upload_file = UploadFileMutation.Field(
-        description="Upload a file, project version, and checksum of it.",
+        description="Mutation takes in a file, project version, and checksum (md5 hashing).",
     )
     # jwt mutations
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()

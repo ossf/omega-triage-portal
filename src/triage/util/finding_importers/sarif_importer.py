@@ -14,6 +14,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from packageurl import PackageURL
 
 from triage.models import File, Finding, ProjectVersion, Tool, WorkItemState
+from triage.models.assertion import Assertion, AssertionsPerPackage
 from triage.util.general import get_complex
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,12 @@ class SARIFImporter:
 
         if user is None:
             user = get_user_model().objects.get(id=1)  # TODO: Fix this hardcoding
+
+        # Store the assertion_data value in a variable
+        assertion_data = sarif.get("assertion_data")
+        # Checks if assertion key exists in JSON and saves data to db
+        if assertion_data is not None:
+            self.add_assertion(assertion_data)
 
         num_imported = 0
         processed = set()  # Reduce duplicates
@@ -167,6 +174,45 @@ class SARIFImporter:
         else:
             logger.debug("SARIF file processed, but no issues were found.")
             return False
+
+    def add_assertion(self, assertion_data) -> bool:
+        """Adds details of the assertion data."""
+        try:
+            # Counts the total number of assertions found for the package
+            total_assertions = len(assertion_data)
+
+            # Gets the package_name, package_uuid, url for the AssertionsPerPackage
+            package_uuid = assertion_data[0].get("subject").get("uuid")
+            package_name = assertion_data[0].get("subject").get("identifier")
+
+            package_assertions = AssertionsPerPackage()
+            package_assertions.package_uuid = package_uuid
+            package_assertions.package_name = package_name
+            package_assertions.total_assertions = total_assertions
+
+            package_assertions.save()
+
+            # For each assertion found within a package store the uuid, name, package
+            for assertion_found in assertion_data:
+                assertion = Assertion()
+                assertion.assertion_uuid = assertion_found.get("uuid")
+                assertion.assertion_name = self.normalize_assertion_name(assertion_found.get("generator").get("name"))
+                assertion.assertions_per_package = package_assertions
+                assertion.save()
+
+            logger.debug("Assertion data added successfully.")
+            return True
+
+        except Exception as e:
+            logger.debug(f"An error occurred while adding assertion details: {e}")
+            return False
+
+    def normalize_assertion_name(self, name: str) -> str:
+        """Normalizes the assertion name."""
+        parts = name.split(".")  # Split the name into parts using dot as delimiter
+        last_part = parts[-1]  # Get the last part of the split result which is the actual name
+        formatted_name = last_part.replace("_", " ").title()  # Format the name
+        return formatted_name
 
     def normalize_file_path(self, path: str) -> str:
         """Normalizes a file path to be relative to the root."""

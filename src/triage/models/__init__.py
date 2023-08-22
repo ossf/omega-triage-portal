@@ -12,6 +12,7 @@ from triage.models.case import Case
 from triage.models.file import File, FileContent
 from triage.models.filter import Filter
 from triage.models.finding import Finding
+from triage.models.assertion import Assertion
 from triage.models.note import Note
 from triage.models.project import Project, ProjectVersion
 from triage.models.tool import Tool
