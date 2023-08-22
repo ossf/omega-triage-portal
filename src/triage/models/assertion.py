@@ -3,7 +3,8 @@ from django.db import models
 
 
 class AssertionsPerPackage(models.Model):
-    """ All assertions of a Package"""
+    """All assertions of a Package"""
+
     total_assertions = models.PositiveIntegerField()
     package_name = models.CharField(max_length=100)
     package_uuid = models.UUIDField(unique=True)
@@ -20,10 +21,15 @@ class AssertionsPerPackage(models.Model):
 
 
 class Assertion(models.Model):
-    """ An assertion of a package """
+    """An assertion of a package"""
+
     assertion_uuid = models.UUIDField(db_index=True, default=uuid.uuid4, editable=False)
     assertion_name = models.CharField(max_length=100, default=None)
-    assertions_per_package = models.ForeignKey(to="AssertionsPerPackage", on_delete=models.CASCADE, default=None)
+    assertions_per_package = models.ForeignKey(
+        to="AssertionsPerPackage",
+        on_delete=models.CASCADE,
+        default=None,
+    )
 
     def __str__(self):
         return f"Assertion: {self.assertion_name}"

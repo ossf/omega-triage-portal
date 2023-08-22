@@ -196,7 +196,9 @@ class SARIFImporter:
             for assertion_found in assertion_data:
                 assertion = Assertion()
                 assertion.assertion_uuid = assertion_found.get("uuid")
-                assertion.assertion_name = self.normalize_assertion_name(assertion_found.get("generator").get("name"))
+                assertion.assertion_name = self.normalize_assertion_name(
+                    assertion_found.get("generator").get("name"),
+                )
                 assertion.assertions_per_package = package_assertions
                 assertion.save()
 
@@ -210,7 +212,9 @@ class SARIFImporter:
     def normalize_assertion_name(self, name: str) -> str:
         """Normalizes the assertion name."""
         parts = name.split(".")  # Split the name into parts using dot as delimiter
-        last_part = parts[-1]  # Get the last part of the split result which is the actual name
+        last_part = parts[
+            -1
+        ]  # Get the last part of the split result which is the actual name
         formatted_name = last_part.replace("_", " ").title()  # Format the name
         return formatted_name
 
