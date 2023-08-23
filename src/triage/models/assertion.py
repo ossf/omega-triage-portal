@@ -1,4 +1,4 @@
-import uuid
+import os
 from django.db import models
 
 
@@ -16,14 +16,17 @@ class AssertionsPerPackage(models.Model):
     def save(self, *args, **kwargs):
         if self.package_uuid and not self.url:
             # Generate the URL based on package_uuid and fixed URL pattern
-            self.url = f"https://oafdev1.westus2.cloudapp.azure.com/assertions/show?subject_uuid={self.package_uuid}"
+            assertion_url = os.environ.get(
+                "ASSERTION_URL"
+            )  # Gets the environment variable for the assertion URL
+            self.url = f"{assertion_url}{self.package_uuid}"
         super().save(*args, **kwargs)
 
 
 class Assertion(models.Model):
     """An assertion of a package"""
 
-    assertion_uuid = models.UUIDField(db_index=True, default=uuid.uuid4, editable=False)
+    assertion_uuid = models.UUIDField(unique=True)
     assertion_name = models.CharField(max_length=100, default=None)
     assertions_per_package = models.ForeignKey(
         to="AssertionsPerPackage",

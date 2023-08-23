@@ -63,7 +63,7 @@ class SARIFImporter:
         assertion_data = sarif.get("assertion_data")
         # Checks if assertion key exists in JSON and saves data to db
         if assertion_data is not None:
-            self.add_assertion(assertion_data)
+            self.add_or_update_assertion(assertion_data)
 
         num_imported = 0
         processed = set()  # Reduce duplicates
@@ -175,32 +175,31 @@ class SARIFImporter:
             logger.debug("SARIF file processed, but no issues were found.")
             return False
 
-    def add_assertion(self, assertion_data) -> bool:
+    def add_or_update_assertion(self, assertion_data) -> bool:
         """Adds details of the assertion data."""
         try:
             # Counts the total number of assertions found for the package
             total_assertions = len(assertion_data)
 
-            # Gets the package_name, package_uuid, url for the AssertionsPerPackage
-            package_uuid = assertion_data[0].get("subject").get("uuid")
-            package_name = assertion_data[0].get("subject").get("identifier")
-
-            package_assertions = AssertionsPerPackage()
-            package_assertions.package_uuid = package_uuid
-            package_assertions.package_name = package_name
-            package_assertions.total_assertions = total_assertions
-
-            package_assertions.save()
+            # Update or create AssertionsPerPackage instance
+            package_assertions, created = AssertionsPerPackage.objects.update_or_create(
+                # Gets the package_name, package_uuid, and stores total_assertions for the AssertionsPerPackage
+                package_uuid=assertion_data[0].get("subject").get("uuid"),
+                package_name=assertion_data[0].get("subject").get("identifier"),
+                defaults={"total_assertions": total_assertions},
+            )
 
             # For each assertion found within a package store the uuid, name, package
             for assertion_found in assertion_data:
-                assertion = Assertion()
-                assertion.assertion_uuid = assertion_found.get("uuid")
-                assertion.assertion_name = self.normalize_assertion_name(
-                    assertion_found.get("generator").get("name"),
+                Assertion.objects.update_or_create(
+                    assertion_uuid=assertion_found.get("uuid"),
+                    assertions_per_package=package_assertions,
+                    defaults={
+                        "assertion_name": self.normalize_assertion_name(
+                            assertion_found.get("generator").get("name"),
+                        ),
+                    },
                 )
-                assertion.assertions_per_package = package_assertions
-                assertion.save()
 
             logger.debug("Assertion data added successfully.")
             return True
