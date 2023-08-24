@@ -17,7 +17,7 @@ class AssertionsPerPackage(models.Model):
         if self.package_uuid and not self.url:
             # Generate the URL based on package_uuid and fixed URL pattern
             assertion_url = os.environ.get(
-                "ASSERTION_URL"
+                "ASSERTION_URL",
             )  # Gets the environment variable for the assertion URL
             self.url = f"{assertion_url}{self.package_uuid}"
         super().save(*args, **kwargs)
