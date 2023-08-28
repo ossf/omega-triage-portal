@@ -94,7 +94,8 @@ class Filter(BaseTimestampedModel, BaseUserTrackedModel):
             if Filter.is_safe_function(function_str):
                 return compile(function_str, the_type, "exec")
             raise Exception("Function is not safe.")
-        except Exception as msg:  # pylint: disable=broad-except
+        # pylint: disable=broad-except
+        except Exception as msg:
             logger.warning("Invalid %s function: %s", the_type, msg)
             return None
 

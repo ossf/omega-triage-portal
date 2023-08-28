@@ -18,8 +18,8 @@ button. A new widow will open. This is needed because VS Code launch settings ar
 within the omega/triage-portal folder.
 
 You can then run the Django launch task to start the application. Navigate to
-<http://localhost:0/admin> and enter the default credentials (admin/admin), then
-navigate back to <http://localhost:8001>.
+<http://localhost:8001/admin/login/?next=/admin/> and enter the default credentials that you created (admin/admin),
+then navigate back to <http://localhost:8001>.
 
 ## Local Development
 
@@ -55,7 +55,16 @@ Issues enabling python virtualenv
 
 https://stackoverflow.com/questions/69605313/vs-code-terminal-activate-ps1-cannot-be-loaded-because-running-scripts-is-disa
 
-### Azure Development Environment
+
+## The API Connecting The Omega Analyser And Triage Portal
+
+The documentation for the API that connects the Omega Analyzer and Triage Portal is housed within the GraphiQL IDE, which is basically a playground
+offered by GraphQL to facilitate interactions with its APIs. It is conveniently accessible through the `http://localhost:8001/graphql` endpoint.
+This documentation becomes available after the application is successfully deployed.
+
+**_File Size:_** Please be aware that the current file size limitation for the API stands at `200 MB`. This constraint should be considered when handling file uploads or other data interactions within the Triage Portal's API.
+
+## Azure Development Environment
 
 The Proof of concept webapp is available at https://otpdev1.eastus.cloudapp.azure.com/admin
 
